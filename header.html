@@ -103,9 +103,9 @@
 		player.parentNode.previousSibling.setAttribute("bgcolor", "white");
 	    }
 	}
-        e.play();
-	//e.addEventListener("play",(event) => {setMediaMeta(playid)});
         headerrow.childNodes[2].innerHTML = e.parentElement.previousSibling.innerHTML;
+        e.play();
+	e.addEventListener("play",(event) => {setMediaMeta(playid)});
     }
 
   </script>
