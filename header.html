@@ -46,13 +46,7 @@
 		tempVideo.addEventListener("ended", (event) => {
 		    event.target.setAttribute("style","display:none");
 		    let e = document.getElementById(event.target.getAttribute('nextid'));
-		    e.play();
-		    e.setAttribute("style","display");
-		    e.parentElement.previousSibling.scrollIntoView({ block: "center", inline: "nearest" });
-		    e.parentElement.previousSibling.setAttribute("bgcolor", "#FFFFC0");
-		    //e.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
-		    setMediaMeta(e.id);
-		    headerrow.childNodes[2].innerHTML = e.parentElement.previousSibling.innerHTML;
+		    playAndReset(e, e.id);
 		});
 		let tempTD = document.createElement("td");
 		tempTD.setAttribute("hidevideotd",i);
@@ -65,18 +59,7 @@
 		soundicons[i].addEventListener("click",(event) => {
 		    let playid = event.target.getAttribute('play');
 		    let e = document.getElementById(playid);
-		    e.play();
-		    e.setAttribute("style","display");
-		    for (let x =0; x < jj.length ; x++) {
-			if (jj[x] != playid) {
-			    let player = document.getElementById(jj[x]);
-			    player.pause();
-			    player.setAttribute("style","display:none");
-			    player.parentNode.previousSibling.setAttribute("bgcolor", "white");
-			}
-		    }
-		    setMediaMeta(playid);
-		    headerrow.childNodes[2].innerHTML = e.parentElement.previousSibling.innerHTML;
+		    playAndReset(e,playid);
 		});
 	    }
 	}
@@ -100,7 +83,7 @@
 		title: soundicons[playid].nextElementSibling.innerHTML ,
 		artist:document.querySelector("title").innerHTML ,
 		album: soundicons[playid].nextElementSibling.innerHTML,
-		artwork: [{ src: "" }],
+		artwork: [{ src: "" }]
 	    });
 	}
 
@@ -108,7 +91,6 @@
 
     function playAndReset (e, playid) {
 
-        e.play();
         e.setAttribute("style","display");
         e.parentElement.previousSibling.scrollIntoView({ block: "center", inline: "nearest" });
         e.parentElement.previousSibling.setAttribute("bgcolor", "#FFFFC0");
@@ -121,8 +103,8 @@
 		player.parentNode.previousSibling.setAttribute("bgcolor", "white");
 	    }
 	}
-
-        setMediaMeta(playid);
+        e.play();
+	//e.addEventListener("play",(event) => {setMediaMeta(playid)});
         headerrow.childNodes[2].innerHTML = e.parentElement.previousSibling.innerHTML;
     }
 
