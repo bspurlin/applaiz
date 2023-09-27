@@ -1,0 +1,22 @@
+tr.indexhead {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #FFFFC0;
+}
+
+[alt="[SND]"] {
+
+    width: 2rem;
+  
+}
+
+.mediaplayer {
+    position:fixed;
+    bottom:0%;
+    right:0%;
+    width: 100%;
+    height: 7%; /* Not higher than 7%, or the mediaplayer will invisibly mask the next higher media selection */
+}
+
