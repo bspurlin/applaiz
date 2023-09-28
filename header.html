@@ -20,7 +20,7 @@
 	for(let i =0; i < soundicons.length; i++) {
 	    //Create a media player for each sound selection
 	    if (soundicons[i].childNodes[0].getAttribute("alt") == '[SND]') {
-		let tempVideo = document.createElement("video");
+		let tempVideo = document.createElement("audio");
 		let tempSource = document.createElement("source");
 		let thisname = soundicons[i].nextElementSibling.childNodes[0].getAttribute("href");
 
@@ -28,6 +28,7 @@
 		tempVideo.setAttribute("controls","");
 		tempVideo.setAttribute("id", i);
 		tempVideo.setAttribute("nextid", i +1 ); //So we have a linked list of sound selections
+                tempVideo.setAttribute("previd", i - 1 ); // Fix this below for i == 0 and i == soundicons.length
 		tempVideo.setAttribute("webkit-playsinline","");
 		tempVideo.setAttribute("playsinline","");
 		tempVideo.setAttribute("class","mediaplayer");
@@ -46,7 +47,7 @@
 		tempVideo.addEventListener("ended", (event) => {
 		    event.target.setAttribute("style","display:none");
 		    let e = document.getElementById(event.target.getAttribute('nextid'));
-		    playAndReset(e, e.id);
+		    playAndReset(e);
 		});
 		let tempTD = document.createElement("td");
 		tempTD.setAttribute("hidevideotd",i);
@@ -59,14 +60,17 @@
 		soundicons[i].addEventListener("click",(event) => {
 		    let playid = event.target.getAttribute('play');
 		    let e = document.getElementById(playid);
-		    playAndReset(e,playid);
+		    playAndReset(e);
 		});
 	    }
 	}
 	// Set the next id of the last id to the first id so
 	// selections in the directory will continue to play from the beginning.
+	// Similarly with previd
 	var e = document.getElementById(jj[jj.length - 1]); 
 	if (e !=null) e.setAttribute("nextid",jj[0]);
+	e = document.getElementById(jj[0]);
+	if (e !=null) e.setAttribute("previd",jj[jj.length - 1]);
 	//Set the window title and the (fixed, for mobile devices) table header to the directory name
 	var href = document.location.href;
 	href = decodeURI(href);
@@ -77,20 +81,28 @@
     };
   </script>
   <script>
-    function setMediaMeta (playid) {
+    function setMediaMeta (e) {
 	if ("mediaSession" in navigator) {
 	    navigator.mediaSession.metadata = new MediaMetadata({
-		title: soundicons[playid].nextElementSibling.innerHTML ,
+		title: soundicons[e.id].nextElementSibling.innerHTML ,
 		artist:document.querySelector("title").innerHTML ,
-		album: soundicons[playid].nextElementSibling.innerHTML,
+		album: soundicons[e.id].nextElementSibling.innerHTML,
 		artwork: [{ src: "" }]
 	    });
+	    navigator.mediaSession.setActionHandler("nexttrack", () => {
+		let en = document.getElementById(e.getAttribute("nextid"));
+		playAndReset(en)
+	    });
+	    navigator.mediaSession.setActionHandler("previoustrack", () => {
+                let en = document.getElementById(e.getAttribute("previd"));
+                playAndReset(en)
+            });
 	}
 
     }
 
-    function playAndReset (e, playid) {
-
+    function playAndReset (e) {
+	let playid = e.id;
         e.setAttribute("style","display");
         e.parentElement.previousSibling.scrollIntoView({ block: "center", inline: "nearest" });
         e.parentElement.previousSibling.setAttribute("bgcolor", "#FFFFC0");
@@ -104,8 +116,8 @@
 	    }
 	}
         headerrow.childNodes[2].innerHTML = e.parentElement.previousSibling.innerHTML;
+	e.addEventListener("play",(event) => {setMediaMeta(e)});
         e.play();
-	e.addEventListener("play",(event) => {setMediaMeta(playid)});
     }
 
   </script>
