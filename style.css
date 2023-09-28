@@ -14,9 +14,9 @@ tr.indexhead {
 
 .mediaplayer {
     position:fixed;
-    bottom:0%;
-    right:0%;
-    width: 100%;
+    bottom:calc(48% + 0px);
+    right:10%;
+    width: 70%;
     height: 7%; /* Not higher than 7%, or the mediaplayer will invisibly mask the next higher media selection */
 }
 
