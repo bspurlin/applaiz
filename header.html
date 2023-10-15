@@ -97,6 +97,12 @@
                 let en = document.getElementById(e.getAttribute("previd"));
                 playAndReset(en)
             });
+	    navigator.mediaSession.setActionHandler("pause", () => {
+                e.pause()
+            });
+	    navigator.mediaSession.setActionHandler("play", () => {
+                e.play()
+            });
 	}
 
     }
