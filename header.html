@@ -120,13 +120,13 @@
 	audioElement.src = e.src;
 	audioElement.title = e.title;
         let el = document.getElementById(playid + 1000);
-	el.scrollIntoView({ block: "center", inline: "nearest" });
+	el.scrollIntoView({block: "center"});
         //el.previousElement.setAttribute("bgcolor", "#FFFFC0");
         headerrow.childNodes[2].innerHTML = e.title;
 	audioElement.addEventListener("play",(event) => {setMediaMeta(e)});
         audioElement.play();
         audioElement.display = "block";
-        audioElement.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });                               
+
     }
 
   </script>
