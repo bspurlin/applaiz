@@ -11,10 +11,10 @@
 	audioElement.controls=true;
 	//audioElement.webkit-playsinline=true;
 	audioElement.playsinline=true;
-//	audioElement.class="mediaplayer";
+	//audioElement.class="mediaplayer";
 	audioElement.type = "audio/mpeg";
 	audioElement.preload = "none";
-
+	audioElement.id=0;
 	document.querySelector("tr.indexhead").childNodes[1].childNodes[0].remove(); //remove the mod_autoindex <a>
 	headerrow = document.querySelector("tr.indexhead");
 	headerrow.appendChild(document.createElement("th"));
@@ -39,7 +39,7 @@
 		tempAudio.nextid = i + 1;
 		if (i == soundicons.length -1)  tempAudio.nextid = 0 ; //So we have a linked list of sound selections
                 tempAudio.previd = i - 1 ; 
-		if (i == 0) tempAudio.nextid = soundicons.length -1;
+		if (i == 0) tempAudio.previd = soundicons.length -1;
 
 
 		//Now that we have set up a player with a source, remove the old anchor link,
@@ -61,7 +61,7 @@
 
 		
 		let tempTD = document.createElement("td");
-		
+		//tempTD.setAttribute("class","mediaplayer");	
 		soundicons[i].parentElement.setAttribute("id",i + 1000);
 		soundicons[i].nextElementSibling.insertAdjacentElement("afterend",tempTD);
 
@@ -76,7 +76,7 @@
 	});
 
 	document.body.insertBefore(audioElement,document.querySelector("table"));
-	audioElement.style = "width: 70%;  position: sticky; top: 10%; left: 10%";
+	audioElement.style = "width: 70%;  position: sticky; top: 90%; left: 20%";
 	
 	//Set the window title and the (fixed, for mobile devices) table header to the directory name
 	var href = document.location.href;
@@ -114,7 +114,8 @@
 
     function playAndReset (e) {
 	let playid = e.id;
-	audioElement.id = e.id;
+	soundicons[audioElement.id].nextElementSibling.setAttribute("bgcolor", "#FFFFFF");
+	audioElement.id = playid;
 	audioElement.nextid = e.nextid;
 	audioElement.previd = e.previd;
 	audioElement.src = e.src;
@@ -123,6 +124,8 @@
 	el.scrollIntoView({block: "center"});
         //el.previousElement.setAttribute("bgcolor", "#FFFFC0");
         headerrow.childNodes[2].innerHTML = e.title;
+	soundicons[playid].nextElementSibling.setAttribute("bgcolor", "#FFFFC0");
+	//soundicons[playid].parentElement.lastChild.appendChild(audioElement);
 	audioElement.addEventListener("play",(event) => {setMediaMeta(e)});
         audioElement.play();
         audioElement.display = "block";
