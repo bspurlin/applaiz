@@ -1,0 +1,22 @@
+{
+  "name": "applaiz",
+  "version": "0.0.0",
+  "description": "nodejs directory server for applaiz, to supersede mod_autoindex",
+  "main": "fsObj.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bspurlin/applaiz.git"
+  },
+  "author": "bspurlin",
+  "license": "GPL-2.0-only",
+  "bugs": {
+    "url": "https://github.com/bspurlin/applaiz/issues"
+  },
+  "homepage": "https://github.com/bspurlin/applaiz#readme",
+  "dependencies": {
+    "node-id3": "^0.2.6"
+  }
+}
