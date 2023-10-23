@@ -2,8 +2,9 @@
 
 fs = require("fs");
 path = require("path");
+opt = require('node-getopt').create([['s' , '', 'short option.'],['g','=']]).parseSystem();
 
-fsobj=JSON.parse(fs.readFileSync("./fsobj.2"))
+fsobj=JSON.parse(fs.readFileSync(opt.argv[0]))
 
 
 function ff (fsobj,parent) {
@@ -31,5 +32,17 @@ function ff (fsobj,parent) {
     }
 }
 
+function mkTable(path,f) {
+    let dirobj = f(path);
+    
+}
+
+
 ff(fsobj,"");
 
+if (opt.options.g) mkTable(opt.options.g,(path) => {
+    let aa = path.split('.');
+    let obj=fsobj.directories[aa.shift()];
+    while((x = aa.shift()) != undefined) obj=obj.directories[x];
+    return obj
+})
