@@ -18,6 +18,7 @@
   "homepage": "https://github.com/bspurlin/applaiz#readme",
   "dependencies": {
     "node-getopt": "^0.3.2",
-    "node-id3": "^0.2.6"
+    "node-id3": "^0.2.6",
+    "object-sizeof": "^2.6.3"
   }
 }

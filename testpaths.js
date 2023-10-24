@@ -2,9 +2,25 @@
 
 fs = require("fs");
 path = require("path");
-opt = require('node-getopt').create([['s' , '', 'short option.'],['g','=']]).parseSystem();
+opt = require('node-getopt').create([['f','', 'short option.'],['s' , '', 'short option.'],['g','=']]).parseSystem();
+sizeof = require('object-sizeof');
+fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
 
-fsobj=JSON.parse(fs.readFileSync(opt.argv[0]))
+exports.countAttr = countAttr;
+exports.ff = ff;
+
+function countAttr (c, fsobj) {
+
+    if(fsobj.files.length > 0) {
+	c +=  fsobj.files.length
+    }
+
+    for(let x =0; x < fsobj.directories.length; x++) {
+	c = countAttr(c,fsobj.directories[x]);
+    };
+
+    return c;
+}
 
 
 function ff (fsobj,parent) {
@@ -32,17 +48,26 @@ function ff (fsobj,parent) {
     }
 }
 
-function mkTable(path,f) {
-    let dirobj = f(path);
+function mkTable(pathn,f) {
+    let dirobj = f(pathn);
     
 }
 
 
 ff(fsobj,"");
 
-if (opt.options.g) mkTable(opt.options.g,(path) => {
-    let aa = path.split('.');
+if(opt.options.f) {console.log("count = ",countAttr(0,fsobj))};
+
+if (opt.options.g) mkTable(opt.options.g,(pathn) => {
+    let aa = pathn.split('.').filter(x => x);
     let obj=fsobj.directories[aa.shift()];
-    while((x = aa.shift()) != undefined) obj=obj.directories[x];
-    return obj
+    function generateDirFields(obj) {
+	while((x = aa.shift()) != undefined) obj=obj.directories[x];
+	let directories = [];
+	for (let i = 0; i < obj.directories.length; i++)
+	    aa[i] = path.basename(obj.directories[i].dirname);
+	return {'dirname': obj.dirname,'files': obj.files, 'directories': aa}
+    };
+
+    return aa.length?generateDirFields(obj):generateDirFields(fsobj);
 })
