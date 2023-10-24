@@ -9,18 +9,29 @@ fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
 exports.countAttr = countAttr;
 exports.ff = ff;
 
+// Count the number of sound files in an applaiz filesystem object, and count some ID3 attributes 
+//{"length":0,"title":0,"artist":0,"album":0} i. e. length of files array == number of files
+
 function countAttr (c, fsobj) {
 
     if(fsobj.files.length > 0) {
-	c +=  fsobj.files.length
+	c.length +=  fsobj.files.length
     }
 
+    for (let x = 0; x <  fsobj.files.length; x++){
+	c.title += fsobj.files[x].title != undefined;
+	c.artist += fsobj.files[x].artist != undefined;
+	c.album += fsobj.files[x].album != undefined;
+    }
+    
     for(let x =0; x < fsobj.directories.length; x++) {
 	c = countAttr(c,fsobj.directories[x]);
     };
 
     return c;
 }
+
+
 
 
 function ff (fsobj,parent) {
@@ -36,7 +47,9 @@ function ff (fsobj,parent) {
 	    return 0
 	})
     }		
-			
+
+    //Add a paths object to the directory object, and a parent field
+    
     for (let i =0; i < fsobj.directories.length; i++) {
 	let x = fsobj.directories[i];
 	let parentt = parent + "." + i;
@@ -50,13 +63,23 @@ function ff (fsobj,parent) {
 
 function mkTable(pathn,f) {
     let dirobj = f(pathn);
-    
+    //TBD
 }
 
 
-ff(fsobj,"");
+//ff(fsobj,"");
 
-if(opt.options.f) {console.log("count = ",countAttr(0,fsobj))};
+if(opt.options.f) {
+    let count = countAttr({"length":0,"title":0,"artist":0,"album":0},fsobj);
+    console.log("count = ",
+		count.length,
+		"title = ",
+		count.title,
+		"artist = ",
+		count.artist,
+		"album = ",
+		count.album);
+}
 
 if (opt.options.g) mkTable(opt.options.g,(pathn) => {
     let aa = pathn.split('.').filter(x => x);
