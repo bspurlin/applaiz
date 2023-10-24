@@ -2,7 +2,7 @@
 
 const { readdir, readdirSync } = require('fs');
 const NodeID3 = require('node-id3');
-const re = /(mp3|m4a)/i;
+const re = /(mp3|m4a$)/i;
 opt = require('node-getopt').create([['s' , '', 'short option.']]).parseSystem();
 
 let dirobj = {};
@@ -24,7 +24,9 @@ function fst (dirname,space) {
 	    } else if (re.test(entry.name)) {
 		    try {
 			let tags = NodeID3.read(dirname + "/" + entry.name);
-			fsr.files.push({"filename": entry.name, "artist": tags.artist,"title":tags.title,"album":tags.album})
+			const  {artist,title,album} = tags;
+			const filename = entry.name;
+			fsr.files.push({filename,title,artist,album})
 		    } catch (error) {
 			console.error(entry.name + " " + error)
 		    }
