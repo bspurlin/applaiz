@@ -2,15 +2,25 @@
 
 fs = require("fs");
 path = require("path");
-opt = require('node-getopt').create([['f','', 'short option.'],['s' , '', 'short option.'],['g','=']]).parseSystem();
+opt = require('node-getopt').create([
+    ['f','', 'short option.'],
+    ['s' , '', 'short option.'],
+    ['g','','generate a stripped down object from a path. requires opt p'],
+    ['p','=']    // a numeric path, e. g. .45.5.1
+]).parseSystem();
+
 sizeof = require('object-sizeof');
 fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
 
 exports.countAttr = countAttr;
 exports.ff = ff;
 
-// Count the number of sound files in an applaiz filesystem object, and count some ID3 attributes 
-//{"length":0,"title":0,"artist":0,"album":0} i. e. length of files array == number of files
+/*
+ Count the number of sound files in an applaiz filesystem object, and count some ID3 attributes 
+ {"length":0,"title":0,"artist":0,"album":0} i. e. length of files array == number of files
+ Output looks like:
+ count =  56742 title =  52828 artist =  52058 album =  51860
+*/
 
 function countAttr (c, fsobj) {
 
@@ -63,14 +73,21 @@ function ff (fsobj,parent) {
 
 function mkTable(pathn,f) {
     let dirobj = f(pathn);
+    console.log(dirobj)
     //TBD
 }
 
 
-//ff(fsobj,"");
+ff(fsobj,"");
 
 if(opt.options.f) {
-    let count = countAttr({"length":0,"title":0,"artist":0,"album":0},fsobj);
+    let obj =fsobj;
+    if(opt.options.p){
+	let aa = opt.options.p.split('.').filter(x => x);
+	obj=fsobj.directories[aa.shift()];
+	while((x = aa.shift()) != undefined) obj=obj.directories[x];
+    } 
+    let count = countAttr({"length":0,"title":0,"artist":0,"album":0},obj);
     console.log("count = ",
 		count.length,
 		"title = ",
@@ -81,7 +98,19 @@ if(opt.options.f) {
 		count.album);
 }
 
-if (opt.options.g) mkTable(opt.options.g,(pathn) => {
+/*
+ A numeric pathname, e. g., .42.5.1 ,
+ where /Shared/Music is the 43nd directory under Shared,
+ Delos is the 6th directory under Shared/Music and
+ Art.Blakey.And.The.Jazz.Messengers-Feeling.Good.4007 is the second
+ directory under Shared/Music/Delos.
+ Find a directory using the numeric pathn
+ and extract a stripped-down, non-recursive descriptive object
+ from it to be used in creating a table for display
+ in the browser.
+*/
+
+if (opt.options.g && opt.options.p) mkTable(opt.options.p,(pathn) => { 
     let aa = pathn.split('.').filter(x => x);
     let obj=fsobj.directories[aa.shift()];
     function generateDirFields(obj) {
