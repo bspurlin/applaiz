@@ -4,16 +4,17 @@ fs = require("fs");
 path = require("path");
 opt = require('node-getopt').create([
     ['f','', 'short option.'],
-    ['s' , '', 'short option.'],
+    ['s' , '=', 'short option.'],
     ['g','','generate a stripped down object from a path. requires opt p'],
     ['p','=']    // a numeric path, e. g. .45.5.1
 ]).parseSystem();
 
 sizeof = require('object-sizeof');
-fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
+module.exports = { countAttr, ff, mkDirObj };
 
-exports.countAttr = countAttr;
-exports.ff = ff;
+
+//
+
 
 /*
  Count the number of sound files in an applaiz filesystem object, and count some ID3 attributes 
@@ -42,7 +43,7 @@ function countAttr (c, fsobj) {
 }
 
 
-
+// ff modifes the global fsobj
 
 function ff (fsobj,parent) {
     fsobj.paths = {};
@@ -71,14 +72,22 @@ function ff (fsobj,parent) {
     }
 }
 
-function mkTable(pathn,f) {
-    let dirobj = f(pathn);
-    console.log(dirobj)
-    //TBD
+
+let fsobj = JSON.parse(fs.readFileSync(opt.argv[0]));
+ff(fsobj,"");
+
+if(opt.options.p) console.log(mkDirObj(opt.options.p, fsobj));
+
+function mkDirObj(pathn,obj) {
+    let aa = pathn.split('.').filter(x => x);
+    while((x = aa.shift()) != undefined) obj=obj.directories[x];
+    let directories = [];
+    for (let i = 0; i < obj.directories.length; i++)
+        aa[i] = path.basename(obj.directories[i].dirname);
+    return {'dirname': obj.dirname,'files': obj.files, 'directories': aa}
 }
 
 
-ff(fsobj,"");
 
 if(opt.options.f) {
     let obj =fsobj;
@@ -110,6 +119,8 @@ if(opt.options.f) {
  in the browser.
 */
 
+/*
+
 if (opt.options.g && opt.options.p) mkTable(opt.options.p,(pathn) => { 
     let aa = pathn.split('.').filter(x => x);
     let obj=fsobj.directories[aa.shift()];
@@ -123,3 +134,5 @@ if (opt.options.g && opt.options.p) mkTable(opt.options.p,(pathn) => {
 
     return aa.length?generateDirFields(obj):generateDirFields(fsobj);
 })
+
+*/
