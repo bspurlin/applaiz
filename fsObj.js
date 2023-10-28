@@ -38,7 +38,7 @@ function fst (dirname,space) {
 			// name of a variable, a very handy capability, but a kludge in
 			// all programming languages I have studied.
 
-			// 1
+			// 1 Using a setter with a regexp to match the desired fields
 			/*
 			const tobj= {
 			    set: function(a) {
@@ -57,20 +57,24 @@ real    1m7.260s
 user    0m1.975s
 sys     0m9.045s
 			*/
-			// 2
+			
+			//2 Object destructuring
 			//const  {artist,title,album} = tags;
 			//fsr.files.push({filename,title,artist,album});
 			// 3
 			//fsr.files.push({filename, ...(({title,artist,album}) => ({title,artist,album}))(tags)});
-			//4
-			let tobj = {};
-			for (x of ["title","artist","album"]) tobj[x] = tags[x];
+			//4 The simplest
+			//let tobj = {};
+			//for (x of ["title","artist","album"]) tobj[x] = tags[x];
 /*
 real    1m6.982s
 user    0m1.713s
 sys     0m9.280s
 */			
-			fsr.files.push({filename, ...tobj});
+			//fsr.files.push({filename, ...tobj}); // Spread syntax to add the fields of tobj
+			                                     // rather than tobj itself, to the passed
+			                                     // anonymous object
+			fsr.files.push({filename, ...((a) => {let obj = {}; for(x of ["title","artist","album"]){obj[x]=a[x]};return obj})(tags)});
 		    } catch (error) {
 			console.error(entry.name + " " + error)
 		    }
