@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/bspurlin/applaiz#readme",
   "dependencies": {
+    "body-parser": "^1.20.2",
     "node-getopt": "^0.3.2",
     "node-id3": "^0.2.6",
     "object-sizeof": "^2.6.3"

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React MVC Example</title>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      var xmlhttp = new XMLHttpRequest();
+      var url = "https://www.ideologue.net:3000";
+      
+      xmlhttp.onreadystatechange = function() {
+	  if (this.readyState == 4 && this.status == 200) {
+              var myArr = JSON.parse(this.responseText);
+              pieces(myArr);
+	  }
+      };
+      xmlhttp.open("GET", url, true);
+      xmlhttp.send();
+
+      
+        // Model
+      function pieces (dirobj) = {
+	  for (list i = 0; i++; i < dirobj.files.length) {
+	  }
+	  return dirobj;
+      }
+
+        // View
+        function Piece(props) {
+            const { piece } = props;
+            return (
+                <tr className="piece">
+                    <h2>{piece.caption}</h2>
+                    <img className="source" src={piece.src} />
+                    <div className="metadata">{piece.metadata}</div>
+                </tr>
+            );
+        }
+
+        // Controller
+        function PieceList(props) {
+            const { pieces } = props;
+            return (
+                <table>
+                    {pieces.map((piece, index) => (
+                        <Piece key={index} piece={piece} />
+                    ))}
+                </table>
+            );
+        }
+
+        // Render the application
+        ReactDOM.render(<PieceList pieces={pieces} />, document.getElementById('root'));
+    </script>
+</body>
+
+</html>
