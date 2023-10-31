@@ -29,6 +29,15 @@ function mkDirObj(pathn,obj) {
         aa[i] = path.basename(obj.directories[i].dirname);
 	paths[aa[i]] = i;
     }
+    if (aa.length > 0) {
+	aa.sort((a,b) => {
+	    const nameA = a.toUpperCase();
+	    const nameB = b.toUpperCase();
+	    if (nameA < nameB) return -1;
+	    if (nameA > nameB)return 1;
+	    return 0
+	})
+    }		
     return {'dirname': obj.dirname,'files': obj.files, 'directories': aa,'paths': paths}
 }
 

@@ -4,64 +4,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>React MVC Example</title>
+    <title>Ideologue Applaiz</title>
 </head>
+<script>
+  let audioElement;
+  
+  // Create a media player app; render a folder of audio
+  // files using JSON fetched from the server.
 
+    window.onload = (event) => {
+        audioElement = new Audio();
+        audioElement.controls=true;
+        audioElement.playsinline=true;
+        audioElement.type = "audio/mpeg";
+        audioElement.preload = "none";
+	audioElement.id="audio0";
+	//const params = "d=.";
+	const params = {d: "."};
+	const options = {
+	    mode: 'cors',
+	    method: 'POST',
+	    headers: {
+		"Content-Type": "application/json",
+		//'Content-Type':'application/x-www-form-urlencoded'
+	    },
+	    //body: params
+	     body: JSON.stringify(params)
+	};
+	
+	fetch( 'http://floreal:3000', options )
+	    .then( response => response.text() )
+	    .then( response => {
+		console.log(JSON.parse(response))
+	    } );
+	
+    }
+</script>
+<script>
+
+  async function postData(path, data) {
+      const response = await fetch("http://floreal:3000",
+				   { method: "POST",
+				    headers: {
+					"Content-Type": "application/json",
+					// 'Content-Type': 'application/x-www-form-urlencoded',
+				    },
+				     body: JSON.stringify(data)
+				   });
+      return response.json();
+  }
+
+
+
+
+  
+  function renderTable(obj){
+  }
+
+  async function postData(url, data) {
+      // Default options are marked with *
+      const response = await fetch(url, {
+	  method: "POST", // *GET, POST, PUT, DELETE, etc.
+	  mode: "no-cors", // no-cors, *cors, same-origin
+	  cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+	  credentials: "same-origin", // include, *same-origin, omit
+	  headers: {
+	      "Content-Type": "application/json",
+	      // 'Content-Type': 'application/x-www-form-urlencoded',
+	  },
+	  redirect: "follow", // manual, *follow, error
+	  referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+	  body: JSON.stringify(data), // body data type must match "Content-Type" header
+      });
+      return response.json(); // parses JSON response into native JavaScript objects
+  }
+  
+</script>
 <body>
-    <div id="root"></div>
-
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <script type="text/babel">
-      var xmlhttp = new XMLHttpRequest();
-      var url = "https://www.ideologue.net:3000";
-      
-      xmlhttp.onreadystatechange = function() {
-	  if (this.readyState == 4 && this.status == 200) {
-              var myArr = JSON.parse(this.responseText);
-              pieces(myArr);
-	  }
-      };
-      xmlhttp.open("GET", url, true);
-      xmlhttp.send();
-
-      
-        // Model
-      function pieces (dirobj) = {
-	  for (list i = 0; i++; i < dirobj.files.length) {
-	  }
-	  return dirobj;
-      }
-
-        // View
-        function Piece(props) {
-            const { piece } = props;
-            return (
-                <tr className="piece">
-                    <h2>{piece.caption}</h2>
-                    <img className="source" src={piece.src} />
-                    <div className="metadata">{piece.metadata}</div>
-                </tr>
-            );
-        }
-
-        // Controller
-        function PieceList(props) {
-            const { pieces } = props;
-            return (
-                <table>
-                    {pieces.map((piece, index) => (
-                        <Piece key={index} piece={piece} />
-                    ))}
-                </table>
-            );
-        }
-
-        // Render the application
-        ReactDOM.render(<PieceList pieces={pieces} />, document.getElementById('root'));
-    </script>
+  <div id="root"></div>
 </body>
 
 </html>
