@@ -38,15 +38,22 @@ function mkDirObj(pathn,obj) {
 	    return 0
 	})
     }		
-    return {'dirname': obj.dirname,'files': obj.files, 'directories': aa,'paths': paths}
+    return {
+	'dirname': obj.dirname,
+	'files': obj.files,
+	'parent': obj.parent,
+	'path': obj.path,
+	'directories': aa,
+	'paths': paths}
 }
 
 
 // ff modifes the global fsobj
 
-function ff (fsobj,parent) {
+function ff (fsobj,patth,parent) {
     fsobj.paths = {};
-    fsobj.path = parent;
+    fsobj.path = patth;
+    fsobj.parent = parent;
 //Sort the filenames case-insensitively
     if (fsobj.files.length > 0) {
 	fsobj.files.sort((a,b) => {
@@ -62,11 +69,12 @@ function ff (fsobj,parent) {
     
     for (let i =0; i < fsobj.directories.length; i++) {
 	let x = fsobj.directories[i];
-	let parentt = parent + "." + i;
 	if(x) {
 	    let y = path.basename(x.dirname);
 	    fsobj.paths[y] = x ;
-	    ff(x,parentt)
+	    let z;
+	    if (fsobj.path=="."){  z = ""} else z = fsobj.path;
+	    ff(x,z + "." + i, fsobj.path)
 	}
     }
 }
