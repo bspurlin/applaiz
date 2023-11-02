@@ -8,14 +8,61 @@
 </head>
 <script src="/node_modules/ejs/ejs.min.js" ></script>
 
-
 <script>
-</script>
+  function setMediaMeta (e) {
+      if ("mediaSession" in navigator) {
+	  navigator.mediaSession.metadata = new MediaMetadata({
+	      title: e.title ,
+	      artist: e.title ,
+	      album: document.querySelector("title").innerHTML,
+	      artwork: [{ src: "" }]
+	  });
+	  navigator.mediaSession.setActionHandler("nexttrack", () => {
+	      playAndReset(playlist[e.nextid]);
+	  });
+	  navigator.mediaSession.setActionHandler("previoustrack", () => {
+	      playAndReset(playlist[e.previd]);
+          });
+	  navigator.mediaSession.setActionHandler("pause", () => {
+              audioElement.pause()
+          });
+	  navigator.mediaSession.setActionHandler("play", () => {
+              audioElement.play()
+          });
+      }
+      
+  }
+  
+  function playAndReset (e) {
+      let headerrow = document.querySelector("tr.indexhead");
+      let playid = e.id;
+      document.getElementById(audioElement.audioid).parentElement.nextElementSibling.setAttribute("bgcolor", "#FFFFFF");
+      audioElement.audioid =  playid;
+      audioElement.nextid = e.nextid;
+      audioElement.previd = e.previd;
+      audioElement.src = e.src;
+      audioElement.title = e.title;
+      let el = document.getElementById(playid + 1000);
+      el.scrollIntoView({block: "center"});
+      //el.previousElement.setAttribute("bgcolor", "#FFFFC0");
+      headerrow.childNodes[2].innerHTML = e.title;
+      document.getElementById(playid).parentElement.nextElementSibling.setAttribute("bgcolor", "#FFFFC0");
+      audioElement.addEventListener("play",(event) => {setMediaMeta(e)});
+      console.log(audioElement);
+      audioElement.play();
+      audioElement.display = "block";
+      
+  }
 
+</script>
 
 <script>
   let audioElement;
-  
+  let obj;  
+  let soundfileelements;
+  let playlist = {};
+
+
   // Create a media player app; render a folder of audio
   // files using JSON fetched from the server.
 
@@ -25,7 +72,7 @@
       audioElement.playsinline=true;
       audioElement.type = "audio/mpeg";
       audioElement.preload = "none";
-      audioElement.id="audio0";
+      audioElement.audioid="0";
       //const params = "d=.";
       const params = {d: "."};
       fetchObj(params)
@@ -49,7 +96,7 @@
 	fetch( 'http://floreal:3000', options )
 	    .then( response => response.text() )
 	    .then( response => {
-		let obj = JSON.parse(response);
+		obj = JSON.parse(response);
 		renderTable(obj);
 	    } );
 
@@ -74,7 +121,7 @@
     <%if(obj.files[i].title) { name = obj.files[i].title } else {name = filename.replace(re,"")};%>\
     <%if(obj.files[i].album) album = obj.files[i].album;%>\
     <%if(obj.files[i].artist) artist = obj.files[i].artist;%>\
-<tr id="<%= i + 1000%>"><td class="indexcolicon" ><img id="<%= i %>" src="/icons/sound2.gif" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>"><td class="indexcolname"><%- name%></td><td></td></tr>\
+<tr id="<%= i + 1000%>"><td class="indexcolicon" ><img class="soundfile" id="<%= i %>" src="/icons/sound2.gif" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>"><td class="indexcolname"><%- name%></td><td></td></tr>\
 <%}%>\
 </tbody>\
 </table>'
@@ -88,14 +135,38 @@
 	      fetchObj(params)
 	  })
       }
+      soundfileelements =  document.getElementsByClassName("soundfile");
+      for (e of soundfileelements) {
+	  let serverpath = obj.dirname + "/" + e.getAttribute("filename");
+	  let tempAudio = {};
+	  tempAudio.src = serverpath;console.log("serverpath: ",serverpath)
+	  e.setAttribute("play",e.getAttribute("id"));
+	  let i = e.getAttribute("play");
+	  tempAudio.id = i*1;
+	  tempAudio.nextid = i*1 + 1;
+	  if (i == soundfileelements.length -1)  tempAudio.nextid = 0
+	  tempAudio.title = e.getAttribute("selectiontitle");
+	  playlist[i] = tempAudio;
+	  console.log(i, playlist[i]);
+	  e.addEventListener("click",(event) => {
+              let playid = event.target.getAttribute('play');
+              playAndReset(playlist[playid]);
+	  });
+      }
+      audioElement.addEventListener("ended", (event) => {
+	  //document.getElementById(event.target.id).previousElement.setAttribute("bgcolor", "#FFFFFF")
+	  playAndReset(playlist[event.target.nextid]);
+      });
+      document.body.insertBefore(audioElement,document.querySelector("root"));
+      audioElement.style = "width: 70%;  position: sticky; top: 90%; left: 20%";
+      
+      
   }
 
   
 </script>
 <body>
-  <div id="root"></div>
-
-  
+  <div id="root"></div>  
 </body>
 
 </html>
