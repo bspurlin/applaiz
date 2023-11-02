@@ -6,21 +6,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ideologue Applaiz</title>
 </head>
+<script src="/node_modules/ejs/ejs.min.js" ></script>
+
+
+<script>
+</script>
+
+
 <script>
   let audioElement;
   
   // Create a media player app; render a folder of audio
   // files using JSON fetched from the server.
 
-    window.onload = (event) => {
-        audioElement = new Audio();
-        audioElement.controls=true;
-        audioElement.playsinline=true;
-        audioElement.type = "audio/mpeg";
-        audioElement.preload = "none";
-	audioElement.id="audio0";
-	//const params = "d=.";
-	const params = {d: "."};
+  window.onload = (event) => {
+      audioElement = new Audio();
+      audioElement.controls=true;
+      audioElement.playsinline=true;
+      audioElement.type = "audio/mpeg";
+      audioElement.preload = "none";
+      audioElement.id="audio0";
+      //const params = "d=.";
+      const params = {d: "."};
+      fetchObj(params)
+    }
+</script>
+
+<script>
+
+  function fetchObj(params) {
 	const options = {
 	    mode: 'cors',
 	    method: 'POST',
@@ -35,23 +49,53 @@
 	fetch( 'http://floreal:3000', options )
 	    .then( response => response.text() )
 	    .then( response => {
-		console.log(JSON.parse(response))
+		let obj = JSON.parse(response);
+		renderTable(obj);
 	    } );
-	
-    }
+
+  }
 </script>
+
 <script>
-
-
-
   
   function renderTable(obj){
+
+      let template = '<table><tbody>\
+<tr class="indexhead"><th class="indexcolicon"><img src="/icons/blank.gif"></th><th class="indexcolname" id="dirname"><%let aa=obj.dirname.split("/")%><%= aa[aa.length - 1]%></th><th></th></tr>\
+<tr class="indexbreakrow"><th colspan="2"><hr></th></tr>\
+<tr ><td ><img class="dirselector" path=<%= obj.parent %> id="parent-a"  src="/icons/back.gif"></td><td class="dirselector" path=<%= obj.parent %> id="parent">Parent Directory</td></tr>\
+<% for (let i = 0; i < obj.directories.length; i++) {\
+%><tr ><td class="indexcolicon"><img src="/icons/folder.gif"></td><td id=dirname<%= obj.paths[obj.directories[i]] %> path=<%= obj.path + "." + obj.paths[obj.directories[i]]%> class="dirselector"><%= obj.directories[i]%></td><td></td></tr>\
+<%}%>\
+<% for (let i = 0; i < obj.files.length; i++) {%>\
+    <%let re = /\.(m4a|mp3)$/;%>\
+    <%let filename, name, artist, album;%>\
+    <%filename = obj.files[i].filename;%>\
+    <%if(obj.files[i].title) { name = obj.files[i].title } else {name = filename.replace(re,"")};%>\
+    <%if(obj.files[i].album) album = obj.files[i].album;%>\
+    <%if(obj.files[i].artist) artist = obj.files[i].artist;%>\
+<tr id="<%= i + 1000%>"><td class="indexcolicon" ><img id="<%= i %>" src="/icons/sound2.gif" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>"><td class="indexcolname"><%- name%></td><td></td></tr>\
+<%}%>\
+</tbody>\
+</table>'
+
+      let html = ejs.render(template, {obj: obj});
+      document.getElementById("root").innerHTML = html;
+      let direlements = document.getElementsByClassName("dirselector");
+      for (e of direlements){
+	  e.addEventListener("click",(event) => {
+	      let params = {d: event.target.getAttribute("path")};
+	      fetchObj(params)
+	  })
+      }
   }
 
   
 </script>
 <body>
   <div id="root"></div>
+
+  
 </body>
 
 </html>
