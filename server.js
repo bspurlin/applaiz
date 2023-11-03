@@ -40,6 +40,10 @@ app.get('/icons/*', function (req, res) {
     res.sendFile( __dirname + "/" + req.path)
 })
 
+app.get('/css/*', function (req, res) {  
+    res.sendFile( __dirname + "/" + req.path)
+})
+
 app.get('/Shared/*', function (req, res) {  
     res.sendFile( __dirname + "/" + decodeURI(req.path))
 })

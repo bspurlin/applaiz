@@ -1,0 +1,31 @@
+tr.indexhead {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #FFFFC0;
+}
+
+[alt="[SND]"] {
+
+    width: 2rem;
+  
+}
+
+.mediaplayer {
+    position:fixed;
+    bottom:calc(48% + 0px);
+    right:10%;
+    width: 70%;
+    height: 7%; /* Not higher than 7%, or the mediaplayer will invisibly mask the next higher media selection */
+}
+
+#audio0 {
+
+    width: 70%;
+    position: sticky;
+    top: 90%;
+    left: 20%
+
+}
+
