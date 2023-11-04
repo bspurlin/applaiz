@@ -69,7 +69,8 @@
 
 
   // Create a media player app; render a folder of audio
-  // files using JSON fetched from the server.
+  // files using a JSON representation of a filesystem
+  // fetched from the server.
 
   window.onload = (event) => {
       audioElement = new Audio();
@@ -79,7 +80,6 @@
       audioElement.type = "audio/mpeg";
       audioElement.preload = "none";
       audioElement.audioid="0";
-      document.body.insertBefore(audioElement,document.querySelector("root"));
       audioElement.style = "width: 70%;  position: sticky; top: 90%; left: 20%";
       audioElement.addEventListener("ended", (event) => {
 	  console.log("Listener:", playlist[event.target.nextid]);
@@ -92,6 +92,16 @@
       fetchObj(params)
     }
 </script>
+
+<script>
+  //disable back button
+history.pushState(null, document.title, location.href);
+window.addEventListener('popstate', function (event)
+{
+  history.pushState(null, document.title, location.href);
+});
+</script>
+
 
 <script>
 
@@ -142,6 +152,7 @@
 
       let html = ejs.render(template, {obj: obj});
       document.getElementById("root").innerHTML = html;
+      document.querySelector("#root").insertBefore(audioElement,document.querySelector("table"))
       let direlements = document.getElementsByClassName("dirselector");
       for (e of direlements){
 	  e.addEventListener("click",(event) => {
