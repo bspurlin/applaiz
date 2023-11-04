@@ -2,7 +2,7 @@
 
 const { readdir, readdirSync } = require('fs');
 const NodeID3 = require('node-id3');
-const re = /(mp3|m4a$)/i;
+const re = /(mp3|m4a|flac|wav$)/i;
 
 // option "-s" to follow symbolic links
 opt = require('node-getopt').create([['s' , '', 'short option.']]).parseSystem();
