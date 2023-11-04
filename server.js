@@ -9,7 +9,7 @@ app.use(cors({
 }));
 tp = require("./modules.js");
 
-fsobj = JSON.parse(fs.readFileSync("./fsobj.4")); //get the filesystem
+fsobj = JSON.parse(fs.readFileSync("./fsobj.5")); //get the filesystem
 tp.ff(fsobj,".",0); // massage it
 
 app.use(express.static('public'))
