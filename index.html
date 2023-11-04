@@ -13,9 +13,9 @@
   function setMediaMeta (e) {
       if ("mediaSession" in navigator) {
 	  navigator.mediaSession.metadata = new MediaMetadata({
-	      title: playlists[obj.dirname][e.audioid].title ,
-	      artist: playlists[obj.dirname][e.audioid].artist ,
-	      album: playlists[obj.dirname][e.audioid].album,
+	      title: playlist[e.audioid].title ,
+	      artist: playlist[e.audioid].artist ,
+	      album: playlist[e.audioid].album,
 	      artwork: [{ src: "" }]
 	  });
 	  navigator.mediaSession.setActionHandler("nexttrack", () => {
@@ -53,7 +53,7 @@
       
       audioElement.play();
       console.log(playlists[obj.dirname]);
-      playlist = playlists[obj.dirname];
+//      playlist = playlists[obj.dirname];
       audioElement.display = "block";
       
   }
@@ -166,7 +166,8 @@
 	  dirplaylist[i] = playlistEntry;
 	  e.addEventListener("click",(event) => {
               let playid = event.target.getAttribute('play');
-              playAndReset(playlists[obj.dirname][i]);
+	      playlist = playlists[obj.dirname];
+              playAndReset(playlist[i]);
 	  });
       }
       playlists[obj.dirname] = dirplaylist;
