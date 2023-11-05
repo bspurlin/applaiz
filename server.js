@@ -24,7 +24,7 @@ app.post('/',function(req,res){
 });
 
 app.get('/',function(req,res){
-    console.log("Get ",req.headers);
+    console.log("Get ",req.url,req.ip,new Date(),req.get('user-agent'));
     const options = {
         root: path.join(__dirname)
     };
@@ -44,8 +44,10 @@ app.get('/css/*', function (req, res) {
     res.sendFile( __dirname + "/" + req.path)
 })
 
-app.get('/Shared/*', function (req, res) {  
-    res.sendFile( __dirname + "/" + decodeURI(req.path))
+app.get('/Shared/*', function (req, res) {
+    let decoded = decodeURI(req.path);
+    console.log("Shared: ",decoded,  req.ip, Date());
+    res.sendFile( __dirname + "/" + decoded)
 })
 
 app.listen(3000, function () {
