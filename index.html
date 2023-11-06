@@ -172,6 +172,8 @@ window.addEventListener('popstate', function (event)
 	  playlistEntry.id = i;
 	  playlistEntry.nextid = i + 1;
 	  if (i == soundfileelements.length -1)  playlistEntry.nextid = 0
+	  playlistEntry.previd = i - 1 ; 
+          if (i == 0) playlistEntry.previd = soundfileelements.length -1;
 	  dirplaylist[i] = playlistEntry;
 	  e.addEventListener("click",(event) => {
               let playid = event.target.getAttribute('play');
