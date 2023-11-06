@@ -1,24 +1,24 @@
 path = require("path");
 
-function countAttr (c, fsobj) {
-
-    if(fsobj.files.length > 0) {
-	c.length +=  fsobj.files.length
-    }
-
-    for (let x = 0; x <  fsobj.files.length; x++){
-	c.title += fsobj.files[x].title != undefined;
-	c.artist += fsobj.files[x].artist != undefined;
-	c.album += fsobj.files[x].album != undefined;
-    }
-    
-    for(let x =0; x < fsobj.directories.length; x++) {
-	c = countAttr(c,fsobj.directories[x]);
-    };
-
-    return c;
+function countAttr (fsobj) {
+    return ff(
+	fsobj,
+	undefined,
+	undefined,
+	() => {},
+	(fsobj,robj) => {
+	    robj.length +=  fsobj.files.length;
+	    for (let x = 0; x <  fsobj.files.length; x++){
+		if (fsobj.files[x].title != undefined) ++robj.title;
+		if (fsobj.files[x].artist != undefined) ++robj.artist;
+		if (fsobj.files[x].album != undefined) ++robj.album;
+	    }
+	    return robj
+	},
+	() => {},
+	{length: 0, title: 0, artist: 0, album: 0}
+    )
 }
-
 
 function mkDirObj(pathn,obj) {
     let aa = pathn.split('.').filter(x => x);
@@ -48,35 +48,29 @@ function mkDirObj(pathn,obj) {
 }
 
 
-// ff modifes the global fsobj
+// ff modifes, massages or gains data from the global fsobj
 
-function ff (fsobj,patth,parent) {
-    fsobj.paths = {};
-    fsobj.path = patth;
-    fsobj.parent = parent;
-//Sort the filenames case-insensitively
+function ff (fsobj,patth,parent,fMassage,fFile,fDir, robj) {
+    if (fsobj.paths == undefined) fsobj.paths = {};
+    fMassage(fsobj,patth,parent);
+    // fFile could, e. g., sort the filenames case-insensitively
+    // or, as in countAttr(), count file attributes
     if (fsobj.files.length > 0) {
-	fsobj.files.sort((a,b) => {
-	    const nameA = a.filename.toUpperCase();
-	    const nameB = b.filename.toUpperCase();
-	    if (nameA < nameB) return -1;
-	    if (nameA > nameB)return 1;
-	    return 0
-	})
+	robj = fFile(fsobj, robj)
     }		
 
-    //Add a paths object to the directory object, and a parent field
+    //fDir could, e. g. add a paths object to the directory object
     
     for (let i =0; i < fsobj.directories.length; i++) {
 	let x = fsobj.directories[i];
 	if(x) {
-	    let y = path.basename(x.dirname);
-	    fsobj.paths[y] = x ;
+	    fDir(fsobj,x);
 	    let z;
 	    if (fsobj.path=="."){  z = ""} else z = fsobj.path;
-	    ff(x,z + "." + i, fsobj.path)
+	    robj = ff(x,z + "." + i, fsobj.path,fMassage,fFile,fDir, robj)
 	}
     }
+    return robj;
 }
 
 
