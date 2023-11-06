@@ -10,7 +10,31 @@ app.use(cors({
 tp = require("./modules.js");
 
 fsobj = JSON.parse(fs.readFileSync("./fsobj.5")); //get the filesystem
-tp.ff(fsobj,".",0); // massage it
+
+// massage the filesystem-object
+tp.ff(
+    fsobj,
+    ".",
+    0,
+    (obj, patth, parent) => { //create a paths object
+	obj.path = patth;     // to access the index by name
+	obj.parent = parent;  // and a parent so we can go back
+    },
+    (obj) => {                    // Sort the list of files case-
+	obj.files.sort((a,b) => { //insensitively		       
+	    const nameA = a.filename.toUpperCase();
+	    const nameB = b.filename.toUpperCase();
+	    if (nameA < nameB) return -1;
+	    if (nameA > nameB)return 1;
+	    return 0
+	})
+    },
+    (obj, x)=>{
+    	let y = path.basename(x.dirname); //populate the paths object
+	obj.paths[y] = x ;                //for each directory 
+    },
+    {}
+)
 
 app.use(express.static('public'))
 app.use(bodyParser.json());
