@@ -1,3 +1,5 @@
+// test code for modules:countAttr
+
 ff(fsobj,
    undefined,
    undefined,
