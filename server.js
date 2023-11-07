@@ -29,9 +29,7 @@ tp.ff(
 	    return 0
 	})
     },
-    (obj, x)=>{
-    	let y = path.basename(x.dirname); //populate the paths object
-	obj.paths[y] = x ;                //for each directory 
+    ()=>{
     },
     {}
 )
@@ -72,6 +70,10 @@ app.get('/Shared/*', function (req, res) {
     let decoded = decodeURI(req.path);
     console.log("Shared: ",decoded,  req.ip, Date());
     res.sendFile( __dirname + "/" + decoded)
+})
+
+app.get('/*.js', function (req, res) {
+    res.sendFile( __dirname + "/" + req.path)
 })
 
 app.listen(3000, function () {

@@ -51,7 +51,7 @@ function mkDirObj(pathn,obj) {
 // ff modifes, massages or gains data from the global fsobj
 
 function ff (fsobj,patth,parent,fMassage,fFile,fDir, robj) {
-    if (fsobj.paths == undefined) fsobj.paths = {};
+    //if (fsobj.paths == undefined) fsobj.paths = {};
     fMassage(fsobj,patth,parent);
     // fFile could, e. g., sort the filenames case-insensitively
     // or, as in countAttr(), count file attributes
