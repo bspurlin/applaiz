@@ -16,9 +16,7 @@ ff(
 	    return 0
 	})
     },
-    (obj, x)=>{
-    	let y = path.basename(x.dirname);
-	obj.paths[y] = x ;
+    ()=>{
     },
     {}
 )
