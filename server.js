@@ -39,6 +39,8 @@ app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: true }))
 app.set('view engine', 'ejs')
 
+let re = /%23/ig;
+
 app.post('/',function(req,res){
     res.setHeader('Content-Type', 'application/json');
     console.log("Body: ",JSON.stringify(req.body));
@@ -68,6 +70,7 @@ app.get('/css/*', function (req, res) {
 
 app.get('/Shared/*', function (req, res) {
     let decoded = decodeURI(req.path);
+    decoded = decoded.replace(re,"#");
     console.log("Shared: ",decoded,  req.ip, Date());
     res.sendFile( __dirname + "/" + decoded)
 })

@@ -37,6 +37,8 @@
   function playAndReset (e) {
       let headerrow = document.querySelector("tr.indexhead");
       let playid = e.id;
+      let re = /#/ig;
+      let tmpsrc = "";
       if (playlist == playlists[obj.dirname]) {
 	  document.getElementById(audioElement.audioid).parentElement.nextElementSibling.setAttribute("bgcolor", "#FFFFFF");
 	  document.getElementById(playid).parentElement.nextElementSibling.setAttribute("bgcolor", "#FFFFC0");
@@ -46,7 +48,9 @@
       audioElement.audioid =  playid;
       audioElement.nextid = e.nextid;
       audioElement.previd = e.previd;
-      audioElement.src = e.src;
+      tmpsrc = encodeURI(e.src);
+      tmpsrc = tmpsrc.replace(re,'%23');console.log("tmpsrc :",tmpsrc);      
+      audioElement.src = tmpsrc;
       audioElement.title = e.title;
             //el.previousElement.setAttribute("bgcolor", "#FFFFC0");
       headerrow.childNodes[2].innerHTML = e.title;
