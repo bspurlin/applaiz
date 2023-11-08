@@ -52,8 +52,8 @@
       headerrow.childNodes[2].innerHTML = e.title;
       
       audioElement.play();
-      console.log(playlists[obj.dirname]);
-//      playlist = playlists[obj.dirname];
+//      console.log(playlists[obj.dirname]);
+//      playlist = playlists[obj.dirname]; //set this in the event handler
       audioElement.display = "block";
       
   }
@@ -82,7 +82,7 @@
       audioElement.audioid="0";
       audioElement.style = "width: 70%;  position: sticky; top: 90%; left: 20%";
       audioElement.addEventListener("ended", (event) => {
-	  console.log("Listener:", playlist[event.target.nextid]);
+//	  console.log("Listener:", playlist[event.target.nextid]);
 	  playAndReset(playlist[event.target.nextid]);
       });
       audioElement.addEventListener("play",(event) => {

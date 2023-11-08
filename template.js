@@ -19,13 +19,13 @@ let templates = [`<table>
    <%}%>
 
    <% for (let i = 0; i < obj.files.length; i++) {
-      let re = /.(m4a|mp3|wav|flac)$/;
+      let re = /.(m4a|mp3|wav|flac)$/ig;
       let filename, name, artist, album, title;
       filename = obj.files[i].filename;
       name = filename.replace(re,"");
       if(obj.files[i].title) {
-		title = obj.files[i].title;	       
-		if (title.length >= name.length ) name = obj.files[i].title
+		title = obj.files[i].title.replace(re,"");	       
+		if (title.length >= name.length ) name = title
 	  };
       if(obj.files[i].album) album = obj.files[i].album;
       if(obj.files[i].artist) artist = obj.files[i].artist; %>
