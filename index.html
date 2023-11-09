@@ -164,7 +164,7 @@ window.addEventListener('popstate', function (event)
 	  e.addEventListener("click",(event) => {
               let playid = event.target.getAttribute('play');
 	      playlist = playlists[obj.dirname];
-              playAndReset(playlist[i]);
+              playAndReset(playlist[playid]);
 	  });
       }
       playlists[obj.dirname] = dirplaylist;
