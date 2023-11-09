@@ -6,7 +6,7 @@ tr.indexhead {
   background-color: #FFFFC0;
 }
 
-[alt="[SND]"] {
+img.soundfile, img.dirselector {
 
     width: 2rem;
   
