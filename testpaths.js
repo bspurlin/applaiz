@@ -2,72 +2,47 @@
 
 fs = require("fs");
 path = require("path");
-opt = require('node-getopt').create([['f','', 'short option.'],['s' , '', 'short option.'],['g','=']]).parseSystem();
-sizeof = require('object-sizeof');
+opt = require('node-getopt').create([
+    ['f','', "count the filename, album, artist, title in an fsobj"],
+    ['s' , '=', 'search string-pattern'],
+    ['p','=',"path name in number-dot format"],
+    ['g','', "generate a mkdirobj"]
+]).parseSystem();
+
+size1of = require('object-sizeof');
+const Fuse = require('fuse.js');
+
+
 fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
 
-exports.countAttr = countAttr;
-exports.ff = ff;
+const {countAttr, ff, mkDirObj } = require("./modules.js");
 
-function countAttr (c, fsobj) {
 
-    if(fsobj.files.length > 0) {
-	c +=  fsobj.files.length
+
+
+function searchDirObjs(sstr, pathn, fsobj) {
+    const options = {
+	includeScore: true,
+	ignoreLocation: true,
+	useExtendedSearch: true,
+	keys: ["title","filename","artist","album","dirname"]
     }
-
-    for(let x =0; x < fsobj.directories.length; x++) {
-	c = countAttr(c,fsobj.directories[x]);
-    };
-
-    return c;
-}
-
-
-function ff (fsobj,parent) {
-    fsobj.paths = {};
-    fsobj.path = parent;
-//Sort the filenames case-insensitively
-    if (fsobj.files.length > 0) {
-	fsobj.files.sort((a,b) => {
-	    const nameA = a.filename.toUpperCase();
-	    const nameB = b.filename.toUpperCase();
-	    if (nameA < nameB) return -1;
-	    if (nameA > nameB)return 1;
-	    return 0
-	})
-    }		
-			
-    for (let i =0; i < fsobj.directories.length; i++) {
-	let x = fsobj.directories[i];
-	let parentt = parent + "." + i;
-	if(x) {
-	    let y = path.basename(x.dirname);
-	    fsobj.paths[y] = x ;
-	    ff(x,parentt)
-	}
-    }
-}
-
-function mkTable(pathn,f) {
-    let dirobj = f(pathn);
+    let obj = mkDirObj(pathn, fsobj);
     
-}
+    let aa = obj["files"];
 
+    aa.push({"dirname":obj['dirname']});
 
-ff(fsobj,"");
+    const fuse = new Fuse(aa, options);
+    ss = sstr.split(/\s+/);
+    ss.forEach((element, i) => {ss[i] = "'" + element});
+    sstr = ss.join(" ");
+    sstr = "'"+'"' +"trio in d major"+'"' + " "+"beethoven";
+    console.log(sstr,fuse.search(sstr));
+    }
 
-if(opt.options.f) {console.log("count = ",countAttr(0,fsobj))};
+if (opt.options.s && opt.options.p)  searchDirObjs(opt.options.s, opt.options.p, fsobj)
 
-if (opt.options.g) mkTable(opt.options.g,(pathn) => {
-    let aa = pathn.split('.').filter(x => x);
-    let obj=fsobj.directories[aa.shift()];
-    function generateDirFields(obj) {
-	while((x = aa.shift()) != undefined) obj=obj.directories[x];
-	let directories = [];
-	for (let i = 0; i < obj.directories.length; i++)
-	    aa[i] = path.basename(obj.directories[i].dirname);
-	return {'dirname': obj.dirname,'files': obj.files, 'directories': aa}
-    };
+if(opt.options.f) {console.log("count = ",countAttr(fsobj))};
 
-    return aa.length?generateDirFields(obj):generateDirFields(fsobj);
-})
+if (opt.options.g && opt.options.p) console.log(mkDirObj(opt.options.p, fsobj));
