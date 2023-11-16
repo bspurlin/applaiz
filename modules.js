@@ -1,12 +1,9 @@
 path = require("path");
 
 function countAttr (fsobj) {
-    return ff(
-	fsobj,
-	undefined,
-	undefined,
-	() => {},
-	(fsobj,robj) => {
+    return ff({
+	fsobj: fsobj,
+	fFile: (fsobj,robj) => {
 	    robj.length +=  fsobj.files.length;
 	    for (let x = 0; x <  fsobj.files.length; x++){
 		if (fsobj.files[x].title != undefined) ++robj.title;
@@ -15,9 +12,8 @@ function countAttr (fsobj) {
 	    }
 	    return robj
 	},
-	() => {},
-	{length: 0, title: 0, artist: 0, album: 0}
-    )
+	robj: {length: 0, title: 0, artist: 0, album: 0}
+    })
 }
 
 function mkDirObj(pathn,obj) {
@@ -50,11 +46,20 @@ function mkDirObj(pathn,obj) {
 
 // ff modifes, massages or gains data from the global fsobj
 
-function ff (fsobj,patth,parent,fMassage,fFile,fDir, robj) {
-    //if (fsobj.paths == undefined) fsobj.paths = {};
+function ff ({
+    fsobj = {},
+    patth = ".",
+    parent = "",
+    fMassage = ()=>{},
+    fFile = ()=>{},
+    fDir = ()=>{},
+    robj = undefined}) {
+
     fMassage(fsobj,patth,parent);
+
     // fFile could, e. g., sort the filenames case-insensitively
     // or, as in countAttr(), count file attributes
+
     if (fsobj.files.length > 0) {
 	robj = fFile(fsobj, robj)
     }		
@@ -67,7 +72,14 @@ function ff (fsobj,patth,parent,fMassage,fFile,fDir, robj) {
 	    fDir(fsobj,x);
 	    let z;
 	    if (fsobj.path=="."){  z = ""} else z = fsobj.path;
-	    robj = ff(x,z + "." + i, fsobj.path,fMassage,fFile,fDir, robj)
+	    robj = ff({
+		fsobj: x,
+		patth: z + "." + i,
+		parent: fsobj.path,
+		fMassage: fMassage,
+		fFile: fFile,
+		fDir: fDir,
+		robj: robj})
 	}
     }
     return robj;

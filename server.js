@@ -12,15 +12,13 @@ tp = require("./modules.js");
 fsobj = JSON.parse(fs.readFileSync("./fsobj.5")); //get the filesystem
 
 // massage the filesystem-object
-tp.ff(
-    fsobj,
-    ".",
-    0,
-    (obj, patth, parent) => { //create a paths object
+tp.ff({
+    fsobj: fsobj,
+    fMassage: (obj, patth, parent) => { //create a paths object
 	obj.path = patth;     // to access the index by name
 	obj.parent = parent;  // and a parent so we can go back
     },
-    (obj) => {                    // Sort the list of files case-
+    fFile: (obj) => {                    // Sort the list of files case-
 	obj.files.sort((a,b) => { //insensitively		       
 	    const nameA = a.filename.toUpperCase();
 	    const nameB = b.filename.toUpperCase();
@@ -28,11 +26,9 @@ tp.ff(
 	    if (nameA > nameB)return 1;
 	    return 0
 	})
-    },
-    ()=>{
-    },
-    {}
-)
+    }
+}
+     )
 
 app.use(express.static('public'))
 app.use(bodyParser.json());
