@@ -4,11 +4,12 @@ function mkTempl(i) {
 
 let templates = [`<table>
   <tbody>
-    <tr class="indexhead"><th class="indexcolicon"><img class="dirselector" path=<%= obj.parent %> id="parent-a"  src="/icons/back.gif"></th><th class="indexcolname" id="headerdirname"><%let aa=obj.dirname.split("/")%><%= aa[aa.length - 1]%></th><th></th></tr>
+    <tr class="indexhead"><th class="indexcolicon"><img class="dirselector" path=<%= obj.parent %> id="parent-a"  src="/icons/back.gif"></th><th class="" id="headerdirname"><%let aa=obj.dirname.split("/")%><%= aa[aa.length - 1]%></th><th></th></tr>
 
     <% for (let i = 0; i < obj.directories.length; i++) {%>
    <tr >
-     <td class="indexcolicon"><img  id=dirname<%= obj.paths[obj.directories[i]] %> path=<%= obj.path + "." + obj.paths[obj.directories[i]]%> class="dirselector" src="/icons/folder.gif">
+     <td class="indexcolicon">
+<img  id=dirname<%= obj.paths[obj.directories[i]] %> path=<%= obj.path + "." + obj.paths[obj.directories[i]]%> class="dirselector" src="/icons/folder.gif">
      </td>
      <td>
        <%= obj.directories[i]%>
@@ -32,7 +33,7 @@ let templates = [`<table>
          album = "";
       }
       if(obj.files[i].artist) artist = obj.files[i].artist; %>
-      <tr id="<%= i + 1000%>" bgcolor=<%= i%2?"#F0F0F0":"#FFFFFF"   %>>
+      <tr class=indexrow id="<%= i + 1000%>" bgcolor=<%= i%2?"#F0F0F0":"#FFFFFF"   %>>
 	<td class="indexcolicon" ><img class="soundfile" id="<%= i %>" src="/icons/loudspeaker.svg" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
 	</td>
 	<td class="indexcolname"><%- name%>
