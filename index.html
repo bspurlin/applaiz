@@ -40,7 +40,8 @@
       let re = /#/ig;
       let tmpsrc = "";
       if (playlist == playlists[obj.dirname]) {
-	  document.getElementById(audioElement.audioid).parentElement.nextElementSibling.setAttribute("bgcolor", "#FFFFFF");
+	  if (audioElement.audioid < obj.files.length || playid == 0)
+	      document.getElementById(audioElement.audioid).parentElement.nextElementSibling.setAttribute("bgcolor", "#FFFFFF");
 	  document.getElementById(playid).parentElement.nextElementSibling.setAttribute("bgcolor", "#FFFFC0");
 	  let el = document.getElementById(playid + 1000);
 	  el.scrollIntoView({block: "center"});
@@ -54,7 +55,12 @@
       audioElement.title = e.title;
             //el.previousElement.setAttribute("bgcolor", "#FFFFC0");
       headerrow.childNodes[2].innerHTML = e.title;
-      
+      if (e.album.length > document.getElementById("headerdirname").innerHTML.length) {
+	  document.getElementById("headerdirname").innerHTML = e.album;
+      } else {
+	  let aa=obj.dirname.split("/");
+	  document.getElementById("headerdirname").innerHTML = aa[aa.length - 1]
+      }
       audioElement.play();
 //      console.log(playlists[obj.dirname]);
 //      playlist = playlists[obj.dirname]; //set this in the event handler
