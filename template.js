@@ -4,7 +4,7 @@ function mkTempl(i) {
 
 let templates = [`<table>
   <tbody>
-    <tr class="indexhead"><th class="indexcolicon"><img class="dirselector" path=<%= obj.parent %> id="parent-a"  src="/icons/back.gif"></th><th class="indexcolname" id="dirname"><%let aa=obj.dirname.split("/")%><%= aa[aa.length - 1]%></th><th></th></tr>
+    <tr class="indexhead"><th class="indexcolicon"><img class="dirselector" path=<%= obj.parent %> id="parent-a"  src="/icons/back.gif"></th><th class="indexcolname" id="headerdirname"><%let aa=obj.dirname.split("/")%><%= aa[aa.length - 1]%></th><th></th></tr>
 
     <% for (let i = 0; i < obj.directories.length; i++) {%>
    <tr >
@@ -27,7 +27,10 @@ let templates = [`<table>
 		title = obj.files[i].title.replace(re,"");	       
 		if (title.length >= name.length ) name = title
 	  };
-      if(obj.files[i].album) album = obj.files[i].album;
+      if(obj.files[i].album) {
+         album = obj.files[i].album; } else {
+         album = "";
+      }
       if(obj.files[i].artist) artist = obj.files[i].artist; %>
       <tr id="<%= i + 1000%>">
 	<td class="indexcolicon" ><img class="soundfile" id="<%= i %>" src="/icons/sound2.gif" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
