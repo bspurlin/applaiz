@@ -1,5 +1,51 @@
 path = require("path");
 
+function searchFsObj (fsobj, rearray) {
+    let score = rearray.length;
+    let gobj = fsobj;
+    ff({fsobj: fsobj,fMassage: (fsobj,patth,parent)=>{fsobj.path = patth;fsobj.parent = parent;}})
+    return ff({
+	fsobj: fsobj,
+	fFile: (fsobj,robj) => {
+	    let n = 0;
+	    for(let i =0; i< score; i++){
+		let re = rearray[i];
+		for (let x = 0; x <  fsobj.files.length; x++){
+		    let searchstring=fsobj.files.filename;
+		    if (fsobj.files[x].title != undefined)
+			searchstring = searchstring + fsobj.files[x].title;
+		    if (fsobj.files[x].artist != undefined)
+			searchstring = searchstring + fsobj.files[x].artist;
+		    if (fsobj.files[x].album != undefined)
+			searchstring = searchstring + fsobj.files[x].album;
+		    if (re.test(searchstring)) {
+			n++;
+			break;
+		    }
+		}
+	    }
+	    if (n >= score) {
+		/*			    console.log("Here ",
+					    rearray,
+					    score,
+					    fsobj.path,
+					    fsobj.directories.length,
+					    fsobj.dirname)*/
+		if (fsobj.directories.length == 0) {
+		    robj.push(fsobj);
+		}else{ //mkDirObj only works on the global fsobj
+		    let dirobj = mkDirObj(fsobj.path,gobj);
+		    robj.push(dirobj);
+		}
+	    }
+	return robj;
+	},
+	robj: []
+    })
+}
+
+
+
 function countAttr (fsobj) {
     return ff({
 	fsobj: fsobj,
@@ -86,4 +132,4 @@ function ff ({
 }
 
 
-module.exports = { countAttr, ff, mkDirObj };
+module.exports = { countAttr, ff, mkDirObj, searchFsObj };
