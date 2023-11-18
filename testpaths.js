@@ -15,33 +15,20 @@ const Fuse = require('fuse.js');
 
 fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
 
-const {countAttr, ff, mkDirObj } = require("./modules.js");
+const {countAttr, ff, mkDirObj, searchFsObj } = require("./modules.js");
 
 
 
 
-function searchDirObjs(sstr, pathn, fsobj) {
-    const options = {
-	includeScore: true,
-	ignoreLocation: true,
-	useExtendedSearch: true,
-	keys: ["title","filename","artist","album","dirname"]
-    }
-    let obj = mkDirObj(pathn, fsobj);
-    
-    let aa = obj["files"];
+function searchDirObjs(searchres, fsobj) {
+    let aa  = searchres.split(",");
+    let rearray = []
+    for (r of aa) rearray.push(new RegExp(r,'i'));
+    let output = searchFsObj(fsobj,rearray);
+    console.log(output)
+}
 
-    aa.push({"dirname":obj['dirname']});
-
-    const fuse = new Fuse(aa, options);
-    ss = sstr.split(/\s+/);
-    ss.forEach((element, i) => {ss[i] = "'" + element});
-    sstr = ss.join(" ");
-    sstr = "'"+'"' +"trio in d major"+'"' + " "+"beethoven";
-    console.log(sstr,fuse.search(sstr));
-    }
-
-if (opt.options.s && opt.options.p)  searchDirObjs(opt.options.s, opt.options.p, fsobj)
+if (opt.options.s)  searchDirObjs(opt.options.s,fsobj);
 
 if(opt.options.f) {console.log("count = ",countAttr(fsobj))};
 
