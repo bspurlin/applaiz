@@ -29,3 +29,7 @@ img.soundfile, img.dirselector {
 
 }
 
+#root {
+  height: 100%;
+  top: -10%
+}
