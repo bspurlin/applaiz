@@ -8,9 +8,9 @@ let templates = [`<table>
 
     <% for (let i = 0; i < obj.directories.length; i++) {%>
    <tr >
-     <td class="indexcolicon"><img src="/icons/folder.gif">
+     <td class="indexcolicon"><img  id=dirname<%= obj.paths[obj.directories[i]] %> path=<%= obj.path + "." + obj.paths[obj.directories[i]]%> class="dirselector" src="/icons/folder.gif">
      </td>
-     <td id=dirname<%= obj.paths[obj.directories[i]] %> path=<%= obj.path + "." + obj.paths[obj.directories[i]]%> class="dirselector">
+     <td>
        <%= obj.directories[i]%>
      </td>
      <td>
@@ -32,8 +32,8 @@ let templates = [`<table>
          album = "";
       }
       if(obj.files[i].artist) artist = obj.files[i].artist; %>
-      <tr id="<%= i + 1000%>">
-	<td class="indexcolicon" ><img class="soundfile" id="<%= i %>" src="/icons/sound2.gif" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
+      <tr id="<%= i + 1000%>" bgcolor=<%= i%2?"#F0F0F0":"#FFFFFF"   %>>
+	<td class="indexcolicon" ><img class="soundfile" id="<%= i %>" src="/icons/loudspeaker.svg" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
 	</td>
 	<td class="indexcolname"><%- name%>
 	</td>
