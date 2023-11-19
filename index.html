@@ -1,14 +1,50 @@
-<!DOCTYPE html>
 <html lang="en">
 
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ideologue Applaiz</title>
     <link rel="stylesheet" href="/css/style.css" type="text/css">
-</head>
+  </head>
 <script src="/node_modules/ejs/ejs.min.js" ></script>
 <script src="template.js" type="text/javascript"> </script>
+
+<script>
+
+  //Globals
+  
+  let audioElement;
+  let obj;  
+  let playlist = [];
+  let playlists = {};
+
+
+  // Create a media player app; render a folder of audio
+  // files using a JSON representation of a filesystem
+  // fetched from the server.
+
+  window.onload = (event) => {
+      audioElement = new Audio();
+      audioElement.id = "audio0";
+      audioElement.controls=true;
+      audioElement.playsinline=true;
+      audioElement.type = "audio/mpeg";
+      audioElement.preload = "none";
+      audioElement.audioid="0";
+      audioElement.addEventListener("ended", (event) => {
+	  let originaldirname = event.target.dirname;
+	  let el = document.getElementById(event.target.nextid + 1000);
+	  playAndReset(playlist[event.target.nextid],originaldirname);
+	  Highlight(el, originaldirname);
+      });
+      audioElement.addEventListener("play",(event) => {
+	  setMediaMeta(event.target)});
+      //const params = "d=.";
+      const params = {d: "."};
+      fetchObj(params)
+    }
+</script>
+
 <script>
   function setMediaMeta (e) {
       if ("mediaSession" in navigator) {
@@ -34,18 +70,11 @@
       
   }
   
-  function playAndReset (e) {
+  function playAndReset (e, dirname = obj.dirname) {
       let headerrow = document.querySelector("tr.indexhead");
       let playid = e.id;
       let re = /#/ig;
       let tmpsrc = "";
-      if (playlist == playlists[obj.dirname]) {
-	  if (audioElement.audioid < obj.files.length || playid == 0)
-	      document.getElementById(audioElement.audioid).parentElement.nextElementSibling.setAttribute("bgcolor", "#FFFFFF");
-	  document.getElementById(playid).parentElement.nextElementSibling.setAttribute("bgcolor", "#FFFFC0");
-	  let el = document.getElementById(playid + 1000);
-	  el.scrollIntoView({block: "center"});
-      }
       audioElement.audioid =  playid;
       audioElement.nextid = e.nextid;
       audioElement.previd = e.previd;
@@ -53,7 +82,7 @@
       tmpsrc = tmpsrc.replace(re,'%23');console.log("tmpsrc :",tmpsrc);      
       audioElement.src = tmpsrc;
       audioElement.title = e.title;
-            //el.previousElement.setAttribute("bgcolor", "#FFFFC0");
+      audioElement.dirname = dirname;
       headerrow.childNodes[2].innerHTML = e.title;
       if (e.album.length > document.getElementById("headerdirname").innerHTML.length) {
 	  document.getElementById("headerdirname").innerHTML = e.album;
@@ -62,45 +91,10 @@
 	  document.getElementById("headerdirname").innerHTML = aa[aa.length - 1]
       }
       audioElement.play();
-//      console.log(playlists[obj.dirname]);
-//      playlist = playlists[obj.dirname]; //set this in the event handler
       audioElement.display = "block";
       
   }
 
-</script>
-
-<script>
-  let audioElement;
-  let obj;  
-  let soundfileelements;
-  let playlist = [];
-  let playlists = {};
-
-
-  // Create a media player app; render a folder of audio
-  // files using a JSON representation of a filesystem
-  // fetched from the server.
-
-  window.onload = (event) => {
-      audioElement = new Audio();
-      audioElement.id = "audio0";
-      audioElement.controls=true;
-      audioElement.playsinline=true;
-      audioElement.type = "audio/mpeg";
-      audioElement.preload = "none";
-      audioElement.audioid="0";
-      audioElement.style = "width: 70%;  position: sticky; top: 90%; left: 20%";
-      audioElement.addEventListener("ended", (event) => {
-//	  console.log("Listener:", playlist[event.target.nextid]);
-	  playAndReset(playlist[event.target.nextid]);
-      });
-      audioElement.addEventListener("play",(event) => {
-	  setMediaMeta(event.target)});
-      //const params = "d=.";
-      const params = {d: "."};
-      fetchObj(params)
-    }
 </script>
 
 <script>
@@ -150,7 +144,7 @@ window.addEventListener('popstate', function (event)
 	      fetchObj(params)
 	  })
       }
-      soundfileelements =  document.getElementsByClassName("soundfile");
+      let soundfileelements =  document.getElementsByClassName("soundfile");
       let dirplaylist = [];
       for (let i = 0; i < soundfileelements.length; i++) {
 	  let e = soundfileelements[i];
@@ -170,12 +164,25 @@ window.addEventListener('popstate', function (event)
 	  e.addEventListener("click",(event) => {
               let playid = event.target.getAttribute('play');
 	      playlist = playlists[obj.dirname];
-              playAndReset(playlist[playid]);
+              playAndReset(playlist[playid],obj.dirname);
+	      let el = document.getElementById(audioElement.audioid + 1000);
+	      Highlight(el, obj.dirname);
 	  });
       }
       playlists[obj.dirname] = dirplaylist;
   }
 
+  function Highlight (el, dirname) {
+      if (dirname == obj.dirname) {
+	  let rows =  document.getElementsByClassName("indexcolname");
+	  for (let i = 0; i < rows.length; i++)
+	      rows[i].setAttribute("bgcolor", i % 2 ?"#F0F0F0":"#FFFFFF");
+	  el.childNodes[3].setAttribute("bgcolor", "#FFFFC0");
+	  el.scrollIntoView({block: "center"});
+      }	  
+
+  }
+  
   
 </script>
 <body>
