@@ -12,14 +12,6 @@ img.soundfile, img.dirselector {
   
 }
 
-.mediaplayer {
-    position:fixed;
-    bottom:calc(48% + 0px);
-    right:10%;
-    width: 70%;
-    height: 7%; /* Not higher than 7%, or the mediaplayer will invisibly mask the next higher media selection */
-}
-
 #audio0 {
 
     width: 70%;
@@ -30,6 +22,7 @@ img.soundfile, img.dirselector {
 }
 
 #root {
-  height: 100%;
-  top: -10%
+    height: auto;
+    min-height: 800px;
+    top: -10%
 }
