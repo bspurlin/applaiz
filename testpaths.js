@@ -25,7 +25,7 @@ function searchDirObjs(searchres, fsobj) {
     let rearray = []
     for (r of aa) rearray.push(new RegExp(r,'i'));
     let output = searchFsObj(fsobj,rearray);
-    console.log(output)
+    fs.writeFileSync(1,JSON.stringify(output,null,1))
 }
 
 if (opt.options.s)  searchDirObjs(opt.options.s,fsobj);
