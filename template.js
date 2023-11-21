@@ -3,20 +3,53 @@ function mkTempl(i) {
 }
 
 let templates = [`<table>
-  <tbody>
-    <tr class="indexhead"><th class="indexcolicon"><img class="dirselector" path=<%= obj.parent %> id="parent-a"  src="/icons/back.gif"></th><th class="" id="headerdirname"><%let aa=obj.dirname.split("/")%><%= aa[aa.length - 1]%></th><th></th></tr>
 
-    <% for (let i = 0; i < obj.directories.length; i++) {%>
+
+
+  <tbody>
+    <tr class="indexhead">
+       <th class="indexcolicon">
+         <img class="dirselector" path=<%= obj.parent %> id="parent-a"  src="/icons/back.gif">
+
+       </th>
+       <th class="" id="headerdirname"><%let aa=obj.dirname.split("/")%><%= aa[aa.length - 1]%></th>
+       <th id="header3">
+       </th>
+       <th>
+           <img src="/icons/blank.gif">
+
+     <div class="dropdown">
+      <img src="/icons/search.svg">
+      <form id="sf" onsubmit="console.log(JSON.stringify(event.target[0]));event.preventDefault()"  accept-charset="utf-8" class="dropdown-content" >
+	<input type="text" class="searchTerm" name="d" placeholder="First?"/>
+	<input type="text" class="searchTerm" placeholder="Second?"/>
+	<input type="text" class="searchTerm" placeholder="Third?"/>
+	<button id="sb" type="submit" img="/icons/search.svg" class="searchButton">
+          <i class="fa fa-search"></i>
+	</button>
+      </form>
+    </div>
+
+
+
+       </th>
+    </tr>
+
+   <% for (let i = 0; i < obj.directories.length; i++) {%>
+
    <tr >
      <td class="indexcolicon">
-<img  id=dirname<%= obj.paths[obj.directories[i]] %> path=<%= obj.path + "." + obj.paths[obj.directories[i]]%> class="dirselector" src="/icons/folder.gif">
+        <img  id=dirname<%= obj.paths[obj.directories[i]] %> path=<%= obj.path + "." + obj.paths[obj.directories[i]]%> class="dirselector" src="/icons/folder.gif">
      </td>
      <td>
        <%= obj.directories[i]%>
      </td>
      <td>
      </td>
+     <td>
+     </td>
    </tr>
+
    <%}%>
 
    <% for (let i = 0; i < obj.files.length; i++) {
@@ -40,6 +73,9 @@ let templates = [`<table>
 	</td>
 	<td>
 	</td>
+       <td>
+       </td>
+
       </tr>
       <%}%>
   </tbody>
