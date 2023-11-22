@@ -21,9 +21,9 @@ let templates = [`<table>
      <div class="dropdown">
       <img src="/icons/search.svg">
       <form id="sf" onsubmit="console.log(JSON.stringify(event.target[0]));event.preventDefault()"  accept-charset="utf-8" class="dropdown-content" >
-	<input type="text" class="searchTerm" name="d" placeholder="First?"/>
-	<input type="text" class="searchTerm" placeholder="Second?"/>
-	<input type="text" class="searchTerm" placeholder="Third?"/>
+	<input type="text" class="searchTerm" name = "s1" placeholder="First?"/>
+	<input type="text" class="searchTerm" name = "s2" placeholder="Second?"/>
+	<input type="text" class="searchTerm" name = "s3" placeholder="Third?"/>
 	<button id="sb" type="submit" img="/icons/search.svg" class="searchButton">
           <i class="fa fa-search"></i>
 	</button>
@@ -39,10 +39,10 @@ let templates = [`<table>
 
    <tr >
      <td class="indexcolicon">
-        <img  id=dirname<%= obj.paths[obj.directories[i]] %> path=<%= obj.path + "." + obj.paths[obj.directories[i]]%> class="dirselector" src="/icons/folder.gif">
+        <img  id=dirname<%= i %> path=<%= obj.directories[i].path%> class="dirselector" src="/icons/folder.gif">
      </td>
      <td>
-       <%= obj.directories[i]%>
+       <%= obj.directories[i].name%>
      </td>
      <td>
      </td>

@@ -15,20 +15,11 @@ const Fuse = require('fuse.js');
 
 fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
 
-const {countAttr, ff, mkDirObj, searchFsObj } = require("./modules.js");
+const {countAttr, ff, mkDirObj, searchFsObj, searchDirObjs } = require("./modules.js");
 
 
 
-
-function searchDirObjs(searchres, fsobj) {
-    let aa  = searchres.split(",");
-    let rearray = []
-    for (r of aa) rearray.push(new RegExp(r,'i'));
-    let output = searchFsObj(fsobj,rearray);
-    fs.writeFileSync(1,JSON.stringify(output,null,1))
-}
-
-if (opt.options.s)  searchDirObjs(opt.options.s,fsobj);
+if (opt.options.s)  fs.writeFileSync(1,JSON.stringify(searchDirObjs(opt.options.s,fsobj),null,1));
 
 if(opt.options.f) {console.log("count = ",countAttr(fsobj))};
 

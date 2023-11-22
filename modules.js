@@ -66,15 +66,16 @@ function mkDirObj(pathn,obj) {
     let aa = pathn.split('.').filter(x => x);
     while((x = aa.shift()) != undefined) obj=obj.directories[x];
     let directories = [];
-    let paths = {};
     for (let i = 0; i < obj.directories.length; i++) {
-        aa[i] = path.basename(obj.directories[i].dirname);
-	paths[aa[i]] = i;
+        aa[i] = {
+	    "name":path.basename(obj.directories[i].dirname),
+	    "path": obj.directories[i].path
+	};
     }
     if (aa.length > 0) {
 	aa.sort((a,b) => {
-	    const nameA = a.toUpperCase();
-	    const nameB = b.toUpperCase();
+	    const nameA = a.name.toUpperCase();
+	    const nameB = b.name.toUpperCase();
 	    if (nameA < nameB) return -1;
 	    if (nameA > nameB)return 1;
 	    return 0
@@ -85,8 +86,8 @@ function mkDirObj(pathn,obj) {
 	'files': obj.files,
 	'parent': obj.parent,
 	'path': obj.path,
-	'directories': aa,
-	'paths': paths}
+	'directories': aa
+    }
 }
 
 
@@ -132,4 +133,22 @@ function ff ({
 }
 
 
-module.exports = { countAttr, ff, mkDirObj, searchFsObj };
+
+
+function searchDirObjs(searchres, fsobj,parentpath) {
+    let aa  = searchres.split(",");
+    let rearray = [];
+    for (r of aa) rearray.push(new RegExp(r,'i'));
+    let output = searchFsObj(fsobj,rearray);
+    let robj = {};
+    robj.dirname = "Search: " + searchres;
+    robj.parent = parentpath;
+    robj.path = parentpath;
+    robj.files = [];
+    robj.directories = [];
+    for (let x in output) robj.directories.push({"name": path.basename(output[x].dirname),"path": output[x].path});
+    return robj;
+}
+
+
+module.exports = { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs };

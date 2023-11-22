@@ -40,7 +40,7 @@
       audioElement.addEventListener("play",(event) => {
 	  setMediaMeta(event.target)});
       //const params = "d=.";
-      const params = {d: "."};
+      let params = {d: "."};
       fetchObj(params);
       
     }
@@ -110,7 +110,7 @@ window.addEventListener('popstate', function (event)
 
 <script>
 
-  function fetchObj(params) {
+  function fetchObj(params,url = document.URL) {
 	const options = {
 	    mode: 'cors',
 	    method: 'POST',
@@ -122,7 +122,7 @@ window.addEventListener('popstate', function (event)
 	     body: JSON.stringify(params)
 	};
 	
-	fetch( document.URL, options )
+      fetch( url, options )
 	    .then( response => response.text() )
 	    .then( response => {
 		obj = JSON.parse(response);
@@ -147,8 +147,12 @@ window.addEventListener('popstate', function (event)
       }
       let tform = document.getElementById("sf");
       tform.addEventListener("submit", (e) => {
-          let v = tform.querySelector('input[name="d"]');
-	  console.log("v = ",v,tform.querySelector('input.searchterm').value)
+	  let inputAll = document.querySelectorAll('.searchTerm');
+	  let aa = [];
+          inputAll.forEach((x) => { if (x.value) aa.push(x.value) })
+	  let params = {s: aa.join(","),p: obj.path};
+	  console.log(params);
+	  fetchObj(params,'/search')
       })
       document.getElementById("sb").addEventListener(
 	  "click",

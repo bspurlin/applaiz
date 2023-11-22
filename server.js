@@ -14,8 +14,8 @@ fsobj = JSON.parse(fs.readFileSync("./fsobj.5")); //get the filesystem
 // massage the filesystem-object
 tp.ff({
     fsobj: fsobj,
-    fMassage: (obj, patth, parent) => { //create a paths object
-	obj.path = patth;     // to access the index by name
+    fMassage: (obj, patth, parent) => { //give every directory
+	obj.path = patth;     // a dot-numeric path
 	obj.parent = parent;  // and a parent so we can go back
     },
     fFile: (obj) => {                    // Sort the list of files case-
@@ -41,6 +41,12 @@ app.post('/',function(req,res){
     res.setHeader('Content-Type', 'application/json');
     console.log("Body: ",JSON.stringify(req.body));
     res.end(JSON.stringify(tp.mkDirObj(req.body.d,fsobj)));
+});
+
+app.post('/search/',function(req,res){
+    res.setHeader('Content-Type', 'application/json');
+    console.log("Search: ",JSON.stringify(req.body));
+    res.end(JSON.stringify(tp.searchDirObjs(req.body.s,fsobj,req.body.p)));
 });
 
 app.get('/',function(req,res){
