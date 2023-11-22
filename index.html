@@ -11,14 +11,25 @@
 
 <script>
 
+  // The search results button will cycle
+  // through the searches stored in the session
+  
+  function sr_cyclic (aa) {
+      let i = 0;
+      let f = () =>  {return (i++ % aa.length)}
+      return f
+  }
+  
+  
   //Globals
   
   let audioElement;
   let obj;  
   let playlist = [];
   let playlists = {};
-
-
+  let searchresults = [];
+  let  sr_cyc =  sr_cyclic(searchresults);
+  
   // Create a media player app; render a folder of audio
   // files using a JSON representation of a filesystem
   // fetched from the server.
@@ -41,7 +52,7 @@
 	  setMediaMeta(event.target)});
       //const params = "d=.";
       let params = {d: "."};
-      fetchObj(params);
+      fetchObj(params).then(anobj => renderTable(anobj))
       
     }
 </script>
@@ -110,7 +121,7 @@ window.addEventListener('popstate', function (event)
 
 <script>
 
-  function fetchObj(params,url = document.URL) {
+async  function fetchObj(params,url = document.URL) {
 	const options = {
 	    mode: 'cors',
 	    method: 'POST',
@@ -122,13 +133,10 @@ window.addEventListener('popstate', function (event)
 	     body: JSON.stringify(params)
 	};
 	
-      fetch( url, options )
-	    .then( response => response.text() )
-	    .then( response => {
-		obj = JSON.parse(response);
-		renderTable(obj);
-	    } );
-
+    let response = await  fetch( url, options );
+    obj = JSON.parse(await response.text());
+    return obj;
+	
   }
 </script>
 
@@ -137,12 +145,12 @@ window.addEventListener('popstate', function (event)
   function renderTable(obj){
       let html = ejs.render(mkTempl(0), {obj: obj});
       document.getElementById("root").innerHTML = html;
-      document.querySelector("#root").insertBefore(audioElement,document.querySelector("table"))
+      document.querySelector("#root").insertBefore(audioElement,document.querySelector("table"));
       let direlements = document.getElementsByClassName("dirselector");
       for (e of direlements){
 	  e.addEventListener("click",(event) => {
 	      let params = {d: event.target.getAttribute("path")};
-	      fetchObj(params)
+	      fetchObj(params).then(anobj => renderTable(anobj))
 	  })
       }
       let tform = document.getElementById("sf");
@@ -152,7 +160,14 @@ window.addEventListener('popstate', function (event)
           inputAll.forEach((x) => { if (x.value) aa.push(x.value) })
 	  let params = {s: aa.join(","),p: obj.path};
 	  console.log(params);
-	  fetchObj(params,'/search')
+	  if (params.s.length > 0) {
+	      fetchObj(params,"/search").then(anobj => {
+		  searchresults.push(anobj);
+		  renderTable(anobj);
+	      }
+				   )
+	      
+	  }
       })
       document.getElementById("sb").addEventListener(
 	  "click",
@@ -186,6 +201,13 @@ window.addEventListener('popstate', function (event)
 	  });
       }
       playlists[obj.dirname] = dirplaylist;
+      if(searchresults.length > 0) {
+	  let el = document.getElementById("sr");
+	  el.setAttribute("style", "display: inline;" );
+	  el.addEventListener("click",(event) => {
+	      renderTable(searchresults[sr_cyc()]);
+	  })			     
+      }
   }
 
   function Highlight (el, dirname) {
@@ -198,7 +220,6 @@ window.addEventListener('popstate', function (event)
       }	  
 
   }
-  
   
 </script>
   </head>
