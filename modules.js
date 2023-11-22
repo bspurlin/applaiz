@@ -86,7 +86,9 @@ function mkDirObj(pathn,obj) {
 	'files': obj.files,
 	'parent': obj.parent,
 	'path': obj.path,
-	'directories': aa
+	'directories': aa,
+	'params': {"d": obj.parent },
+	'serverpath': "/"
     }
 }
 
@@ -135,17 +137,19 @@ function ff ({
 
 
 
-function searchDirObjs(searchres, fsobj,parentpath) {
-    let aa  = searchres.split(",");
+function searchDirObjs(searchterms, fsobj,parentpath) {
+    let aa  = searchterms.split(",");
     let rearray = [];
     for (r of aa) rearray.push(new RegExp(r,'i'));
     let output = searchFsObj(fsobj,rearray);
     let robj = {};
-    robj.dirname = "Search: " + searchres;
+    robj.dirname = "Search: " + searchterms;
     robj.parent = parentpath;
-    robj.path = parentpath;
+    robj.path = searchterms;
     robj.files = [];
     robj.directories = [];
+    robj.params = {"s": searchterms ,"p": parentpath };
+    robj.serverpath = "/search";
     for (let x in output) robj.directories.push({"name": path.basename(output[x].dirname),"path": output[x].path});
     return robj;
 }
