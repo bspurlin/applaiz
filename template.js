@@ -24,8 +24,11 @@ let templates = [`<table>
 	<input type="text" class="searchTerm" name = "s1" placeholder="First?"/>
 	<input type="text" class="searchTerm" name = "s2" placeholder="Second?"/>
 	<input type="text" class="searchTerm" name = "s3" placeholder="Third?"/>
-	<button id="sb" type="submit" img="/icons/search.svg" class="searchButton">
-          <i class="fa fa-search"></i>
+	<button id="sb" type="submit"  class="searchButton">
+          <img src="/icons/search.svg">
+	</button>
+        <button id="sr" type="button" >
+	Search Results
 	</button>
       </form>
     </div>
