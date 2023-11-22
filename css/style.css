@@ -52,3 +52,6 @@ img.soundfile, img.dirselector {
   display: block;
 }
 
+#sr {
+    display: none;
+}
