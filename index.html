@@ -162,10 +162,14 @@ async  function fetchObj(params,url = document.URL) {
 	  console.log(params);
 	  if (params.s.length > 0) {
 	      fetchObj(params,"/search").then(anobj => {
-		  searchresults.push(anobj);
-		  renderTable(anobj);
+		  if(anobj.files.length == 0 && anobj.directories.length ==0) {
+		      alert(params.s + " No Results")
+		  } else {
+		      searchresults.push(anobj);
+		      renderTable(anobj);
+		  }
 	      }
-				   )
+					     )
 	      
 	  }
       })
