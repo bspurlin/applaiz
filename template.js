@@ -8,14 +8,14 @@ let templates = [`<table>
 
   <tbody>
     <tr class="indexhead">
-       <th class="indexcolicon">
+       <th class="indexcolicon" id= "header1">
          <img class="dirselector" path=<%= obj.parent %> id="parent-a"  src="/icons/back.gif">
 
        </th>
        <th class="" id="headerdirname"><%let aa=obj.dirname.split("/")%><%= aa[aa.length - 1]%></th>
        <th id="header3">
        </th>
-       <th>
+       <th id="header4">
            <img src="/icons/blank.gif">
 
      <div class="dropdown">
