@@ -10,8 +10,13 @@ function searchFsObj (fsobj, rearray) {
 	    let n = 0;
 	    for(let i =0; i< score; i++){
 		let re = rearray[i];
+		let searchstring = fsobj.dirname;
+		if (re.test(searchstring)) {
+		    n++;
+		    continue;
+		}
 		for (let x = 0; x <  fsobj.files.length; x++){
-		    let searchstring=fsobj.files[x].filename;
+		    searchstring=fsobj.files[x].filename;
 		    if (fsobj.files[x].title != undefined)
 			searchstring = searchstring + fsobj.files[x].title;
 		    if (fsobj.files[x].artist != undefined)
