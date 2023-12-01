@@ -92,4 +92,4 @@ sys     0m9.280s
 
 out = fst(opt.argv[0]);
 
-console.log(JSON.stringify(out));
+console.log(JSON.stringify(out,null,2));
