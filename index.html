@@ -67,10 +67,14 @@
 	      artwork: [{ src: "" }]
 	  });
 	  navigator.mediaSession.setActionHandler("nexttrack", () => {
+	      let el = document.getElementById(e.nextid + 1000)
 	      playAndReset(playlists[obj.dirname][e.nextid]);
+	      Highlight(el);
 	  });
 	  navigator.mediaSession.setActionHandler("previoustrack", () => {
+	      let el = document.getElementById(e.previd + 1000)
 	      playAndReset(playlists[obj.dirname][e.previd]);
+	      Highlight(el);
           });
 	  navigator.mediaSession.setActionHandler("pause", () => {
               audioElement.pause()
@@ -214,7 +218,7 @@ async  function fetchObj(params,url = document.URL) {
       }
   }
 
-  function Highlight (el, dirname) {
+  function Highlight (el, dirname = obj.dirname) {
       if (dirname == obj.dirname) {
 	  let rows =  document.getElementsByClassName("indexcolname");
 	  for (let i = 0; i < rows.length; i++)
