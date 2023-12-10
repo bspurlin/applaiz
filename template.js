@@ -19,7 +19,7 @@ let templates = [`<table>
            <img src="/icons/blank.gif">
 
      <div class="dropdown">
-      <img src="/icons/search.svg">
+      <img id="searchicon" src="/icons/search.svg">
       <form id="sf" onsubmit="console.log(JSON.stringify(event.target[0]));event.preventDefault()"  accept-charset="utf-8" class="dropdown-content" >
 	<input type="text" class="searchTerm" name = "s1" placeholder="First?"/>
 	<input type="text" class="searchTerm" name = "s2" placeholder="Second?"/>
