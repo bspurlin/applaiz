@@ -1,5 +1,9 @@
 #!/usr/bin/node
 
+// A script to try to recover from adding ID3
+// tags to an Apple Lossless file
+// by deleting everything before ftyp execept
+// two nulls.
 
 fs = require("fs");
 path = require("path");

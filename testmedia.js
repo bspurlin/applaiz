@@ -1,14 +1,13 @@
 let  mediainfo  = require("mediainfo.js");
 let fs = require("node:fs");
-let b = fs.readFileSync("/home/bill/Music/m4a/Gramophone 2008/The.Debussy.RecordingsA.2008.100CD/01 - Trois Nocturnes - I. Nuages.mp3");
-let size = b.length;
+let b = fs.readFileSync("../Music/Shared/Music by Label/Delos/Famous.Film.Themes.8102/01 - Mutiny on the Bounty.mp3");
+let oobj = {"a":"b"};
 
-async function findMediaInfo(b,size) {
+async function findMediaInfo(b,m) {
     let str="";
-    let m = await mediainfo.default({ format: 'json',chunkSize: size });
-    let output = "";
-    await m.analyzeData(()=>size,()=>b).then((data)=>{output = data})
-    aa = output.split("\n");
+
+    oobj = await m.analyzeData(()=>b.length,()=>b);
+    aa = oobj.split("\n");
     bb=[];
     for (x of aa) if(x) bb.push(x)
     aa=[];
@@ -19,12 +18,20 @@ async function findMediaInfo(b,size) {
     aa = aa.map(str=>str.replace(/^(.+)$/,"\"$1\""))
     str = aa.toString()
     str = '{'+str+'}';
-    return str
+    oobj=JSON.parse(str)
 }
 
-findMediaInfo(b,size).then((str) => {
-    let obj=JSON.parse(str);
-    console.log(obj,"Name:",obj["Track name"],"Performer:",obj["Performer"],"Album:",obj["Album"])
-}
-)
+
+(async function(){
+    let m =  await mediainfo.default({ format: 'json' });
+    await findMediaInfo(b,m)
+    console.log(
+    "title\t", oobj["Track name"],"\n",
+    "artist\t",oobj["Performer"],"\n",
+    "album\t", oobj["Album"],"\n"
+    )}
+)();
+
+
+
 

@@ -7,7 +7,8 @@ opt = require('node-getopt').create([
     ['s' , '=', 'search string-pattern'],
     ['p','=',"path name in number-dot format"],
     ['g','', "generate a mkdirobj"],
-    ['m','=',"process m4a moov data"]
+    ['m','=',"process m4a ilst data"],
+    ['x','=','optional dirname prefix with -m']
 ]).parseSystem();
 
 size1of = require('object-sizeof');
@@ -30,7 +31,10 @@ function m4aData (dirname) {
     let adir = fs.readdirSync(dirname);
     let dirn = dirname;
     let bigobj = {};
-    dirlist=adir.filter((x) => x.match(/^[^\.].+m4a/));
+    bigobj.directories = [];
+    bigobj.files = [];
+    bigobj.dirname = opt.options.x + "/" + path.basename(dirn); 
+    dirlist=adir.filter((x) => x.match(/^[^\.].+(m4a|mp3)/));
     let b,fn;
     for (filename of dirlist) {
 	fn = dirn + "/" + filename;
@@ -65,13 +69,10 @@ function m4aData (dirname) {
 	    if (tag == 'gen') {genre = value;meta.genre=genre}
 	}
 	console.error("album:",meta.album,"title:",meta.title);
-	if (bigobj[album]){
-	
-	}else {
-	    bigobj[album] = {"files":[]};
-	}
-	bigobj[album].files.push(meta);
+
+	bigobj.files.push(meta);
     }
+/*
     for(x of Object.keys(bigobj)) {
 	let i = 0, prevartist="", signal=false, dirname = "";
 	for(j of bigobj[x].files){
@@ -90,6 +91,7 @@ function m4aData (dirname) {
 	    bigobj[x].dirname=dirname
 	}
     }
+*/
     return bigobj
     
 }
