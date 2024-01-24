@@ -142,10 +142,10 @@ function ff ({
 
 
 
-function searchDirObjs(searchterms, fsobj,parentpath) {
+function searchDirObjs(searchterms, fsobj,parentpath) {//returns a dirObj
     let aa  = searchterms.split(",");
     let rearray = [];
-    for (r of aa) rearray.push(new RegExp(r,'i'));
+    for (r of aa) rearray.push(new RegExp(r.trim(),'i'));
     let output = searchFsObj(fsobj,rearray);
     let robj = {};
     robj.dirname = "Search: " + searchterms;
