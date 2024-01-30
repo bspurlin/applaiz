@@ -50,7 +50,17 @@ app.post('/search/',function(req,res){
 });
 
 app.get('/',function(req,res){
-    console.log("Get ",req.url,req.ip,new Date(),req.get('user-agent'));
+    console.log(
+	"Get ",
+	req.url,
+	req.ip,
+	new Date(),
+	req.get('user-agent'),
+	"X-Forwarded-Host = ",
+	req.get('X-Forwarded-Host'),
+	"X-Forwarded-For = ",
+	req.get('X-Forwarded-For')
+    );
     const options = {
         root: path.join(__dirname)
     };
