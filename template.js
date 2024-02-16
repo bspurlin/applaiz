@@ -9,7 +9,7 @@ let templates = [`<table>
   <tbody>
     <tr class="indexhead">
        <th class="indexcolicon" id= "header1">
-         <img class="dirselector" path=<%= obj.parent %> id="parent-a"  src="/icons/back.gif">
+         <img class="dirselector" path=<%= obj.parent||"." %> id="parent-a"  src="/icons/back.gif">
 
        </th>
        <th class="" id="headerdirname"><%let aa=obj.dirname.split("/")%><%= aa[aa.length - 1]%></th>
