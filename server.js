@@ -91,6 +91,6 @@ app.get('/*.js', function (req, res) {
     res.sendFile( __dirname + "/" + req.path)
 })
 
-app.listen(3000, function () {
-  console.log('App listening on port 3000!')
+app.listen({port: process.env.NODE_PORT, host: "localhost"}, function () {
+  console.log('App listening on port ' + process.env.NODE_PORT)
 })
