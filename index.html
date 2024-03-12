@@ -29,6 +29,7 @@
   let playlists = {};
   let searchresults = [];
   let  sr_cyc =  sr_cyclic(searchresults);
+  let dirobj_cache = {};
   
   // Create a media player app; render a folder of audio
   // files using a JSON representation of a filesystem
@@ -52,8 +53,9 @@
 	  setMediaMeta(event.target)});
       //const params = "d=.";
       let params = {d: "."};
-      fetchObj(params).then(anobj => renderTable(anobj))
-      
+      fetchObj(params).then(anobj =>{ renderTable(anobj);
+				      dirobj_cache["."] = anobj
+				    });
     }
 </script>
 
@@ -148,15 +150,36 @@ async  function fetchObj(params,url = document.URL) {
   
   function renderTable(obj){
       let html = ejs.render(mkTempl(0), {obj: obj});
-      document.getElementById("root").innerHTML = html;
+      document.querySelector("#root").innerHTML = html;
       document.querySelector("#root").insertBefore(audioElement,document.querySelector("table"));
       let direlements = document.getElementsByClassName("dirselector");
       for (e of direlements){
 	  e.addEventListener("click",(event) => {
-	      let params = {d: event.target.getAttribute("path")};
-	      fetchObj(params).then(anobj => renderTable(anobj))
+	      let path = event.target.getAttribute("path")
+	      let params = {d: path};
+	      if (!dirobj_cache[obj.path])  dirobj_cache[obj.path] = obj;
+	      dirobj_cache[obj.path].scrollpos =  event.target.id;
+	      if(dirobj_cache[path]) {
+		  obj = dirobj_cache[path];
+		  renderTable(obj);
+	      } else {
+		  fetchObj(params).then(anobj => {
+		      renderTable(anobj);
+		  })
+	      }
 	  })
       }
+
+      let backelem = document.getElementById("parent-a");
+      backelem.addEventListener("click",(event) => {
+	  if (!dirobj_cache[obj.path])  dirobj_cache[obj.path] = obj;
+	  dirobj_cache[obj.path].scrollpos =  event.target.id;
+	  let path = event.target.getAttribute("path")
+	  obj = dirobj_cache[path];
+	  renderTable(obj);
+      })
+			       	  
+	  
       let tform = document.getElementById("sf");
       tform.addEventListener("submit", (e) => {
 	  let inputAll = document.querySelectorAll('.searchTerm');
@@ -177,11 +200,6 @@ async  function fetchObj(params,url = document.URL) {
 	      
 	  }
       })
-      document.getElementById("sb").addEventListener(
-	  "click",
-	  (e) => {
-	      console.log("sb click here",e);
-	  });							 
 
       let soundfileelements =  document.getElementsByClassName("soundfile");
       let dirplaylist = [];
@@ -216,6 +234,8 @@ async  function fetchObj(params,url = document.URL) {
 	      renderTable(searchresults[sr_cyc()]);
 	  })			     
       }
+      if(obj.scrollpos)document.getElementById(obj.scrollpos).scrollIntoView()
+
   }
 
   function Highlight (el, dirname = obj.dirname) {

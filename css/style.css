@@ -31,7 +31,7 @@ tr.indexhead {
   background-color: #FFFFC0;
 }
 
-img.soundfile, img.dirselector, #searchicon {
+img.soundfile, img.dirselector, img.backselector #searchicon {
 
     width: 2rem;
   
