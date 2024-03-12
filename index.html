@@ -172,8 +172,8 @@ async  function fetchObj(params,url = document.URL) {
 
       let backelem = document.getElementById("parent-a");
       backelem.addEventListener("click",(event) => {
-	  if (!dirobj_cache[obj.path])  dirobj_cache[obj.path] = obj;
-	  dirobj_cache[obj.path].scrollpos =  event.target.id;
+//	  if (!dirobj_cache[obj.path])  dirobj_cache[obj.path] = obj;
+//	  dirobj_cache[obj.path].scrollpos =  event.target.id;
 	  let path = event.target.getAttribute("path")
 	  obj = dirobj_cache[path];
 	  renderTable(obj);
