@@ -151,7 +151,7 @@ async  function fetchObj(params,url = document.URL) {
   function renderTable(obj){
       let html = ejs.render(mkTempl(0), {obj: obj});
       document.querySelector("#root").innerHTML = html;
-      document.querySelector("#root").insertBefore(audioElement,document.querySelector("table"));
+      document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
       let direlements = document.getElementsByClassName("dirselector");
       for (e of direlements){
 	  e.addEventListener("click",(event) => {
@@ -234,7 +234,10 @@ async  function fetchObj(params,url = document.URL) {
 	      renderTable(searchresults[sr_cyc()]);
 	  })			     
       }
-      if(obj.scrollpos)document.getElementById(obj.scrollpos).scrollIntoView()
+      if(obj.scrollpos){
+	  let e = document.getElementById(obj.scrollpos);
+	  e.scrollIntoView({ block: "center" })
+      b}
 
   }
 
@@ -250,10 +253,11 @@ async  function fetchObj(params,url = document.URL) {
   }
   
 </script>
-  </head>
-  <body>
+</head>
+<body>
 
-    <div id="root">
+    <div id="root"></div>
+    <div id="ae"></div>
 
 </body>
 
