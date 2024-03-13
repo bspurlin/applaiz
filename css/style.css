@@ -38,7 +38,7 @@ img.soundfile, img.backselector #searchicon {
 }
 
 img.dirselector {
- height: 1.5rem; width: 2rem;
+ height: 32px; width: 32px;
 }
 
 #audio0 {
