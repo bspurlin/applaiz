@@ -31,10 +31,14 @@ tr.indexhead {
   background-color: #FFFFC0;
 }
 
-img.soundfile, img.dirselector, img.backselector #searchicon {
+img.soundfile, img.backselector #searchicon {
 
     width: 2rem;
-  
+
+}
+
+img.dirselector {
+ height: 1.5rem; width: 2rem;
 }
 
 #audio0 {

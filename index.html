@@ -175,8 +175,15 @@ async  function fetchObj(params,url = document.URL) {
 //	  if (!dirobj_cache[obj.path])  dirobj_cache[obj.path] = obj;
 //	  dirobj_cache[obj.path].scrollpos =  event.target.id;
 	  let path = event.target.getAttribute("path")
-	  obj = dirobj_cache[path];
-	  renderTable(obj);
+	  if(dirobj_cache[path]) {
+	      obj = dirobj_cache[path];
+	      renderTable(obj);
+	  } else {
+	      let params = {d: path};
+	      fetchObj(params).then(anobj => {
+		  renderTable(anobj);
+	      })
+	  }
       })
 			       	  
 	  
@@ -235,9 +242,10 @@ async  function fetchObj(params,url = document.URL) {
 	  })			     
       }
       if(obj.scrollpos){
-	  let e = document.getElementById(obj.scrollpos);
-	  e.scrollIntoView({ block: "center" })
-      b}
+    let e = document.getElementById(obj.scrollpos);
+    if(obj.directories && obj.directories.length > 10)
+	  e.scrollIntoView({ block: "nearest" })
+      }
 
   }
 
