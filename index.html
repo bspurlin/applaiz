@@ -242,11 +242,11 @@ async  function fetchObj(params,url = document.URL) {
 	  })			     
       }
       if(obj.scrollpos){
-    let e = document.getElementById(obj.scrollpos);
-    if(obj.directories && obj.directories.length > 10){
-      e.scrollIntoView({block: "center", inline: "nearest"});
-      }
-      }
+	  let e = document.getElementById(obj.scrollpos);
+	  if(obj.directories && obj.directories.length > 10){
+	      e.scrollIntoView({block: "center", inline: "nearest"});
+	  }else {window.scrollTo(0,0)}
+      } else {window.scrollTo(0,0)}
 
   }
 
