@@ -24,7 +24,7 @@
   //Globals
   
   let audioElement;
-  let obj;  
+  let globj;  
   let playlist = [];
   let playlists = {};
   let searchresults = [];
@@ -50,32 +50,35 @@
 	  Highlight(el, originaldirname);
       });
       audioElement.addEventListener("play",(event) => {
-	  setMediaMeta(event.target)});
+	  setMediaMeta(event.target);
+      } );
+
       //const params = "d=.";
       let params = {d: "."};
       fetchObj(params).then(anobj =>{ renderTable(anobj);
 				      dirobj_cache["."] = anobj
 				    });
+//      for(x of ["canplay","canplaythrough","ended","emptied","loadeddata","stalled","suspend","waiting"])audioElement.addEventListener(x,(e) => console.log("audioElement event type: ", e.type))
     }
 </script>
 
 <script>
   function setMediaMeta (e) {
-      if ("mediaSession" in navigator) {
+      if ("mediaSession" in navigator) {console.log("mediaSession: ",playlist[e.audioid].title);
 	  navigator.mediaSession.metadata = new MediaMetadata({
 	      title: playlist[e.audioid].title ,
 	      artist: playlist[e.audioid].artist ,
 	      album: playlist[e.audioid].album,
 	      artwork: [{ src: "" }]
 	  });
-	  navigator.mediaSession.setActionHandler("nexttrack", () => {
+	  navigator.mediaSession.setActionHandler("nexttrack", () => {console.log("nexttrack");
 	      let el = document.getElementById(e.nextid + 1000)
-	      playAndReset(playlists[obj.dirname][e.nextid]);
+	      playAndReset(playlists[globj.dirname][e.nextid]);
 	      Highlight(el);
 	  });
 	  navigator.mediaSession.setActionHandler("previoustrack", () => {
 	      let el = document.getElementById(e.previd + 1000)
-	      playAndReset(playlists[obj.dirname][e.previd]);
+	      playAndReset(playlists[globj.dirname][e.previd]);
 	      Highlight(el);
           });
 	  navigator.mediaSession.setActionHandler("pause", () => {
@@ -88,7 +91,7 @@
       
   }
   
-  function playAndReset (e, dirname = obj.dirname) {
+  function playAndReset (e, dirname = globj.dirname) {
       let headerrow = document.querySelector("tr.indexhead");
       let playid = e.id;
       let re = /#/ig;
@@ -97,7 +100,8 @@
       audioElement.nextid = e.nextid;
       audioElement.previd = e.previd;
       tmpsrc = encodeURI(e.src);
-      tmpsrc = tmpsrc.replace(re,'%23');console.log("tmpsrc :",tmpsrc);      
+      tmpsrc = tmpsrc.replace(re,'%23');
+      console.log("tmpsrc :",tmpsrc);      
       audioElement.src = tmpsrc;
       audioElement.title = e.title;
       audioElement.dirname = dirname;
@@ -105,7 +109,7 @@
       if (e.album.length > document.getElementById("headerdirname").innerHTML.length) {
 	  document.getElementById("headerdirname").innerHTML = e.album;
       } else {
-	  let aa=obj.dirname.split("/");
+	  let aa=globj.dirname.split("/");
 	  document.getElementById("headerdirname").innerHTML = aa[aa.length - 1]
       }
       audioElement.play();
@@ -127,7 +131,8 @@ window.addEventListener('popstate', function (event)
 
 <script>
 
-async  function fetchObj(params,url = document.URL) {
+  async  function fetchObj(params,url = document.URL) {
+      let anobj = {};
 	const options = {
 	    mode: 'cors',
 	    method: 'POST',
@@ -140,16 +145,17 @@ async  function fetchObj(params,url = document.URL) {
 	};
 	
     let response = await  fetch( url, options );
-    obj = JSON.parse(await response.text());
-    return obj;
+      anobj = JSON.parse(await response.text());
+      globj = anobj;
+    return anobj;
 	
   }
 </script>
 
 <script>
   
-  function renderTable(obj){
-      let html = ejs.render(mkTempl(0), {obj: obj});
+  function renderTable(lobj){
+      let html = ejs.render(mkTempl(0), {obj: lobj});
       document.querySelector("#root").innerHTML = html;
       document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
       let direlements = document.getElementsByClassName("dirselector");
@@ -157,11 +163,11 @@ async  function fetchObj(params,url = document.URL) {
 	  e.addEventListener("click",(event) => {
 	      let path = event.target.getAttribute("path")
 	      let params = {d: path};
-	      if (!dirobj_cache[obj.path])  dirobj_cache[obj.path] = obj;
-	      dirobj_cache[obj.path].scrollpos =  event.target.id;
+	      if (!dirobj_cache[lobj.path])  dirobj_cache[lobj.path] = lobj;
+	      dirobj_cache[lobj.path].scrollpos =  event.target.id;
 	      if(dirobj_cache[path]) {
-		  obj = dirobj_cache[path];
-		  renderTable(obj);
+		  lobj = dirobj_cache[path];
+		  renderTable(lobj);
 	      } else {
 		  fetchObj(params).then(anobj => {
 		      renderTable(anobj);
@@ -176,8 +182,8 @@ async  function fetchObj(params,url = document.URL) {
 //	  dirobj_cache[obj.path].scrollpos =  event.target.id;
 	  let path = event.target.getAttribute("path")
 	  if(dirobj_cache[path]) {
-	      obj = dirobj_cache[path];
-	      renderTable(obj);
+	      lobj = dirobj_cache[path];
+	      renderTable(lobj);
 	  } else {
 	      let params = {d: path};
 	      fetchObj(params).then(anobj => {
@@ -192,7 +198,7 @@ async  function fetchObj(params,url = document.URL) {
 	  let inputAll = document.querySelectorAll('.searchTerm');
 	  let aa = [];
           inputAll.forEach((x) => { if (x.value) aa.push(x.value) })
-	  let params = {s: aa.join(","),p: obj.path};
+	  let params = {s: aa.join(","),p: lobj.path};
 	  console.log(params);
 	  if (params.s.length > 0) {
 	      fetchObj(params,"/search").then(anobj => {
@@ -212,7 +218,7 @@ async  function fetchObj(params,url = document.URL) {
       let dirplaylist = [];
       for (let i = 0; i < soundfileelements.length; i++) {
 	  let e = soundfileelements[i];
-	  let serverpath = obj.dirname + "/" + e.getAttribute("filename");
+	  let serverpath = lobj.dirname + "/" + e.getAttribute("filename");
 	  let playlistEntry = {};
 	  playlistEntry.src = serverpath;
 	  e.setAttribute("play",e.getAttribute("id"));
@@ -227,13 +233,13 @@ async  function fetchObj(params,url = document.URL) {
 	  dirplaylist[i] = playlistEntry;
 	  e.addEventListener("click",(event) => {
               let playid = event.target.getAttribute('play');
-	      playlist = playlists[obj.dirname];
-              playAndReset(playlist[playid],obj.dirname);
+	      playlist = playlists[lobj.dirname];
+              playAndReset(playlist[playid],lobj.dirname);
 	      let el = document.getElementById(audioElement.audioid + 1000);
-	      Highlight(el, obj.dirname);
+	      Highlight(el, lobj.dirname);
 	  });
       }
-      playlists[obj.dirname] = dirplaylist;
+      playlists[lobj.dirname] = dirplaylist;
       if(searchresults.length > 0) {
 	  let el = document.getElementById("sr");
 	  el.setAttribute("style", "display: inline;" );
@@ -241,17 +247,17 @@ async  function fetchObj(params,url = document.URL) {
 	      renderTable(searchresults[sr_cyc()]);
 	  })			     
       }
-      if(obj.scrollpos){
-	  let e = document.getElementById(obj.scrollpos);
-	  if(obj.directories && obj.directories.length > 10){
+      if(lobj.scrollpos){
+	  let e = document.getElementById(lobj.scrollpos);
+	  if(lobj.directories && lobj.directories.length > 10){
 	      e.scrollIntoView({block: "center", inline: "nearest"});
 	  }else {window.scrollTo(0,0)}
       } else {window.scrollTo(0,0)}
 
   }
 
-  function Highlight (el, dirname = obj.dirname) {
-      if (dirname == obj.dirname) {
+  function Highlight (el, dirname = globj.dirname) {
+      if (dirname == globj.dirname) {
 	  let rows =  document.getElementsByClassName("indexcolname");
 	  for (let i = 0; i < rows.length; i++)
 	      rows[i].setAttribute("bgcolor", i % 2 ?"#F0F0F0":"#FFFFFF");
