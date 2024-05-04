@@ -36,7 +36,7 @@
   // fetched from the server.
 
   window.onload = (event) => {
-      audioElement = new Audio();
+      audioElement = document.createElement('audio');
       audioElement.id = "audio0";
       audioElement.controls=true;
       audioElement.playsinline=true;
@@ -58,7 +58,7 @@
       fetchObj(params).then(anobj =>{ renderTable(anobj);
 				      dirobj_cache["."] = anobj
 				    });
-//      for(x of ["canplay","canplaythrough","ended","emptied","loadeddata","stalled","suspend","waiting"])audioElement.addEventListener(x,(e) => console.log("audioElement event type: ", e.type))
+      for(x of ["abort","canplay","canplaythrough","ended","emptied","error","loadeddata","loadedmetadata","loadstart","pause","play","playing","progress","ratechange","seeked","seeking","stalled","suspend","timeupdate","volumechange","waiting"])audioElement.addEventListener(x,(e) => console.log("audioElement event type: ", e.type))
     }
 </script>
 
@@ -69,10 +69,10 @@
 	      title: playlist[e.audioid].title ,
 	      artist: playlist[e.audioid].artist ,
 	      album: playlist[e.audioid].album,
-	      artwork: [{ src: "" }]
-	  });
-	  navigator.mediaSession.setActionHandler("nexttrack", () => {console.log("nexttrack");
-	      let el = document.getElementById(e.nextid + 1000)
+	      artwork: [{ src: "/icons/sound2.gif" }]
+	  });e.play();
+	  navigator.mediaSession.setActionHandler("nexttrack", () => {
+	      let el = document.getElementById(e.nextid + 1000);
 	      playAndReset(playlists[globj.dirname][e.nextid]);
 	      Highlight(el);
 	  });
@@ -113,6 +113,42 @@
 	  document.getElementById("headerdirname").innerHTML = aa[aa.length - 1]
       }
       audioElement.play();
+      let audio_element_attributes = [
+	  "audioTracks",
+	  "autoplay",
+	  "buffered",
+	  "controller",
+	  "controls",
+	  "controlsList",
+	  "crossOrigin",
+	  "currentSrc",
+	  "currentTime",
+	  "defaultMuted",
+	  "defaultPlaybackRate",
+	  "disableRemotePlayback",
+	  "duration",
+	  "ended",
+	  "error",
+	  "loop",
+	  "mediaGroup",
+	  "mediaKeys",
+	  "muted",
+	  "networkState",
+	  "paused",
+	  "playbackRate",
+	  "preservesPitch",
+	  "readyState",
+	  "remote",
+	  "seekable",
+	  "sinkId",
+	  "src",
+	  "srcObject",
+	  "textTracks",
+	  "videoTracks",
+	  "volume"
+      ];
+      for (x of audio_element_attributes) 
+	  console.log(x,"\t",audioElement[x])
       audioElement.display = "block";
       
   }
