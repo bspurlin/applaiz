@@ -44,7 +44,7 @@ img.dirselector {
 #audio0 {
 
     width: 70%;
-    position: sticky;
+    position: fixed;
     top: 90%;
     left: 20%
 
