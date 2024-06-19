@@ -30,6 +30,17 @@ if (opt.options.g && opt.options.p) console.log(mkDirObj(opt.options.p, fsobj));
 if (opt.options.m)  fs.writeFileSync(1,JSON.stringify(m4aData(opt.options.m),null,1));
 
 function m4aData (dirname) {
+
+    /*
+
+      m4a tags
+      https://atomicparsley.sourceforge.net/mpeg-4files.html
+
+      m4a genre ids: egrep Genre_ MediaInfoLib/Source/Resource/Text/Language/DefaultLanguage.csv
+      https://github.com/MediaArea/MediaInfoLib/blob/master/Source/Resource/Text/Language/DefaultLanguage.csv
+      
+     */
+
     let adir = fs.readdirSync(dirname);
     let dirn = dirname;
     let bigobj = {};
@@ -50,32 +61,40 @@ function m4aData (dirname) {
 	let bilst = Buffer.allocUnsafe(ilistl);
 	for(i = 0; i < ilistl; i++)bilst[i]=b[b.indexOf("ilst")+i];
 	let pointer = 0;
-	let dirname, title,album, track, year,genre = "";
+	let dirname, title,album, track, year,genre,albumartist,composer = "";
 	let artist = " ";
 	let meta = {};
 	meta.filename = filename;
 	while (pointer >= 0) {
+	    let tag = "";
 	    pointer = bilst.indexOf('data',pointer+1);
-	    tag = bilst.slice(pointer-7,pointer-2).toString().replace(/[\x00-\x01]/g,"")
+	    let tagslice = bilst.slice(pointer-8,pointer-2)
+	    for (let i = 0; i < tagslice.length; i++) {
+		tag=tag.concat(String.fromCharCode(tagslice[i]))
+	    }
+	    tag = tag.replace(/[\x00-\x01]/g,"")
+	    // console.error("tag = ",tag)
 	    value = bilst.slice(pointer+4,pointer + bilst[pointer - 1] +bilst[pointer -2]*0x100 -1);
 
-	    if (tag == 'rkn') {
+	    if (tag == 'trkn') {
 		track = value[11] < 10?'0' + value[11]:value[11];
 		track = track + " of " + value[13];
 		meta.track=track;
 	    }
 
-	    if (tag == 'nre') {
+	    if (tag == 'gnre') {
 		genre = genrs[value[9]];
 		meta.genre = genre;
 	    }
 	    
 	    value = value.toString().replace(/[\x00-\x01]/g,"")
-	    if (tag == 'nam') {title = value;meta.title=title}
-	    if (tag == 'ART') {artist = artist + value;meta.artist=artist}
-	    if (tag == 'day') {year = value;meta.year=year}
-	    if (tag == 'alb') {album = value;meta.album=album}
-	    if (tag == 'gen') {genre = value;meta.genre=genre}
+	    if (tag == '©nam') {title = value;meta.title=title}
+	    if (tag == '©ART' || tag == '©art') {artist = artist + value;meta.artist=artist}
+	    if (tag == 'aART') {albumartist = value;meta.albumartist = albumartist}
+	    if (tag == '©day') {year = value;meta.year=year}
+	    if (tag == '©alb') {album = value;meta.album=album}
+	    if (tag == '©gen') {genre = value;meta.genre=genre}
+	    if (tag == '©wrt') {composer = value;meta.composer=composer}
 	}
 	console.error("album:",meta.album,"title:",meta.title,"genre:",meta.genre);
 
