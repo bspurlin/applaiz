@@ -13,6 +13,8 @@ opt = require('node-getopt').create([
 
 size1of = require('object-sizeof');
 
+const genrs = JSON.parse(fs.readFileSync("Genre_s.json"));
+
 if(opt.argv[0])fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
 
 const {countAttr, ff, mkDirObj, searchFsObj, searchDirObjs } = require("./modules.js");
@@ -56,11 +58,18 @@ function m4aData (dirname) {
 	    pointer = bilst.indexOf('data',pointer+1);
 	    tag = bilst.slice(pointer-7,pointer-2).toString().replace(/[\x00-\x01]/g,"")
 	    value = bilst.slice(pointer+4,pointer + bilst[pointer - 1] +bilst[pointer -2]*0x100 -1);
+
 	    if (tag == 'rkn') {
 		track = value[11] < 10?'0' + value[11]:value[11];
 		track = track + " of " + value[13];
 		meta.track=track;
 	    }
+
+	    if (tag == 'nre') {
+		genre = genrs[value[9]];
+		meta.genre = genre;
+	    }
+	    
 	    value = value.toString().replace(/[\x00-\x01]/g,"")
 	    if (tag == 'nam') {title = value;meta.title=title}
 	    if (tag == 'ART') {artist = artist + value;meta.artist=artist}
@@ -68,7 +77,7 @@ function m4aData (dirname) {
 	    if (tag == 'alb') {album = value;meta.album=album}
 	    if (tag == 'gen') {genre = value;meta.genre=genre}
 	}
-	console.error("album:",meta.album,"title:",meta.title);
+	console.error("album:",meta.album,"title:",meta.title,"genre:",meta.genre);
 
 	bigobj.files.push(meta);
     }
