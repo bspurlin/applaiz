@@ -1,4 +1,9 @@
+
 path = require("path");
+
+const NodeID3 = require('node-id3');
+
+const genrs = JSON.parse(fs.readFileSync("Genre_s.json"));
 
 function searchFsObj (fsobj, rearray) {
     let score = rearray.length;
@@ -159,5 +164,97 @@ function searchDirObjs(searchterms, fsobj,parentpath) {//returns a dirObj
     return robj;
 }
 
+function m4aFile(fn) {
+    /*
 
-module.exports = { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs };
+      m4a tags
+      https://atomicparsley.sourceforge.net/mpeg-4files.html
+
+      m4a genre ids: egrep Genre_ MediaInfoLib/Source/Resource/Text/Language/DefaultLanguage.csv
+      https://github.com/MediaArea/MediaInfoLib/blob/master/Source/Resource/Text/Language/DefaultLanguage.csv
+      
+     */
+
+    stats=fs.statSync(fn);
+    console.error("file name",fn,"stats ",stats.size);
+    b = Buffer.alloc(stats.size);
+    b = fs.readFileSync(fn);
+    
+    let ilistl = b[b.indexOf("ilst")-2]*256 + b[b.indexOf("ilst")-1];
+    console.error("ilistl = ",ilistl);
+    if (!ilistl) return 0;
+    let bilst = Buffer.allocUnsafe(ilistl);
+    for(i = 0; i < ilistl; i++)bilst[i]=b[b.indexOf("ilst")+i];
+    let pointer = 0;
+    let title,album, track, year,genre,albumartist,composer = "";
+    let artist = " ";
+    let meta = {};
+    meta.filename = fn;
+    while (pointer >= 0) {
+	let tag = "";
+	pointer = bilst.indexOf('data',pointer+1);
+	let tagslice = bilst.slice(pointer-8,pointer-2)
+	for (let i = 0; i < tagslice.length; i++) {
+	    tag=tag.concat(String.fromCharCode(tagslice[i]))
+	}
+	tag = tag.replace(/[\x00-\x01]/g,"")
+	// console.error("tag = ",tag)
+	value = bilst.slice(pointer+4,pointer + bilst[pointer - 1] +bilst[pointer -2]*0x100 -1);
+	
+	if (tag == 'trkn') {
+	    track = value[11] < 10?'0' + value[11]:value[11];
+	    if (value[13] > 0) track = track + " of " + value[13];
+	    meta.trackNumber=track;
+	}
+	
+	if (tag == 'gnre') {
+	    genre = genrs[value[9]];
+	    meta.genre = genre;
+	}
+	
+	value = value.toString().replace(/[\x00-\x01]/g,"")
+	if (tag == '©nam') {title = value;meta.title=title}
+	if (tag == '©ART' || tag == '©art') {artist = artist + value;meta.artist=artist}
+	if (tag == 'aART') {albumartist = value;meta.albumartist = albumartist}
+	if (tag == '©day') {year = value;meta.year=year}
+	if (tag == '©alb') {album = value;meta.album=album}
+	if (tag == '©gen') {genre = value;meta.genre=genre}
+	if (tag == '©wrt') {composer = value;meta.composer=composer}
+    }
+    console.error("album:",meta.album,"title:",meta.title,"genre:",meta.genre);
+    return meta
+}
+
+function mp3File (fn) {
+    const re = /(mp3|flac|wav$)/i;
+    let re_gnre = /\((\d+)\)/;
+    let gnre_result;
+    if (re.test(fn)) {
+		    try {
+			let tags = NodeID3.read(fn);console.error("tags: ",tags)
+			const filename = fn;
+			return {filename, ...(
+			    (a) => {
+				let obj = {};
+				for(x of ["title","artist","album","year","genre","performerInfo","composer","trackNumber"])
+				{
+				    if(x == "performerInfo"){
+					obj["albumartist"] = a[x]
+				    } else {
+					obj[x]=a[x]
+				    }
+				};
+				gnre_result = re_gnre.exec(obj.genre);
+			    if (gnre_result) {obj.genre = genrs[ + gnre_result[1] + 1]};
+				return obj}
+			)(tags)
+			       };
+		    } catch (error) {
+			console.error(filename + " " + error);
+			return 0
+		    }
+    
+    }
+}
+
+module.exports = { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File };
