@@ -80,7 +80,8 @@ function mkDirObj(pathn,obj) {
     for (let i = 0; i < obj.directories.length; i++) {
         aa[i] = {
 	    "name":path.basename(obj.directories[i].dirname),
-	    "path": obj.directories[i].path
+	    "path": obj.directories[i].path,
+	    "ndirs": obj.directories[i].ndirs
 	};
     }
     if (aa.length > 0) {
