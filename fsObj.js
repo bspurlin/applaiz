@@ -22,12 +22,13 @@ function fst (dirname,space) {
     fsr.files = [];
     fsr.dirname = dirname;
     try {
-	let files = readdirSync(dirname,{withFileTypes:"true"});
-	
-	for (let i =0; i < files.length; i++ ) {
-	    let entry = files[i];
+	let direntries = readdirSync(dirname,{withFileTypes:"true"});
+	let ndrs=0;
+	for (let i =0; i < direntries.length; i++ ) {
+	    let entry = direntries[i];
 	    if(entry.isDirectory()) {
 		fsr.directories.push(fst(dirname + "/" + entry.name));
+		ndrs++
 		console.error(dirname + "/" + entry.name);
 	    } else if (re.test(entry.name)) {
 		const filename = dirname + "/" + entry.name;
@@ -48,7 +49,7 @@ function fst (dirname,space) {
 		
 	    }
 	}
-	
+	fsr.ndirs = ndrs
     } catch (error) {console.error(dirname + " " + error)}
     return fsr
 } 
