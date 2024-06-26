@@ -82,7 +82,7 @@ img.dirselector {
 
 .bigrow {
  height: 30px;
-  font-style: italic;
-  font-size: large; 
+/*  font-style: italic;
+  font-size: large; */ 
   font-weight: bold;
 }
