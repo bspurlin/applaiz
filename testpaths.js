@@ -23,7 +23,15 @@ const { readFile,open } = require('node:fs/promises');
 
 if (opt.options.s)  fs.writeFileSync(1,JSON.stringify(searchDirObjs(opt.options.s,fsobj),null,1));
 
-if(opt.options.f) {console.log("count = ",countAttr(fsobj))};
+if(opt.options.f) {
+    let count = countAttr(fsobj);
+    console.log("total tracks = ", count.length,
+		"\ntotal albums = ", count.albumcount,
+		"\ntitle tags = ", count.title,
+		"\nartist tags = ", count.artist,
+		"\nalbum tags = ", count.album
+	       )
+};
 
 if (opt.options.g && opt.options.p) console.log(mkDirObj(opt.options.p, fsobj));
 
