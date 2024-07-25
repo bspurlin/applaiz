@@ -1,6 +1,6 @@
 #!/usr/bin/node
 
-const { readdir, readdirSync } = require('fs');
+const { readdir, readdirSync, readFileSync } = require('fs');
 const NodeID3 = require('node-id3');
 const re = /(mp3|m4a|flac|wav$)/i;
 const regexm4a = new RegExp('\.m4a$','i')
@@ -21,6 +21,7 @@ function fst (dirname,space) {
     fsr.directories = [];
     fsr.files = [];
     fsr.dirname = dirname;
+    let applaizfiles = [];
     try {
 	let direntries = readdirSync(dirname,{withFileTypes:"true"});
 	let ndrs=0;
@@ -30,7 +31,11 @@ function fst (dirname,space) {
 		fsr.directories.push(fst(dirname + "/" + entry.name));
 		ndrs++
 		console.error(dirname + "/" + entry.name);
-	    } else if (re.test(entry.name)) {
+	    } else if ( entry.isFile() && entry.name == "applaiz-files.json") {
+		fsr.files = JSON.parse(readFileSync(dirname + "/" + entry.name));
+		break
+	    }
+	    else if (re.test(entry.name)) {
 		const filename = dirname + "/" + entry.name;
 		try {
 		    if (regexm4a.test(filename)) {
