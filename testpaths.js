@@ -13,34 +13,27 @@ opt = require('node-getopt').create([
 
 size1of = require('object-sizeof');
 
-const genrs = JSON.parse(fs.readFileSync("Genre_s.json"));
-
 if(opt.argv[0])fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
 
-const {countAttr, ff, mkDirObj, searchFsObj, searchDirObjs } = require("./modules.js");
-
-const { readFile,open } = require('node:fs/promises');
+const {countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File } = require("./modules.js");
 
 if (opt.options.s)  fs.writeFileSync(1,JSON.stringify(searchDirObjs(opt.options.s,fsobj),null,1));
 
-if(opt.options.f) {console.log("count = ",countAttr(fsobj))};
+if(opt.options.f) {
+    let count = countAttr(fsobj);
+    console.log("total tracks = ", count.length,
+                "\ntotal albums = ", count.albumcount,
+                "\ntitle tags = ", count.title,
+                "\nartist tags = ", count.artist,
+                "\nalbum tags = ", count.album
+               )
+};
 
 if (opt.options.g && opt.options.p) console.log(mkDirObj(opt.options.p, fsobj));
 
-if (opt.options.m)  fs.writeFileSync(1,JSON.stringify(m4aData(opt.options.m),null,1));
+if (opt.options.m)  fs.writeFileSync(1,JSON.stringify(audioMetaData(opt.options.m),null,1));
 
-function m4aData (dirname) {
-
-    /*
-
-      m4a tags
-      https://atomicparsley.sourceforge.net/mpeg-4files.html
-
-      m4a genre ids: egrep Genre_ MediaInfoLib/Source/Resource/Text/Language/DefaultLanguage.csv
-      https://github.com/MediaArea/MediaInfoLib/blob/master/Source/Resource/Text/Language/DefaultLanguage.csv
-      
-     */
-
+function audioMetaData (dirname) {
     let adir = fs.readdirSync(dirname);
     let dirn = dirname;
     let bigobj = {};
@@ -51,75 +44,10 @@ function m4aData (dirname) {
     let b,fn;
     for (filename of dirlist) {
 	fn = dirn + "/" + filename;
-	stats=fs.statSync(fn);
-	console.error("file name",fn,"stats ",stats.size);
-	b = Buffer.alloc(stats.size);
-	b = fs.readFileSync(fn);
-
-	let ilistl = b[b.indexOf("ilst")-2]*256 + b[b.indexOf("ilst")-1];
-	
-	let bilst = Buffer.allocUnsafe(ilistl);
-	for(i = 0; i < ilistl; i++)bilst[i]=b[b.indexOf("ilst")+i];
-	let pointer = 0;
-	let dirname, title,album, track, year,genre,albumartist,composer = "";
-	let artist = " ";
-	let meta = {};
+	meta = m4aFile(fn);
+	if (!meta ) meta = mp3File(fn);
 	meta.filename = filename;
-	while (pointer >= 0) {
-	    let tag = "";
-	    pointer = bilst.indexOf('data',pointer+1);
-	    let tagslice = bilst.slice(pointer-8,pointer-2)
-	    for (let i = 0; i < tagslice.length; i++) {
-		tag=tag.concat(String.fromCharCode(tagslice[i]))
-	    }
-	    tag = tag.replace(/[\x00-\x01]/g,"")
-	    // console.error("tag = ",tag)
-	    value = bilst.slice(pointer+4,pointer + bilst[pointer - 1] +bilst[pointer -2]*0x100 -1);
-
-	    if (tag == 'trkn') {
-		track = value[11] < 10?'0' + value[11]:value[11];
-		track = track + " of " + value[13];
-		meta.track=track;
-	    }
-
-	    if (tag == 'gnre') {
-		genre = genrs[value[9]];
-		meta.genre = genre;
-	    }
-	    
-	    value = value.toString().replace(/[\x00-\x01]/g,"")
-	    if (tag == '©nam') {title = value;meta.title=title}
-	    if (tag == '©ART' || tag == '©art') {artist = artist + value;meta.artist=artist}
-	    if (tag == 'aART') {albumartist = value;meta.albumartist = albumartist}
-	    if (tag == '©day') {year = value;meta.year=year}
-	    if (tag == '©alb') {album = value;meta.album=album}
-	    if (tag == '©gen') {genre = value;meta.genre=genre}
-	    if (tag == '©wrt') {composer = value;meta.composer=composer}
-	}
-	console.error("album:",meta.album,"title:",meta.title,"genre:",meta.genre);
-
 	bigobj.files.push(meta);
     }
-/*
-    for(x of Object.keys(bigobj)) {
-	let i = 0, prevartist="", signal=false, dirname = "";
-	for(j of bigobj[x].files){
-	    if(i > 0 && prevartist != j.artist){
-		signal = true;
-	    }else {
-		dirname=x+j.artist
-	    };
-	    prevartist=j.artist;i++
-	}
-	if(signal) {
-	    console.error(x," has multiple artists");
-	    bigobj[x].dirname=x+" multiple artists"
-	}else {
-	    console.error("dirname= ",dirname);
-	    bigobj[x].dirname=dirname
-	}
-    }
-*/
-    return bigobj
-    
+    return bigobj    
 }
