@@ -38,14 +38,26 @@ let templates = [`<table>
        </th>
     </tr>
 
-   <% for (let i = 0; i < obj.directories.length; i++) {%>
+<%
+let bigdirs = [];
+let littledirs = [];
+for (let i = 0; i < obj.directories.length; i++) {
+   if(obj.directories[i].ndirs > 18) {
+      bigdirs.push(obj.directories[i])
+   } else {
+      littledirs.push(obj.directories[i])
+   }
+}
+%>
 
-   <tr >
+   <% for (let i = 0; i < bigdirs.length; i++) {%>
+
+   <tr class="bigrow">
      <td class="indexcolicon">
-        <img  id=dirname<%= i %> path=<%= obj.directories[i].path%> class="dirselector" src="/icons/folder.gif">
+        <img  id=dirname<%= i %> path=<%= bigdirs[i].path%> class="dirselector" src="/icons/folder.gif">
      </td>
      <td>
-       <%= obj.directories[i].name%>
+       <%= bigdirs[i].name%>
      </td>
      <td>
      </td>
@@ -54,6 +66,25 @@ let templates = [`<table>
    </tr>
 
    <%}%>
+
+
+   <% for (let i = 0; i < littledirs.length; i++) {%>
+
+   <tr >
+     <td class="indexcolicon">
+        <img  id=dirname<%= i %> path=<%= littledirs[i].path%> class="dirselector" src="/icons/folder.gif">
+     </td>
+     <td>
+       <%= littledirs[i].name%>
+     </td>
+     <td>
+     </td>
+     <td>
+     </td>
+   </tr>
+
+   <%}%>
+
 
    <% for (let i = 0; i < obj.files.length; i++) {
       let re = /.(m4a|mp3|wav|flac)$/ig;

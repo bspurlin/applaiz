@@ -22,7 +22,7 @@ if (opt.options.s)  fs.writeFileSync(1,JSON.stringify(searchDirObjs(opt.options.
 if(opt.options.f) {
     let count = countAttr(fsobj);
     console.log("total tracks = ", count.length,
-                "\ntotal albums = ", count.albumcount,
+		"\ntotal albums = ", count.albumcount,
                 "\ntitle tags = ", count.title,
                 "\nartist tags = ", count.artist,
                 "\nalbum tags = ", count.album

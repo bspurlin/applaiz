@@ -1,4 +1,4 @@
-
+fs = require("fs")
 path = require("path");
 
 const NodeID3 = require('node-id3');
@@ -60,6 +60,7 @@ function countAttr (fsobj) {
     return ff({
 	fsobj: fsobj,
 	fFile: (fsobj,robj) => {
+	    if(fsobj.files.length > 0 ) robj.albumcount++;
 	    robj.length +=  fsobj.files.length;
 	    for (let x = 0; x <  fsobj.files.length; x++){
 		if (fsobj.files[x].title != undefined) ++robj.title;
@@ -68,7 +69,7 @@ function countAttr (fsobj) {
 	    }
 	    return robj
 	},
-	robj: {length: 0, title: 0, artist: 0, album: 0}
+	robj: {length: 0, title: 0, artist: 0, album: 0, albumcount: 0}
     })
 }
 
@@ -79,7 +80,8 @@ function mkDirObj(pathn,obj) {
     for (let i = 0; i < obj.directories.length; i++) {
         aa[i] = {
 	    "name":path.basename(obj.directories[i].dirname),
-	    "path": obj.directories[i].path
+	    "path": obj.directories[i].path,
+	    "ndirs": obj.directories[i].ndirs
 	};
     }
     if (aa.length > 0) {
@@ -189,7 +191,7 @@ function m4aFile(fn) {
     let title,album, track, year,genre,albumartist,composer = "";
     let artist = " ";
     let meta = {};
-    meta.filename = fn;
+    meta.filename = path.basename(fn);
     while (pointer >= 0) {
 	let tag = "";
 	pointer = bilst.indexOf('data',pointer+1);
@@ -232,7 +234,7 @@ function mp3File (fn) {
     if (re.test(fn)) {
 		    try {
 			let tags = NodeID3.read(fn);console.error("tags: ",tags)
-			const filename = fn;
+			const filename = path.basename(fn);
 			return {filename, ...(
 			    (a) => {
 				let obj = {};

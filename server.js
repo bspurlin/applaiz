@@ -18,7 +18,7 @@ tp.ff({
 	obj.path = patth;     // a dot-numeric path
 	obj.parent = parent;  // and a parent so we can go back
     },
-    fFile: (obj) => {                    // Sort the list of files case-
+    fFile: (obj) => {            //console.error("Here: ",obj.dirname)        // Sort the list of files case-
 	obj.files.sort((a,b) => { //insensitively		       
 	    const nameA = a.filename.toUpperCase();
 	    const nameB = b.filename.toUpperCase();
