@@ -88,7 +88,7 @@ for (let i = 0; i < obj.directories.length; i++) {
 
    <% for (let i = 0; i < obj.files.length; i++) {
       let re = /.(m4a|mp3|wav|flac)$/ig;
-      let filename, name, artist, album, title,composer,year,genre,trackNumber;
+      let filename, name, artist, album, title,composer,year,genre,trackNumber, albumartist;
       filename = obj.files[i].filename;
       name = filename.replace(re,"");
       if(obj.files[i].title) {
@@ -102,6 +102,8 @@ for (let i = 0; i < obj.directories.length; i++) {
       artist = obj.files[i].artist?obj.files[i].artist:"";
       composer = obj.files[i]['composer']?obj.files[i]['composer']:"";
       composer = artist === composer?"":composer;
+      albumartist = obj.files[i]['albumartist']?obj.files[i]['albumartist']:"";
+      albumartist = albumartist === artist?"":albumartist;
       year = obj.files[i]['year']?obj.files[i]['year']:"";
       genre = obj.files[i]['genre']?obj.files[i]['genre']:"";
       trackNumber = obj.files[i]['trackNumber']?obj.files[i]['trackNumber']:""; 
@@ -111,7 +113,7 @@ for (let i = 0; i < obj.directories.length; i++) {
 	</td>
 	<td class="indexcolname hoverMeta"><%- name%>
          <span class="metaContent">
-<%- artist + " " + composer + " " + year + " " + genre  %>
+<%- artist + " " + composer + " " + albumartist + " " + year + " " + genre  %>
          </span>
 	</td>
 	<td>
