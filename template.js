@@ -99,8 +99,9 @@ for (let i = 0; i < obj.directories.length; i++) {
          album = obj.files[i].album; } else {
          album = "";
       }
-      if(obj.files[i].artist) artist = obj.files[i].artist;
+      artist = obj.files[i].artist?obj.files[i].artist:"";
       composer = obj.files[i]['composer']?obj.files[i]['composer']:"";
+      composer = artist === composer?"":composer;
       year = obj.files[i]['year']?obj.files[i]['year']:"";
       genre = obj.files[i]['genre']?obj.files[i]['genre']:"";
       trackNumber = obj.files[i]['trackNumber']?obj.files[i]['trackNumber']:""; 
