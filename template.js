@@ -88,7 +88,7 @@ for (let i = 0; i < obj.directories.length; i++) {
 
    <% for (let i = 0; i < obj.files.length; i++) {
       let re = /.(m4a|mp3|wav|flac)$/ig;
-      let filename, name, artist, album, title;
+      let filename, name, artist, album, title,composer,year,genre,trackNumber;
       filename = obj.files[i].filename;
       name = filename.replace(re,"");
       if(obj.files[i].title) {
@@ -99,11 +99,19 @@ for (let i = 0; i < obj.directories.length; i++) {
          album = obj.files[i].album; } else {
          album = "";
       }
-      if(obj.files[i].artist) artist = obj.files[i].artist; %>
+      if(obj.files[i].artist) artist = obj.files[i].artist;
+      composer = obj.files[i]['composer']?obj.files[i]['composer']:"";
+      year = obj.files[i]['year']?obj.files[i]['year']:"";
+      genre = obj.files[i]['genre']?obj.files[i]['genre']:"";
+      trackNumber = obj.files[i]['trackNumber']?obj.files[i]['trackNumber']:""; 
+   %>
       <tr class=indexrow id="<%= i + 1000%>" bgcolor=<%= i%2?"#F0F0F0":"#FFFFFF"   %>>
 	<td class="indexcolicon" ><img class="soundfile" id="<%= i %>" src="/icons/loudspeaker.svg" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
 	</td>
-	<td class="indexcolname"><%- name%>
+	<td class="indexcolname hoverMeta"><%- name%>
+         <span class="metaContent">
+<%- artist + " " + composer + " " + year + " " + genre  %>
+         </span>
 	</td>
 	<td>
 	</td>
