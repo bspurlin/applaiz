@@ -112,3 +112,8 @@ img.dirselector {
 .hoverMeta:hover span.metaContent{
     display:block;
 }
+
+.popupsep {
+  margin-top:1px;
+  margin-bottom:1px;
+}

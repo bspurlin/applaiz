@@ -101,19 +101,25 @@ for (let i = 0; i < obj.directories.length; i++) {
       }
       artist = obj.files[i].artist?obj.files[i].artist:"";
       composer = obj.files[i]['composer']?obj.files[i]['composer']:"";
-      composer = artist === composer?"":composer;
+      composer = artist.trim() === composer.trim()?false:composer;
       albumartist = obj.files[i]['albumartist']?obj.files[i]['albumartist']:"";
-      albumartist = albumartist === artist?"":albumartist;
+      albumartist = albumartist.trim() === artist.trim()?false:albumartist;
       year = obj.files[i]['year']?obj.files[i]['year']:"";
       genre = obj.files[i]['genre']?obj.files[i]['genre']:"";
-      trackNumber = obj.files[i]['trackNumber']?obj.files[i]['trackNumber']:""; 
+      trackNumber = obj.files[i]['trackNumber']?obj.files[i]['trackNumber']:"";
+sepexp = "<hr class='popupsep' />";
+artist = artist?artist + sepexp:"";
+composer = composer?composer + sepexp:"";
+albumartist = albumartist?albumartist + sepexp:"";
+genre = genre?genre + sepexp:"";
+year = year?String(year):"";
    %>
       <tr class=indexrow id="<%= i + 1000%>" bgcolor=<%= i%2?"#F0F0F0":"#FFFFFF"   %>>
 	<td class="indexcolicon" ><img class="soundfile" id="<%= i %>" src="/icons/loudspeaker.svg" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
 	</td>
 	<td class="indexcolname hoverMeta"><%- name%>
          <span class="metaContent">
-<%- artist + " " + composer + " " + albumartist + " " + year + " " + genre  %>
+<%- artist + composer + albumartist + genre + year  %>
          </span>
 	</td>
 	<td>
