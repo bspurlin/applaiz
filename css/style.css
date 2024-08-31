@@ -41,6 +41,11 @@ img.dirselector {
  height: 32px; width: 32px;
 }
 
+td.playicon {
+  width: 40px;
+}
+
+
 #audio0 {
 
     width: 70%;

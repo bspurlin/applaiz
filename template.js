@@ -84,10 +84,17 @@ for (let i = 0; i < obj.directories.length; i++) {
    </tr>
 
    <%}%>
+</table>
+<%# Separate tables for dirs and files; Dir table has 4 columns, files 2 %>
+<table>
 
+  <%
+  let re = /.(m4a|mp3|wav|flac)$/ig;
+  const sepexp = "<hr class='popupsep' />";
+  const resep = new RegExp(sepexp + "$");
 
-   <% for (let i = 0; i < obj.files.length; i++) {
-      let re = /.(m4a|mp3|wav|flac)$/ig;
+  for (let i = 0; i < obj.files.length; i++) {
+      let metastr = "";
       let filename, name, artist, album, title,composer,year,genre,trackNumber, albumartist;
       filename = obj.files[i].filename;
       name = filename.replace(re,"");
@@ -107,25 +114,22 @@ for (let i = 0; i < obj.directories.length; i++) {
       year = obj.files[i]['year']?obj.files[i]['year']:"";
       genre = obj.files[i]['genre']?obj.files[i]['genre']:"";
       trackNumber = obj.files[i]['trackNumber']?obj.files[i]['trackNumber']:"";
-sepexp = "<hr class='popupsep' />";
-artist = artist?artist + sepexp:"";
-composer = composer?composer + sepexp:"";
-albumartist = albumartist?albumartist + sepexp:"";
-genre = genre?genre + sepexp:"";
-year = year?String(year):"";
-   %>
-      <tr class=indexrow id="<%= i + 1000%>" bgcolor=<%= i%2?"#F0F0F0":"#FFFFFF"   %>>
-	<td class="indexcolicon" ><img class="soundfile" id="<%= i %>" src="/icons/loudspeaker.svg" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
+      metastr += artist?artist + sepexp:"";
+      metastr += composer?composer + sepexp:"";
+      metastr += albumartist = albumartist?albumartist + sepexp:"";
+      metastr += genre?genre + sepexp:"";
+      metastr += year?String(year):"";
+      metastr = metastr.replace(resep,"");
+      %>
+   <tr class=indexrow id="<%= i + 1000%>" bgcolor=<%= i%2?"#F0F0F0":"#FFFFFF"   %>>
+	<td class="playicon" ><img class="soundfile" id="<%= i %>" src="/icons/loudspeaker.svg" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
 	</td>
-	<td class="indexcolname hoverMeta"><%- name%>
-         <span class="metaContent">
-<%- artist + composer + albumartist + genre + year  %>
-         </span>
+	<td class="indexcolname hoverMeta">
+	  <%- name%>
+          <span class="metaContent">
+	    <%- metastr  %>
+          </span>
 	</td>
-	<td>
-	</td>
-       <td>
-       </td>
 
       </tr>
       <%}%>
