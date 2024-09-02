@@ -28,6 +28,10 @@ function searchFsObj (fsobj, rearray) {
 			searchstring = searchstring + fsobj.files[x].artist;
 		    if (fsobj.files[x].album != undefined)
 			searchstring = searchstring + fsobj.files[x].album;
+		    if (fsobj.files[x].albumartist != undefined)
+			searchstring = searchstring + fsobj.files[x].albumartist;
+		    if (fsobj.files[x].composer != undefined)
+			searchstring = searchstring + fsobj.files[x].composer;
 		    if (re.test(searchstring)) {
 			n++;
 			break;
