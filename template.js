@@ -111,12 +111,14 @@ for (let i = 0; i < obj.directories.length; i++) {
       composer = artist.trim() === composer.trim()?false:composer;
       albumartist = obj.files[i]['albumartist']?obj.files[i]['albumartist']:"";
       albumartist = albumartist.trim() === artist.trim()?false:albumartist;
+      album = obj.files[i]['album']?obj.files[i]['album']:"";
       year = obj.files[i]['year']?obj.files[i]['year']:"";
       genre = obj.files[i]['genre']?obj.files[i]['genre']:"";
       trackNumber = obj.files[i]['trackNumber']?obj.files[i]['trackNumber']:"";
       metastr += artist?artist + sepexp:"";
       metastr += composer?composer + sepexp:"";
       metastr += albumartist = albumartist?albumartist + sepexp:"";
+      metastr += album?album + sepexp:"";
       metastr += genre?genre + sepexp:"";
       metastr += year?String(year):"";
       metastr = metastr.replace(resep,"");
