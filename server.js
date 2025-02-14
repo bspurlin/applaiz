@@ -39,7 +39,11 @@ let re = /%23/ig;
 
 app.post('/',function(req,res){
     res.setHeader('Content-Type', 'application/json');
-    console.log("Body: ",JSON.stringify(req.body));
+    console.log({
+	"Body":JSON.stringify(req.body),
+	"dn":req.get("ssl_client_s_dn"),
+	"sn": req.get("ssl_client_m_serial"),
+	"verified": req.get("ssl_client_verify")});
     res.end(JSON.stringify(tp.mkDirObj(req.body.d,fsobj)));
 });
 
