@@ -107,14 +107,14 @@ td.playicon {
   border-width:1px;
   border-color:red;
   padding:3px;
-  color:red; 
-  top:20px; 
+  color:700070; 
+  top:0px; 
   left:200px;
   font-size: larger;
 }
 
 
-.hoverMeta:hover span.metaContent{
+.hoverMeta:focus span.metaContent{
     display:block;
 }
 

@@ -59,7 +59,7 @@
 				      dirobj_cache["."] = anobj
 				    });
     //      for(x of ["abort","canplay","canplaythrough","ended","emptied","error","loadeddata","loadedmetadata","loadstart","pause","play","playing","progress","ratechange","seeked","seeking","stalled","suspend","timeupdate","volumechange","waiting"])audioElement.addEventListener(x,(e) => console.log("audioElement event type: ", e.type));
-    document.addEventListener("touchstart", function() {}, true);
+      document.addEventListener("touchstart", function() {}, true);
     }
 </script>
 
@@ -299,6 +299,7 @@ window.addEventListener('popstate', function (event)
 	  for (let i = 0; i < rows.length; i++)
 	      rows[i].setAttribute("bgcolor", i % 2 ?"#F0F0F0":"#FFFFFF");
 	  el.childNodes[3].setAttribute("bgcolor", "#FFFFC0");
+	  el.childNodes[3].focus();
 	  el.scrollIntoView({block: "center"});
       }	  
 

@@ -126,7 +126,7 @@ for (let i = 0; i < obj.directories.length; i++) {
    <tr class=indexrow id="<%= i + 1000%>" bgcolor=<%= i%2?"#F0F0F0":"#FFFFFF"   %>>
 	<td class="playicon" ><img class="soundfile" id="<%= i %>" src="/icons/loudspeaker.svg" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
 	</td>
-	<td class="indexcolname hoverMeta">
+	<td class="indexcolname hoverMeta" tabindex="0">
 	  <%- name%>
           <span class="metaContent">
 	    <%- metastr  %>
