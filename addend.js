@@ -34,18 +34,33 @@ let robj = ff(
 	     if (opt.options.r){
 		 r = obj.directories.findIndex((x)=>x.dirname == addendobj.dirname);
 		 if (r >= 0){
-		     if (process.env.APPLAIZ_DBG) console.error("Replace ",r,"\t",obj.dirname,addendobj.dirname,"\n");
+		     if (process.env.APPLAIZ_DBG) console.error(
+			 {
+			     "Replace ":r,
+			     "Old dirname": obj.dirname,
+			     "New dirname":addendobj.dirname
+			 }
+		     );
 		     obj.directories.splice(r,1,addendobj)
 		 }
 	     }else {
 		 if (process.env.APPLAIZ_DBG) console.error(
-		     "Add",
-		     obj.dirname,
-		     obj.dirname,obj.directories.length,
-		     addendobj.dirname
+		     {
+			 "Add":  obj.dirname,
+			 "To":obj.dirname,
+			 "length":obj.directories.length,
+			 "New dirname":addendobj.dirname
+		     }
 		 );
 		 obj.directories.push(addendobj);
-		 if (process.env.APPLAIZ_DBG) console.error("Added",addendobj.dirname,obj.directories.length);
+		 obj.ndirs = obj.directories.length;
+		 if (process.env.APPLAIZ_DBG) console.error(
+		     {
+			 "Added":addendobj.dirname,
+			 "new length":obj.directories.length,
+			 "ndirs": obj.ndirs
+		     }
+		 )
 	     }
 	 }
      }
