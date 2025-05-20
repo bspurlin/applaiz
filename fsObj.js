@@ -24,12 +24,10 @@ function fst (dirname,space) {
     let applaizfiles = [];
     try {
 	let direntries = readdirSync(dirname,{withFileTypes:"true"});
-	let ndrs=0;
 	for (let i =0; i < direntries.length; i++ ) {
 	    let entry = direntries[i];
 	    if(entry.isDirectory()) {
 		fsr.directories.push(fst(dirname + "/" + entry.name));
-		ndrs++
 		console.error(dirname + "/" + entry.name);
 	    } else if ( entry.isFile() && entry.name == "applaiz-files.json") {
 		fsr.files = JSON.parse(readFileSync(dirname + "/" + entry.name));
@@ -54,7 +52,6 @@ function fst (dirname,space) {
 		
 	    }
 	}
-	fsr.ndirs = ndrs
     } catch (error) {console.error(dirname + " " + error)}
     return fsr
 } 

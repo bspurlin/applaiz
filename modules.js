@@ -78,14 +78,14 @@ function countAttr (fsobj) {
 }
 
 function mkDirObj(pathn,obj) {
-    let aa = pathn.split('.').filter(x => x);
-    while((x = aa.shift()) != undefined) obj=obj.directories[x];
-    let directories = [];
+    let numeric_path = pathn.split('.').filter(x => x);
+    while((x = numeric_path.shift()) != undefined) obj=obj.directories[x];
+    let directories, aa  = [];
     for (let i = 0; i < obj.directories.length; i++) {
         aa[i] = {
 	    "name":path.basename(obj.directories[i].dirname),
 	    "path": obj.directories[i].path,
-	    "ndirs": obj.directories[i].ndirs
+	    "ndirs": obj.directories[i].directories.length
 	};
     }
     if (aa.length > 0) {

@@ -53,12 +53,10 @@ let robj = ff(
 		     }
 		 );
 		 obj.directories.push(addendobj);
-		 obj.ndirs = obj.directories.length;
 		 if (process.env.APPLAIZ_DBG) console.error(
 		     {
 			 "Added":addendobj.dirname,
-			 "new length":obj.directories.length,
-			 "ndirs": obj.ndirs
+			 "new length":obj.directories.length
 		     }
 		 )
 	     }
