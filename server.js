@@ -37,10 +37,10 @@ app.set('view engine', 'ejs')
 
 let re = /%23/ig;
 
-app.post('/',function(req,res){
+app.post('/dirobj/',function(req,res){
     res.setHeader('Content-Type', 'application/json');
     console.log({
-	"Body":JSON.stringify(req.body),
+	"dirObj":JSON.stringify(req.body),
 	"dn":req.get("ssl_client_s_dn"),
 	"sn": req.get("ssl_client_m_serial"),
 	"verified": req.get("ssl_client_verify")});

@@ -55,7 +55,7 @@
 
       //const params = "d=.";
       let params = {d: "."};
-      fetchObj(params).then(anobj =>{ renderTable(anobj);
+      fetchObj(params,"/dirobj").then(anobj =>{ renderTable(anobj);
 				      dirobj_cache["."] = anobj
 				    });
     //      for(x of ["abort","canplay","canplaythrough","ended","emptied","error","loadeddata","loadedmetadata","loadstart","pause","play","playing","progress","ratechange","seeked","seeking","stalled","suspend","timeupdate","volumechange","waiting"])audioElement.addEventListener(x,(e) => console.log("audioElement event type: ", e.type));
@@ -206,7 +206,7 @@ window.addEventListener('popstate', function (event)
 		  lobj = dirobj_cache[path];
 		  renderTable(lobj);
 	      } else {
-		  fetchObj(params).then(anobj => {
+		  fetchObj(params,"/dirobj").then(anobj => {
 		      renderTable(anobj);
 		  })
 	      }
@@ -223,7 +223,7 @@ window.addEventListener('popstate', function (event)
 	      renderTable(lobj);
 	  } else {
 	      let params = {d: path};
-	      fetchObj(params).then(anobj => {
+	      fetchObj(params,"/dirobj").then(anobj => {
 		  renderTable(anobj);
 	      })
 	  }
