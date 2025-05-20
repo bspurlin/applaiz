@@ -8,14 +8,14 @@ th {
 border-top: 1px solid;
 border-bottom: 1px solid;
 }
-#header1 {
+#header1,.metaContent {
   border-left: 1px solid;
   border-top-left-radius: 15px;
   border-bottom-left-radius: 15px;
 
   }
 
-#header4 {
+#header4,.metaContent {
   border-right: 1px solid;
 border-bottom-right-radius: 15px;
 border-top-right-radius: 15px;
