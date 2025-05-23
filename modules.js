@@ -8,30 +8,32 @@ const genrs = JSON.parse(fs.readFileSync("Genre_s.json"));
 function searchFsObj (fsobj, rearray) {
     let score = rearray.length;
     let gobj = fsobj;
-    ff({fsobj: fsobj,fMassage: (fsobj,patth,parent)=>{fsobj.path = patth;fsobj.parent = parent;}})
-    return ff({
-	fsobj: fsobj,
-	fFile: (fsobj,robj) => {
+    let robj = [];
+
+    ff({lobj: fsobj,fMassage: (lobj,patth,parent)=>{lobj.path = patth;lobj.parent = parent;}})
+    ff({
+	lobj: fsobj,
+	fFile: (lobj) => {
 	    let n = 0;
 	    for(let i =0; i< score; i++){
 		let re = rearray[i];
-		let searchstring = fsobj.dirname;
+		let searchstring = lobj.dirname;
 		if (re.test(searchstring)) {
 		    n++;
 		    continue;
 		}
-		for (let x = 0; x <  fsobj.files.length; x++){
-		    searchstring=fsobj.files[x].filename;
-		    if (fsobj.files[x].title != undefined)
-			searchstring = searchstring + fsobj.files[x].title;
-		    if (fsobj.files[x].artist != undefined)
-			searchstring = searchstring + fsobj.files[x].artist;
-		    if (fsobj.files[x].album != undefined)
-			searchstring = searchstring + fsobj.files[x].album;
-		    if (fsobj.files[x].albumartist != undefined)
-			searchstring = searchstring + fsobj.files[x].albumartist;
-		    if (fsobj.files[x].composer != undefined)
-			searchstring = searchstring + fsobj.files[x].composer;
+		for (let x = 0; x <  lobj.files.length; x++){
+		    searchstring=lobj.files[x].filename;
+		    if (lobj.files[x].title != undefined)
+			searchstring = searchstring + lobj.files[x].title;
+		    if (lobj.files[x].artist != undefined)
+			searchstring = searchstring + lobj.files[x].artist;
+		    if (lobj.files[x].album != undefined)
+			searchstring = searchstring + lobj.files[x].album;
+		    if (lobj.files[x].albumartist != undefined)
+			searchstring = searchstring + lobj.files[x].albumartist;
+		    if (lobj.files[x].composer != undefined)
+			searchstring = searchstring + lobj.files[x].composer;
 		    if (re.test(searchstring)) {
 			n++;
 			break;
@@ -42,39 +44,41 @@ function searchFsObj (fsobj, rearray) {
 		/*			    console.log("Here ",
 					    rearray,
 					    score,
-					    fsobj.path,
-					    fsobj.directories.length,
-					    fsobj.dirname)*/
-		if (fsobj.directories.length == 0) {
-		    robj.push(fsobj);
+					    lobj.path,
+					    lobj.directories.length,
+					    lobj.dirname)*/
+		if (lobj.directories.length == 0) {
+		    robj.push(lobj);
 		}else{ //mkDirObj only works on the global fsobj
-		    let dirobj = mkDirObj(fsobj.path,gobj);
+		    let dirobj = mkDirObj(lobj.path,fsobj);
 		    robj.push(dirobj);
 		}
 	    }
-	return robj;
-	},
-	robj: []
+	}
     })
+
+    return robj
+
 }
 
 
 
 function countAttr (fsobj) {
-    return ff({
+    robj = {length: 0, title: 0, artist: 0, album: 0, albumcount: 0};
+    ff({
 	fsobj: fsobj,
-	fFile: (fsobj,robj) => {
-	    if(fsobj.files.length > 0 ) robj.albumcount++;
-	    robj.length +=  fsobj.files.length;
-	    for (let x = 0; x <  fsobj.files.length; x++){
-		if (fsobj.files[x].title != undefined) ++robj.title;
-		if (fsobj.files[x].artist != undefined) ++robj.artist;
-		if (fsobj.files[x].album != undefined) ++robj.album;
+	fFile: (lobj) => {
+	    if(lobj.files.length > 0 ) robj.albumcount++;
+	    robj.length +=  lobj.files.length;
+	    for (let x = 0; x <  lobj.files.length; x++){
+		if (lobj.files[x].title != undefined) ++robj.title;
+		if (lobj.files[x].artist != undefined) ++robj.artist;
+		if (lobj.files[x].album != undefined) ++robj.album;
 	    }
-	    return robj
-	},
-	robj: {length: 0, title: 0, artist: 0, album: 0, albumcount: 0}
-    })
+	    
+	}
+    });
+    return robj
 }
 
 function mkDirObj(pathn,obj) {
@@ -112,42 +116,54 @@ function mkDirObj(pathn,obj) {
 // ff modifes, massages or gains data from the global fsobj
 
 function ff ({
-    fsobj = {},
+    lobj = {},
     patth = ".",
     parent = "",
     fMassage = ()=>{},
     fFile = ()=>{},
-    fDir = ()=>{},
-    robj = undefined}) {
+    fDir = ()=>{}
+}) 
+{
+    if (process.env.APPLAIZ_DBG) console.error(
+        {"dirname":lobj.dirname,"path":patth}
+    );
 
-    fMassage(fsobj,patth,parent);
+
+    if (process.env.APPLAIZ_DBG) console.error(
+	{"dirname":lobj.dirname,"path":patth}
+    );
+
+    fMassage(lobj,patth,parent);
 
     // fFile could, e. g., sort the filenames case-insensitively
     // or, as in countAttr(), count file attributes
 
-    if (fsobj.files.length > 0) {
-	robj = fFile(fsobj, robj)
+    if (lobj.files.length > 0) {
+	fFile(lobj)
     }		
 
     //fDir could, e. g. add a paths object to the directory object
-    
-    for (let i =0; i < fsobj.directories.length; i++) {
-	let x = fsobj.directories[i];
+
+    for (let i =0; i < lobj.directories.length; i++) {
+	if (process.env.APPLAIZ_DBG) console.error({"directory":i});
+	let x = lobj.directories[i];
 	if(x) {
-	    fDir(fsobj,x);
+	    fDir(lobj,x);
 	    let z;
-	    if (fsobj.path=="."){  z = ""} else z = fsobj.path;
-	    robj = ff({
-		fsobj: x,
+	    if (lobj.path=="."){  z = ""} else z = lobj.path;
+
+	    ff({
+		lobj: x,
 		patth: z + "." + i,
-		parent: fsobj.path,
+		parent: lobj.path,
 		fMassage: fMassage,
 		fFile: fFile,
-		fDir: fDir,
-		robj: robj})
+		fDir: fDir
+	    })
+
 	}
     }
-    return robj;
+    return lobj;
 }
 
 

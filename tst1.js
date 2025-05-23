@@ -3,40 +3,41 @@
 fs = require("fs");
 
 function ff ({
-    robj = {}, //robj is local (parameter)
+    local_fsobj = {}, //local_fsobj is local (parameter)
     patth = ".",
     parent = "",
     fMassage = ()=>{},
     fFile = ()=>{},
-    fDir = ()=>{}
+    fDir = ()=>{},
+    robj = {}
 }) 
 {
     if (process.env.APPLAIZ_DBG) console.error(
-	{"dirname":robj.dirname,"path":patth}
+	{"dirname":local_fsobj.dirname,"path":patth}
     );
 
-    fMassage(robj,patth,parent);
+    fMassage(local_fsobj,patth,parent);
 
     // fFile could, e. g., sort the filenames case-insensitively
     // or, as in countAttr(), count file attributes
 
-    if (robj.files.length > 0) {
-	fFile(robj)
+    if (local_fsobj.files.length > 0) {
+	fFile(local_fsobj)
     }		
 
     //fDir could, e. g. add a paths object to the directory object
 
-    for (let i =0; i < robj.directories.length; i++) {
-	let x = robj.directories[i];
+    for (let i =0; i < local_fsobj.directories.length; i++) {
+	let x = local_fsobj.directories[i];
 	if(x) {
-	    fDir(robj,x);
+	    fDir(local_fsobj,x);
 	    let z;
-	    if (robj.path=="."){  z = ""} else z = robj.path;
+	    if (local_fsobj.path=="."){  z = ""} else z = local_fsobj.path;
 
 	    ff({
-		robj: x,
+		local_fsobj: x,
 		patth: z + "." + i,
-		parent: robj.path,
+		parent: local_fsobj.path,
 		fMassage: fMassage,
 		fFile: fFile,
 		fDir: fDir,
@@ -45,7 +46,7 @@ function ff ({
 	    if (process.env.APPLAIZ_DBG) console.error({"directory":i});
 	}
     }
-    return robj;
+    return [ local_fsobj, robj ];
 }
 
 if(process.argv[2])
@@ -56,7 +57,7 @@ if(process.argv[2])
 	JSON.stringify(
 	    ff(
 		{
-		    robj:JSON.parse(fs.readFileSync(process.argv[2])),
+		    local_fsobj:JSON.parse(fs.readFileSync(process.argv[2])),
 		    fMassage: (obj, patth, parent) => { //give every directory
 			obj.path = patth;     // a dot-numeric path
 			obj.parent = parent;  // and a parent so we can go back
