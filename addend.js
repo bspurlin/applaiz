@@ -32,7 +32,7 @@ if(d.length == 0){console.error("input full /-delimited path");process.exit(1)}
 
 
 let robj = ff(
-    {fsobj: fsobj,
+    {lobj: fsobj,
      fMassage: (obj)=>{
 	 let r = -1;	 
 	 if (obj.dirname == d){
