@@ -66,7 +66,7 @@ function searchFsObj (fsobj, rearray) {
 function countAttr (fsobj) {
     robj = {length: 0, title: 0, artist: 0, album: 0, albumcount: 0};
     ff({
-	fsobj: fsobj,
+	lobj: fsobj,
 	fFile: (lobj) => {
 	    if(lobj.files.length > 0 ) robj.albumcount++;
 	    robj.length +=  lobj.files.length;
