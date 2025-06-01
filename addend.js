@@ -3,9 +3,15 @@
 const fs = require('fs');
 const {ff, mkDirObj, countAttr,searchFsObj} = require("./modules.js");
 opt = require('node-getopt').create([
+    ['i', 'input=ARG',  'input fsobj', undefined],
     ['r' , ''                    , 'remove'],
     ['h' , 'help'                , 'display this help']
 ]).bindHelp().parseSystem();
+
+if(opt.options.i){
+    fsobj = JSON.parse(fs.readFileSync(opt.options.i));
+}
+else return;
 
 let d = [];
 if (opt.argv[0]) {
@@ -23,7 +29,6 @@ if (process.env.APPLAIZ_DBG) console.error({argv: opt.argv, replace: opt.options
 
 if(d.length == 0){console.error("input full /-delimited path");process.exit(1)}
 
-fsobj = JSON.parse(fs.readFileSync("fsobj.5"));
 
 
 let robj = ff(
