@@ -124,13 +124,8 @@ function ff ({
     fDir = ()=>{}
 }) 
 {
-    if (process.env.APPLAIZ_DBG) console.error(
+    if (process.env.APPLAIZ_DBG_FF) console.error(
         {"dirname":lobj.dirname,"path":patth}
-    );
-
-
-    if (process.env.APPLAIZ_DBG) console.error(
-	{"dirname":lobj.dirname,"path":patth}
     );
 
     fMassage(lobj,patth,parent);
