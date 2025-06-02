@@ -2,52 +2,7 @@
 
 fs = require("fs");
 
-function ff ({
-    local_fsobj = {}, //local_fsobj is local (parameter)
-    patth = ".",
-    parent = "",
-    fMassage = ()=>{},
-    fFile = ()=>{},
-    fDir = ()=>{},
-    robj = {}
-}) 
-{
-    if (process.env.APPLAIZ_DBG) console.error(
-	{"dirname":local_fsobj.dirname,"path":patth}
-    );
-
-    fMassage(local_fsobj,patth,parent);
-
-    // fFile could, e. g., sort the filenames case-insensitively
-    // or, as in countAttr(), count file attributes
-
-    if (local_fsobj.files.length > 0) {
-	fFile(local_fsobj)
-    }		
-
-    //fDir could, e. g. add a paths object to the directory object
-
-    for (let i =0; i < local_fsobj.directories.length; i++) {
-	let x = local_fsobj.directories[i];
-	if(x) {
-	    fDir(local_fsobj,x);
-	    let z;
-	    if (local_fsobj.path=="."){  z = ""} else z = local_fsobj.path;
-
-	    ff({
-		local_fsobj: x,
-		patth: z + "." + i,
-		parent: local_fsobj.path,
-		fMassage: fMassage,
-		fFile: fFile,
-		fDir: fDir,
-	    })
-
-	    if (process.env.APPLAIZ_DBG) console.error({"directory":i});
-	}
-    }
-    return [ local_fsobj, robj ];
-}
+const {countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File } = require("./modules.js");
 
 if(process.argv[2])
 {
@@ -57,7 +12,7 @@ if(process.argv[2])
 	JSON.stringify(
 	    ff(
 		{
-		    local_fsobj:JSON.parse(fs.readFileSync(process.argv[2])),
+		    lobj:JSON.parse(fs.readFileSync(process.argv[2])),
 		    fMassage: (obj, patth, parent) => { //give every directory
 			obj.path = patth;     // a dot-numeric path
 			obj.parent = parent;  // and a parent so we can go back
