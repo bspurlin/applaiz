@@ -113,7 +113,7 @@ function mkDirObj(pathn,obj) {
 }
 
 
-// ff modifes, massages or gains data from the global fsobj
+// ff modifies, massages or gains data from the fsobj
 
 function ff ({
     lobj = {},
@@ -140,7 +140,7 @@ function ff ({
     //fDir could, e. g. add a paths object to the directory object
 
     for (let i =0; i < lobj.directories.length; i++) {
-	if (process.env.APPLAIZ_DBG) console.error({"directory":i});
+	if (process.env.APPLAIZ_DBG_FF) console.error({"directory":i});
 	let x = lobj.directories[i];
 	if(x) {
 	    fDir(lobj,x);
