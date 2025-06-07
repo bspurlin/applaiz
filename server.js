@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
 const cors = require('cors');
+var index = fs.readFileSync("./index.html")
 app.use(cors({
     origin: '*'
 }));
@@ -33,18 +34,21 @@ fsobj = ff(
 app.use(express.static('public'))
 app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: true }))
-app.set('view engine', 'ejs')
-
+app.set('view engine', 'ejs');
+const { render } = require("./node_modules/ejs/ejs.min.js");
+const { mkTempl } = require("./template.js");
 let re = /%23/ig;
 
-app.post('/dirobj/',(req,res)=>{
+app.get('/dirobj/:patth?',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
     console.log({
-	"dirObj":JSON.stringify(req.body),
+	"dirObj":req.params.patth,
 	"dn":req.get("ssl_client_s_dn"),
 	"sn": req.get("ssl_client_m_serial"),
 	"verified": req.get("ssl_client_verify")});
-    res.end(JSON.stringify(mkDirObj(req.body.d,fsobj)));
+        res.writeHead(200, {'Content-Type': 'text/html'});
+    res.write(render(mkTempl(0),{obj: mkDirObj(req.params.patth?req.params.patth:".",fsobj)}));
+    res.end()
 });
 
 app.post('/search/',(req,res)=>{
@@ -53,7 +57,7 @@ app.post('/search/',(req,res)=>{
     res.end(JSON.stringify(searchDirObjs(req.body.s,fsobj,req.body.p)));
 });
 
-app.get('/',(req,res)=>{
+app.get('/:patth?',(req,res)=>{
     console.log(
 	"Get ",
 	req.url,
@@ -65,11 +69,9 @@ app.get('/',(req,res)=>{
 	"X-Forwarded-For = ",
 	req.get('X-Forwarded-For')
     );
-    const options = {
-        root: path.join(__dirname)
-    };
-    const filename = "index.html"; 
-    res.sendFile(filename,options);
+
+    res.render("index.ejs",{"obj": {"patth":req.params.patth?req.params.patth:"."}});
+
 });
 
 app.get('/node_modules/ejs/ejs.min.js', (req, res)=>{  

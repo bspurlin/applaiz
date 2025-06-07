@@ -24,7 +24,7 @@
   //Globals
   
   let audioElement;
-  let globj;  
+  let globj, g_dirname;  
   let playlist = [];
   let playlists = {};
   let searchresults = [];
@@ -53,8 +53,8 @@
 	  setMediaMeta(event.target);
       } );
 
-      //const params = "d=.";
-      let params = {d: "."};
+      const  startparams = ".";
+      let params = {d: startparams};
       fetchObj(params,"/dirobj").then(anobj =>{ renderTable(anobj);
 				      dirobj_cache["."] = anobj
 				    });
@@ -74,12 +74,12 @@
 	  });e.play();
 	  navigator.mediaSession.setActionHandler("nexttrack", () => {
 	      let el = document.getElementById(e.nextid + 1000);
-	      playAndReset(playlists[globj.dirname][e.nextid]);
+	      playAndReset(playlists[g_dirname][e.nextid]);
 	      Highlight(el);
 	  });
 	  navigator.mediaSession.setActionHandler("previoustrack", () => {
 	      let el = document.getElementById(e.previd + 1000)
-	      playAndReset(playlists[globj.dirname][e.previd]);
+	      playAndReset(playlists[g_dirname][e.previd]);
 	      Highlight(el);
           });
 	  navigator.mediaSession.setActionHandler("pause", () => {
@@ -92,7 +92,7 @@
       
   }
   
-  function playAndReset (e, dirname = globj.dirname) {
+  function playAndReset (e, dirname = g_dirname) {
       let headerrow = document.querySelector("tr.indexhead");
       let playid = e.id;
       let re = /#/ig;
@@ -110,7 +110,7 @@
       if (e.album.length > document.getElementById("headerdirname").innerHTML.length) {
 	  document.getElementById("headerdirname").innerHTML = e.album;
       } else {
-	  let aa=globj.dirname.split("/");
+	  let aa=g_dirname.split("/");
 	  document.getElementById("headerdirname").innerHTML = aa[aa.length - 1]
       }
       audioElement.play();
@@ -172,17 +172,21 @@ window.addEventListener('popstate', function (event)
       let anobj = {};
 	const options = {
 	    mode: 'cors',
-	    method: 'POST',
+	    method: 'GET',
 	    headers: {
-		"Content-Type": "application/json",
+		"Content-Type": "text/html"
+		//"Content-Type": "application/json",
 		//'Content-Type':'application/x-www-form-urlencoded'
 	    },
 	    //body: params
-	     body: JSON.stringify(params)
+	    // body: JSON.stringify(params)
+	    //no body in GET method
 	};
-	
-    let response = await  fetch( url, options );
-      anobj = JSON.parse(await response.text());
+      url=url + "/" + params.d
+      console.log({"Here": {"params":params,"url": url}});
+      let response = await  fetch( url );
+      //      anobj = JSON.parse(await response.text());
+      anobj = await response.text();
       globj = anobj;
     return anobj;
 	
@@ -192,7 +196,8 @@ window.addEventListener('popstate', function (event)
 <script>
   
   function renderTable(lobj){
-      let html = ejs.render(mkTempl(0), {obj: lobj});
+      let html = lobj;
+      //let html = ejs.render(mkTempl(0), {obj: lobj});
       document.querySelector("#root").innerHTML = html;
       document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
       let direlements = document.getElementsByClassName("dirselector");
@@ -253,9 +258,11 @@ window.addEventListener('popstate', function (event)
 
       let soundfileelements =  document.getElementsByClassName("soundfile");
       let dirplaylist = [];
+      let l_dirname = document.getElementById("filetable").getAttribute("dirname");
+      g_dirname = l_dirname;
       for (let i = 0; i < soundfileelements.length; i++) {
 	  let e = soundfileelements[i];
-	  let serverpath = lobj.dirname + "/" + e.getAttribute("filename");
+	  let serverpath = l_dirname + "/" + e.getAttribute("filename");
 	  let playlistEntry = {};
 	  playlistEntry.src = serverpath;
 	  e.setAttribute("play",e.getAttribute("id"));
@@ -270,13 +277,13 @@ window.addEventListener('popstate', function (event)
 	  dirplaylist[i] = playlistEntry;
 	  e.addEventListener("click",(event) => {
               let playid = event.target.getAttribute('play');
-	      playlist = playlists[lobj.dirname];
-              playAndReset(playlist[playid],lobj.dirname);
+	      playlist = playlists[l_dirname];
+              playAndReset(playlist[playid],l_dirname);
 	      let el = document.getElementById(audioElement.audioid + 1000);
-	      Highlight(el, lobj.dirname);
+	      Highlight(el, l_dirname);
 	  });
       }
-      playlists[lobj.dirname] = dirplaylist;
+      playlists[l_dirname] = dirplaylist;
       if(searchresults.length > 0) {
 	  let el = document.getElementById("sr");
 	  el.setAttribute("style", "display: inline;" );
@@ -293,8 +300,8 @@ window.addEventListener('popstate', function (event)
 
   }
 
-  function Highlight (el, dirname = globj.dirname) {
-      if (dirname == globj.dirname) {
+  function Highlight (el, dirname = g_dirname) {
+      if (dirname == g_dirname) {
 	  let rows =  document.getElementsByClassName("indexcolname");
 	  for (let i = 0; i < rows.length; i++)
 	      rows[i].setAttribute("bgcolor", i % 2 ?"#F0F0F0":"#FFFFFF");
