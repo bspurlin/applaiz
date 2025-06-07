@@ -53,25 +53,6 @@ app.post('/search/',(req,res)=>{
     res.end(JSON.stringify(searchDirObjs(req.body.s,fsobj,req.body.p)));
 });
 
-app.get('/',(req,res)=>{
-    console.log(
-	"Get ",
-	req.url,
-	req.ip,
-	new Date(),
-	req.get('user-agent'),
-	"X-Forwarded-Host = ",
-	req.get('X-Forwarded-Host'),
-	"X-Forwarded-For = ",
-	req.get('X-Forwarded-For')
-    );
-    const options = {
-        root: path.join(__dirname)
-    };
-    const filename = "index.html"; 
-    res.sendFile(filename,options);
-});
-
 app.get('/node_modules/ejs/ejs.min.js', (req, res)=>{  
    res.sendFile( __dirname + "/" + "/node_modules/ejs/ejs.min.js" );  
 }) 
@@ -92,8 +73,28 @@ app.get('/Shared/*', (req, res)=>{
 })
 
 app.get('/*.js', (req, res)=>{
+    console.log({"js route": req.url});
     res.sendFile( __dirname + "/" + req.path)
 })
+
+
+// the following route with its optional parameter has
+// follow routes with which it might interfere.
+
+app.get('/:patth?',(req,res)=>{
+    console.log(
+	{"Get /": 
+	 {"URL":req.url,
+	  "ip":req.ip,
+	  "Date":new Date(),
+	  "user-agent":req.get('user-agent'),
+	  "X-Forwarded-Host = ": req.get('X-Forwarded-Host'),
+	  "X-Forwarded-For = ": req.get('X-Forwarded-For')}
+	}
+    );
+
+    res.render("index",{"obj": {"patth":req.params.patth?req.params.patth:"."}});
+});
 
 app.listen({port: process.env.NODE_PORT, host: process.env.NODE_HOST}, ()=>{
     console.log('App listening on ' + process.env.NODE_HOST + ':' + process.env.NODE_PORT)
