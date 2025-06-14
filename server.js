@@ -75,6 +75,11 @@ app.get('/Shared/*', (req, res)=>{
     res.sendFile( __dirname + "/" + decoded)
 })
 
+app.get('/applaiz/:js', (req, res)=>{
+    console.log({"js applaiz  route": req.params.js, "req-params-js": req.path});
+    res.sendFile( __dirname + "/" + req.params.js)
+})
+
 app.get('/*.js', (req, res)=>{
     console.log({"js route": req.url});
     res.sendFile( __dirname + "/" + req.path)
