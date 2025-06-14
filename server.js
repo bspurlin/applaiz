@@ -78,8 +78,8 @@ app.get('/*.js', (req, res)=>{
 })
 
 
-// the following route with its optional parameter has
-// follow routes with which it might interfere.
+// The following route with its optional parameter must
+// follow other GET routes which might interfere with it.
 
 app.get('/:patth?',(req,res)=>{
     console.log(
