@@ -9,6 +9,7 @@ app.use(cors({
 }));
 
 const {ff, mkDirObj, searchDirObjs } = require("./modules.js");
+let permalinks = {};
 
 // massage the filesystem-object
 fsobj = ff(
@@ -16,7 +17,8 @@ fsobj = ff(
 	lobj: JSON.parse(fs.readFileSync("./fsobj")),
 	fMassage: (obj, patth, parent) => { //give every directory
 	    obj.path = patth;     // a dot-numeric path
-	    obj.parent = parent   // and a parent so we can go back
+	    obj.parent = parent;  // and a parent so we can go back
+	    permalinks[obj.perma] = obj.path 
 	},
 	fFile: (obj) => {             // Sort the list of files case-
 	    obj.files.sort((a,b) => { //insensitively		       
@@ -44,13 +46,14 @@ app.post('/dirobj/',(req,res)=>{
 	"dn":req.get("ssl_client_s_dn"),
 	"sn": req.get("ssl_client_m_serial"),
 	"verified": req.get("ssl_client_verify")});
-    res.end(JSON.stringify(mkDirObj(req.body.d,fsobj)));
+    res.end(JSON.stringify(mkDirObj(permalinks[req.body.d],fsobj)));
 });
 
 app.post('/search/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
-    console.log("Search: ",JSON.stringify(req.body));
-    res.end(JSON.stringify(searchDirObjs(req.body.s,fsobj,req.body.p)));
+    let found = searchDirObjs(req.body.s,fsobj,req.body.p);
+    console.log({"Search: ": JSON.stringify(req.body),"found":found.directories.length});
+    res.end(JSON.stringify(found));
 });
 
 app.get('/node_modules/ejs/ejs.min.js', (req, res)=>{  
@@ -93,7 +96,7 @@ app.get('/:patth?',(req,res)=>{
 	}
     );
 
-    res.render("index",{"obj": {"patth":req.params.patth?req.params.patth:"."}});
+    res.render("index",{"obj": {"patth":req.params.patth?req.params.patth:"qqqqqqqq"}});
 });
 
 app.listen({port: process.env.NODE_PORT, host: process.env.NODE_HOST}, ()=>{

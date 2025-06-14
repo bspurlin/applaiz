@@ -89,6 +89,7 @@ function mkDirObj(pathn,obj) {
         aa[i] = {
 	    "name":path.basename(obj.directories[i].dirname),
 	    "path": obj.directories[i].path,
+	    "perma": obj.directories[i].perma,
 	    "ndirs": obj.directories[i].directories.length
 	};
     }
@@ -106,6 +107,7 @@ function mkDirObj(pathn,obj) {
 	'files': obj.files,
 	'parent': obj.parent,
 	'path': obj.path,
+	'perma': obj.perma,
 	'directories': aa,
 	'params': {"d": obj.parent },
 	'serverpath': "/"
@@ -177,7 +179,7 @@ function searchDirObjs(searchterms, fsobj,parentpath) {//returns a dirObj
     robj.directories = [];
     robj.params = {"s": searchterms ,"p": parentpath };
     robj.serverpath = "/search";
-    for (let x in output) robj.directories.push({"name": path.basename(output[x].dirname),"path": output[x].path});
+    for (let x in output) robj.directories.push({"name": path.basename(output[x].dirname),"path": output[x].path, "perma": output[x].perma});
     return robj;
 }
 

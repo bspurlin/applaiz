@@ -38,8 +38,6 @@ let templates = [`<table>
        </th>
     </tr>
 
-
-
    <% for (let i = 0; i < obj.directories.length; i++) {%>
 
 
@@ -47,7 +45,7 @@ let templates = [`<table>
          <tr class="bigrow"> <% } else  {   %> <tr> <% } %>
 
      <td class="indexcolicon">
-        <img  id=dirname<%= i %> path=<%= obj.directories[i].path%> class="dirselector" src="/icons/folder.gif">
+        <img  id=dirname<%= i %> path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %> class="dirselector" src="/icons/folder.gif">
      </td>
      <td>
        <%= obj.directories[i].name%>

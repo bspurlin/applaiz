@@ -128,8 +128,9 @@ function setMediaMeta (e) {
       let direlements = document.getElementsByClassName("dirselector");
       for (e of direlements){
 	  e.addEventListener("click",(event) => {
+	      let perma = event.target.getAttribute("perma")
 	      let path = event.target.getAttribute("path")
-	      let params = {d: path};
+	      let params = {d: perma};
 	      if (!dirobj_cache[lobj.path])  dirobj_cache[lobj.path] = lobj;
 	      dirobj_cache[lobj.path].scrollpos =  event.target.id;
 	      if(dirobj_cache[path]) {
@@ -148,11 +149,12 @@ function setMediaMeta (e) {
 //	  if (!dirobj_cache[obj.path])  dirobj_cache[obj.path] = obj;
 //	  dirobj_cache[obj.path].scrollpos =  event.target.id;
 	  let path = event.target.getAttribute("path")
+	  let perma = event.target.getAttribute("perma")
 	  if(dirobj_cache[path]) {
 	      lobj = dirobj_cache[path];
 	      renderTable(lobj);
 	  } else {
-	      let params = {d: path};
+	      let params = {d: perma};
 	      fetchObj(params,"/dirobj").then(anobj => {
 		  renderTable(anobj);
 	      })
