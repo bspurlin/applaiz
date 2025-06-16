@@ -75,14 +75,15 @@ app.get('/Shared/*', (req, res)=>{
     res.sendFile( __dirname + "/" + decoded)
 })
 
-app.get('/applaiz/:js', (req, res)=>{
-    console.log({"js applaiz  route": req.params.js, "req-params-js": req.path});
-    res.sendFile( __dirname + "/" + req.params.js)
-})
-
 app.get('/*.js', (req, res)=>{
     console.log({"js route": req.url});
-    res.sendFile( __dirname + "/" + req.path)
+    res.sendFile( __dirname + "/" + req.path,{},(err) => {
+	if (err) {
+	    res.status(403).send("<b><h3>Not Found</h3></b><p>404 The requested URL was not found on this server.")
+	} else {
+	    console.log("Sent ", req.url)
+	}
+    })
 })
 
 
