@@ -75,7 +75,7 @@ app.get('/Shared/*', (req, res)=>{
     res.sendFile( __dirname + "/" + decoded)
 })
 
-app.get('/*.js', (req, res)=>{
+app.get('/js/*.js', (req, res)=>{
     console.log({"js route": req.url});
     res.sendFile( __dirname + "/" + req.path,{},(err) => {
 	if (err) {
@@ -86,11 +86,7 @@ app.get('/*.js', (req, res)=>{
     })
 })
 
-
-// The following route with its optional parameter must
-// follow other GET routes which might interfere with it.
-
-app.get('/:patth?',(req,res)=>{
+app.get('/:patth',(req,res)=>{
     console.log(
 	{"Get /": 
 	 {"URL":req.url,
@@ -98,11 +94,12 @@ app.get('/:patth?',(req,res)=>{
 	  "Date":new Date(),
 	  "user-agent":req.get('user-agent'),
 	  "X-Forwarded-Host = ": req.get('X-Forwarded-Host'),
-	  "X-Forwarded-For = ": req.get('X-Forwarded-For')}
+	  "X-Forwarded-For = ": req.get('X-Forwarded-For'),
+	  "patth": req.params.patth}
 	}
     );
 
-    res.render("index",{"obj": {"patth":req.params.patth?req.params.patth:"qqqqqqqq"}});
+    res.render("index",{"obj": {"patth":req.params.patth}});
 });
 
 app.listen({port: process.env.NODE_PORT, host: process.env.NODE_HOST}, ()=>{
