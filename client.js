@@ -125,6 +125,7 @@ function setMediaMeta (e) {
       let html = ejs.render(mkTempl(0), {obj: lobj});
       document.querySelector("#root").innerHTML = html;
       document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
+      document.title = lobj.dirname.replace(/.+\//,"")
       let direlements = document.getElementsByClassName("dirselector");
       for (e of direlements){
 	  e.addEventListener("click",(event) => {
@@ -146,16 +147,14 @@ function setMediaMeta (e) {
 
       let backelem = document.getElementById("parent-a");
       backelem.addEventListener("click",(event) => {
-//	  if (!dirobj_cache[obj.path])  dirobj_cache[obj.path] = obj;
-//	  dirobj_cache[obj.path].scrollpos =  event.target.id;
 	  let path = event.target.getAttribute("path")
 	  let perma = event.target.getAttribute("perma")
 	  if(dirobj_cache[path]) {
 	      lobj = dirobj_cache[path];
 	      renderTable(lobj);
 	  } else {
-	      let params = {d: perma};
-	      fetchObj(params,"/dirobj").then(anobj => {
+	      let params = {d: path};
+	      fetchObj(params,"/dirobj_nocache").then(anobj => {
 		  renderTable(anobj);
 	      })
 	  }

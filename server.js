@@ -49,6 +49,18 @@ app.post('/dirobj/',(req,res)=>{
     res.end(JSON.stringify(mkDirObj(permalinks[req.body.d],fsobj)));
 });
 
+app.post('/dirobj_nocache/',(req,res)=>{
+    res.setHeader('Content-Type', 'application/json');
+    console.log({
+	"dirobj_nocache":JSON.stringify(req.body),
+	"dn":req.get("ssl_client_s_dn"),
+	"sn": req.get("ssl_client_m_serial"),
+	"verified": req.get("ssl_client_verify")});
+    res.end(JSON.stringify(mkDirObj(req.body.d,fsobj)));
+});
+
+
+
 app.post('/search/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
     let found = searchDirObjs(req.body.s,fsobj,req.body.p);
@@ -68,7 +80,7 @@ app.get('/css/*', (req, res)=>{
     res.sendFile( __dirname + "/" + req.path)
 })
 
-app.get('/Shared/*', (req, res)=>{
+app.get('/Applaiz/*', (req, res)=>{
     let decoded = decodeURI(req.path);
     decoded = decoded.replace(re,"#");
     console.log("Shared: ",decoded,  req.ip, Date());
