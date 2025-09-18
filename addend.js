@@ -35,7 +35,7 @@ let robj = ff(
     {lobj: fsobj,
      fMassage: (obj)=>{
 	 let r = -1;	 
-	 if (obj.dirname == d){
+	 if (obj.dirname == d){ console.error(d, "==", obj.dirname);
 	     if (opt.options.r){
 		 r = obj.directories.findIndex((x)=>x.dirname == addendobj.dirname);
 		 if (r >= 0){
@@ -46,6 +46,17 @@ let robj = ff(
 			     "New dirname":addendobj.dirname
 			 }
 		     );
+		     if (obj.directories[r].perma) {
+			 addendobj.perma = obj.directories[r].perma
+		     } else {
+			 console.error(
+			     {
+				 "Replace ":r,
+				 "no obj.directories[r].perma":  obj.directories[r].dirname
+			     }
+			 );
+			 process.exit(1)
+		     }
 		     obj.directories.splice(r,1,addendobj)
 		 }
 	     }else {
