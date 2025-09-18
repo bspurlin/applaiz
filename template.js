@@ -74,7 +74,7 @@ let templates = [`<table>
       name = filename.replace(re,"");
       if(obj.files[i].title) {
 		title = obj.files[i].title.replace(re,"");	       
-		if (title.length >= name.length ) name = title
+		name = title
 	  };
       if(obj.files[i].album) {
          album = obj.files[i].album; } else {
