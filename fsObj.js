@@ -53,6 +53,7 @@ function fst (dirname,space) {
 	    }
 	}
     } catch (error) {console.error(dirname + " " + error)}
+    fsr.perma = "applaiz";
     return fsr
 } 
 
