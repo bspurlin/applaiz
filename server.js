@@ -41,12 +41,16 @@ let re = /%23/ig;
 
 app.post('/dirobj/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
+    let d = permalinks[req.body.d];
+    let retval = mkDirObj(d,fsobj);
     console.log({
 	"dirObj":JSON.stringify(req.body),
+	"dir":d,
+	"dirname":retval.dirname,
 	"dn":req.get("ssl_client_s_dn"),
 	"sn": req.get("ssl_client_m_serial"),
 	"verified": req.get("ssl_client_verify")});
-    res.end(JSON.stringify(mkDirObj(permalinks[req.body.d],fsobj)));
+    res.end(JSON.stringify(retval));
 });
 
 app.post('/dirobj_nocache/',(req,res)=>{
