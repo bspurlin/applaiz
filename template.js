@@ -39,7 +39,12 @@ let templates = [`<table>
        </th>
     </tr>
 
-   <% for (let i = 0; i < obj.directories.length; i++) {%>
+   <% for (let i = 0; i < obj.directories.length; i++) {
+
+let newartist =  "";
+if (obj.directories[i].newartist) newartist = obj.directories[i].newartist + " ";
+
+%>
 
 
 <%    if(obj.directories[i].ndirs > 18) { %>
@@ -49,7 +54,7 @@ let templates = [`<table>
         <img  id=dirname<%= i %> path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %> class="dirselector" src="/icons/folder.gif">
      </td>
      <td>
-       <%= obj.directories[i].name%>
+       <%= newartist + obj.directories[i].name %>
      </td>
      <td>
      </td>

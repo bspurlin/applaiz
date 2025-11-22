@@ -90,6 +90,7 @@ function mkDirObj(pathn,obj) {
 	    "name":path.basename(obj.directories[i].dirname),
 	    "path": obj.directories[i].path,
 	    "perma": obj.directories[i].perma,
+	    "newartist":  obj.directories[i].newartist,
 	    "ndirs": obj.directories[i].directories.length
 	};
     }

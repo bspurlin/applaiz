@@ -17,6 +17,13 @@ if (opt.options.n && opt.options.f){
 }
 const {countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File } = require("./modules.js");
 
+var outobj = {
+    "directories": [],
+    "files": [],
+    "dirname": "./Applaiz",
+    "perma": "applaiz"
+}
+
 
 ff(
     {
@@ -25,19 +32,29 @@ ff(
 	// fDir() - get the stats
 	fDir:(x,y)=>{
 	    if(fs.existsSync(y.dirname)){
+		let artist = undefined;
+		if (y.files &&  y?.files[0]?.artist ) {artist = y.files[0].artist} else {artist = x.dirname.replace(/.+\//,"")};
+		y.newartist = artist;
 		ago = 	(Date.now() - fs.lstatSync(y.dirname).birthtimeMs)/86400000
-		if ( ago < opt.options.n){
+		ago_parent = 	(Date.now() - fs.lstatSync(x.dirname).birthtimeMs)/86400000
+		if ( ago < opt.options.n && ago_parent >= ago){
 		    if(process.env.APPLAIZ_DBG)
 			console.error(
 			    {"fDir-x":x.dirname,
 			     "fDir-y":y.dirname,
-			     "ago":ago
+			     "ago":ago,
+			     "ago_parent": ago_parent,
+			     "newartist": y.newartist
 			    }
 			);
-		    console.log(JSON.stringify(y))
+		    
+		    outobj.directories.push(y)
 		}
 	    }
 	}
     }
     
 )
+
+
+console.log(JSON.stringify(outobj,null,1))
