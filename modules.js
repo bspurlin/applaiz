@@ -124,7 +124,8 @@ function ff ({
     parent = "",
     fMassage = ()=>{},
     fFile = ()=>{},
-    fDir = ()=>{}
+    fDir = ()=>{},
+    fRet = ()=>{}
 }) 
 {
     if (process.env.APPLAIZ_DBG_FF) console.error(
@@ -150,15 +151,19 @@ function ff ({
 	    let z;
 	    if (lobj.path=="."){  z = ""} else z = lobj.path;
 
-	    ff({
+	    fRet(
+		ff({
 		lobj: x,
 		patth: z + "." + i,
 		parent: lobj.path,
 		fMassage: fMassage,
 		fFile: fFile,
-		fDir: fDir
-	    })
-
+		fDir: fDir,
+		fRet: fRet
+		}),
+		i,
+		lobj.directories.length
+	   )
 	}
     }
     return lobj;
