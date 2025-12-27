@@ -2,8 +2,9 @@ function mkTempl(i) {
     return templates[i].replace(/(\r\n|\n|\r)/gm, "")
 }
 
-let templates = [`
-<table>
+let templates = [`<table>
+
+
 
   <tbody>
     <tr class="indexhead">
@@ -64,7 +65,7 @@ if (obj.directories[i].newartist) newartist = obj.directories[i].newartist + " "
    <%}%>
 </table>
 <%# Separate tables for dirs and files; Dir table has 4 columns, files 2 %>
-<table id="filetable" dirname="<%= obj.dirname %>">
+<table>
 
   <%
   let re = /.(m4a|mp3|wav|flac)$/ig;

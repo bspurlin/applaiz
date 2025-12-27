@@ -4,7 +4,6 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const app = express();
 const cors = require('cors');
-var index = fs.readFileSync("./index.html")
 app.use(cors({
     origin: '*'
 }));
@@ -36,12 +35,11 @@ fsobj = ff(
 app.use(express.static('public'))
 app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: true }))
-app.set('view engine', 'ejs');
-const { render } = require("./node_modules/ejs/ejs.min.js");
-const { mkTempl } = require("./template.js");
+app.set('view engine', 'ejs')
+
 let re = /%23/ig;
 
-app.get('/dirobj/:patth?',(req,res)=>{
+app.post('/dirobj/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
     let d = permalinks[req.body.d];
     let retval = mkDirObj(d,fsobj);
@@ -62,9 +60,7 @@ app.post('/dirobj_nocache/',(req,res)=>{
 	"dn":req.get("ssl_client_s_dn"),
 	"sn": req.get("ssl_client_m_serial"),
 	"verified": req.get("ssl_client_verify")});
-        res.writeHead(200, {'Content-Type': 'text/html'});
-    res.write(render(mkTempl(0),{obj: mkDirObj(req.params.patth?req.params.patth:".",fsobj)}));
-    res.end()
+    res.end(JSON.stringify(mkDirObj(req.body.d,fsobj)));
 });
 
 

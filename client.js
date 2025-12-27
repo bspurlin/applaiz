@@ -1,3 +1,4 @@
+
   // The search results button will cycle
   // through the searches stored in the session
   
@@ -9,6 +10,7 @@
   
   
 
+
 function setMediaMeta (e) {
       if ("mediaSession" in navigator) {console.log("mediaSession: ",playlist[e.audioid].title);
 	  navigator.mediaSession.metadata = new MediaMetadata({
@@ -19,12 +21,12 @@ function setMediaMeta (e) {
 	  });e.play();
 	  navigator.mediaSession.setActionHandler("nexttrack", () => {
 	      let el = document.getElementById(e.nextid + 1000);
-	      playAndReset(playlists[g_dirname][e.nextid]);
+	      playAndReset(playlists[globj.dirname][e.nextid]);
 	      Highlight(el);
 	  });
 	  navigator.mediaSession.setActionHandler("previoustrack", () => {
 	      let el = document.getElementById(e.previd + 1000)
-	      playAndReset(playlists[g_dirname][e.previd]);
+	      playAndReset(playlists[globj.dirname][e.previd]);
 	      Highlight(el);
           });
 	  navigator.mediaSession.setActionHandler("pause", () => {
@@ -37,7 +39,7 @@ function setMediaMeta (e) {
       
   }
   
-  function playAndReset (e, dirname = g_dirname) {
+  function playAndReset (e, dirname = globj.dirname) {
       let headerrow = document.querySelector("tr.indexhead");
       let playid = e.id;
       let re = /#/ig;
@@ -55,7 +57,7 @@ function setMediaMeta (e) {
       if (e.album.length > document.getElementById("headerdirname").innerHTML.length) {
 	  document.getElementById("headerdirname").innerHTML = e.album;
       } else {
-	  let aa=g_dirname.split("/");
+	  let aa=globj.dirname.split("/");
 	  document.getElementById("headerdirname").innerHTML = aa[aa.length - 1]
       }
       audioElement.play();
@@ -103,29 +105,24 @@ function setMediaMeta (e) {
       let anobj = {};
 	const options = {
 	    mode: 'cors',
-	    method: 'GET',
+	    method: 'POST',
 	    headers: {
-		"Content-Type": "text/html"
-		//"Content-Type": "application/json",
+		"Content-Type": "application/json",
 		//'Content-Type':'application/x-www-form-urlencoded'
 	    },
 	    //body: params
-	    // body: JSON.stringify(params)
-	    //no body in GET method
+	     body: JSON.stringify(params)
 	};
-      url=url + "/" + params.d
-      console.log({"Here": {"params":params,"url": url}});
-      let response = await  fetch( url );
-      //      anobj = JSON.parse(await response.text());
-      anobj = await response.text();
+	
+    let response = await  fetch( url, options );
+      anobj = JSON.parse(await response.text());
       globj = anobj;
     return anobj;
 	
   }
   
   function renderTable(lobj){
-      let html = lobj;
-      //let html = ejs.render(mkTempl(0), {obj: lobj});
+      let html = ejs.render(mkTempl(0), {obj: lobj});
       document.querySelector("#root").innerHTML = html;
       document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
       document.title = lobj.dirname.replace(/.+\//,"")
@@ -187,11 +184,9 @@ function setMediaMeta (e) {
 
       let soundfileelements =  document.getElementsByClassName("soundfile");
       let dirplaylist = [];
-      let l_dirname = document.getElementById("filetable").getAttribute("dirname");
-      g_dirname = l_dirname;
       for (let i = 0; i < soundfileelements.length; i++) {
 	  let e = soundfileelements[i];
-	  let serverpath = l_dirname + "/" + e.getAttribute("filename");
+	  let serverpath = lobj.dirname + "/" + e.getAttribute("filename");
 	  let playlistEntry = {};
 	  playlistEntry.src = serverpath;
 	  e.setAttribute("play",e.getAttribute("id"));
@@ -206,13 +201,13 @@ function setMediaMeta (e) {
 	  dirplaylist[i] = playlistEntry;
 	  e.addEventListener("click",(event) => {
               let playid = event.target.getAttribute('play');
-	      playlist = playlists[l_dirname];
-              playAndReset(playlist[playid],l_dirname);
+	      playlist = playlists[lobj.dirname];
+              playAndReset(playlist[playid],lobj.dirname);
 	      let el = document.getElementById(audioElement.audioid + 1000);
-	      Highlight(el, l_dirname);
+	      Highlight(el, lobj.dirname);
 	  });
       }
-      playlists[l_dirname] = dirplaylist;
+      playlists[lobj.dirname] = dirplaylist;
       if(searchresults.length > 0) {
 	  let el = document.getElementById("sr");
 	  el.setAttribute("style", "display: inline;" );
@@ -229,8 +224,8 @@ function setMediaMeta (e) {
 
   }
 
-  function Highlight (el, dirname = g_dirname) {
-      if (dirname == g_dirname) {
+  function Highlight (el, dirname = globj.dirname) {
+      if (dirname == globj.dirname) {
 	  let rows =  document.getElementsByClassName("indexcolname");
 	  for (let i = 0; i < rows.length; i++)
 	      rows[i].setAttribute("bgcolor", i % 2 ?"#F0F0F0":"#FFFFFF");
