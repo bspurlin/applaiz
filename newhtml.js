@@ -53,22 +53,28 @@ ff( //begin L4
 				    // than n days.
 				    if(fs.existsSync(y.dirname)){
 					let artist = undefined;
+					let stat1 = fs.lstatSync(y.dirname);
+					let stat_parent = fs.lstatSync(x.dirname);
 					if (y.files &&  y?.files[0]?.artist ) {artist = y.files[0].artist} else {artist = x.dirname.replace(/.+\//,"")};
 					y.newartist = artist;
-					ago = 	(Date.now() - fs.lstatSync(y.dirname).birthtimeMs)/86400000
-					ago_parent = 	(Date.now() - fs.lstatSync(x.dirname).birthtimeMs)/86400000
-					if ( ago < opt.options.n && ago_parent >= ago){
+					datenow = Date.now();
+					
+					ago = 	stat1.mtimeMs < stat1.birthtimeMs?
+					    (datenow - stat1.mtimeMs)/86400000 : (datenow - stat1.birthtimeMs)/86400000 ;
+
+					if ( ago < opt.options.n ){
 					    if(process.env.APPLAIZ_DBG)
 						console.error(
 						    {"fDir-x":x.dirname,
 						     "fDir-y":y.dirname,
 						     "ago":ago,
-						     "ago_parent": ago_parent,
+						     "this mtime < this birthtime": stat1.mtimeMs < stat1.birthtimeMs,
+						     "parent mtime < parent birthtime": stat_parent.mtimeMs < stat_parent.birthtimeMs,
 						     "newartist": y.newartist
 						    }
 						);
 					    x.isnew = 1;
-					    y.isnew = 1;
+					    y.isnew = 1; // If a directory is new, its parent is also new
 					    outobj.directories.push(y)
 					} else {
 					    y.isnew = 0;
