@@ -5,12 +5,16 @@ const NodeID3 = require('node-id3');
 const re = /(mp3|m4a|flac|wav$)/i;
 const regexm4a = new RegExp('\.m4a$','i')
 const regextherest = new RegExp('(\.mp3$|\.wav$|\.flac$)','i')
-
+const crypto = require("node:crypto");
 
 const {m4aFile, mp3File } = require("./modules.js");
 
 // option "-s" to follow symbolic links
-opt = require('node-getopt').create([['s' , '', 'short option.']]).parseSystem();
+// option "-p" to create permalinks, i. e., permalinks don't exist when scanning a new directory
+opt = require('node-getopt').create([
+	['s' , '', 'follow symbolic links'],
+	['p', '', 'create permalink']
+    ]).parseSystem();
 
 let dirobj = {};
 let space = "\t";
@@ -53,6 +57,10 @@ function fst (dirname,space) {
 	    }
 	}
     } catch (error) {console.error(dirname + " " + error)}
+    if (opt.options.p)
+	fsr.perma =   crypto.createHash('shake128').update(fsr.dirname + Date.now().toString()).digest("base64url")
+    else
+	fsr.perma = "applaiz";
     return fsr
 } 
 

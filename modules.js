@@ -89,6 +89,8 @@ function mkDirObj(pathn,obj) {
         aa[i] = {
 	    "name":path.basename(obj.directories[i].dirname),
 	    "path": obj.directories[i].path,
+	    "perma": obj.directories[i].perma,
+	    "newartist":  obj.directories[i].newartist,
 	    "ndirs": obj.directories[i].directories.length
 	};
     }
@@ -106,6 +108,7 @@ function mkDirObj(pathn,obj) {
 	'files': obj.files,
 	'parent': obj.parent,
 	'path': obj.path,
+	'perma': obj.perma,
 	'directories': aa,
 	'params': {"d": obj.parent },
 	'serverpath': "/"
@@ -113,7 +116,7 @@ function mkDirObj(pathn,obj) {
 }
 
 
-// ff modifes, massages or gains data from the global fsobj
+// ff modifies, massages or gains data from the fsobj
 
 function ff ({
     lobj = {},
@@ -121,7 +124,8 @@ function ff ({
     parent = "",
     fMassage = ()=>{},
     fFile = ()=>{},
-    fDir = ()=>{}
+    fDir = ()=>{},
+    fRet = ()=>{}
 }) 
 {
     if (process.env.APPLAIZ_DBG_FF) console.error(
@@ -140,22 +144,26 @@ function ff ({
     //fDir could, e. g. add a paths object to the directory object
 
     for (let i =0; i < lobj.directories.length; i++) {
-	if (process.env.APPLAIZ_DBG) console.error({"directory":i});
+	if (process.env.APPLAIZ_DBG_FF) console.error({"directory":i});
 	let x = lobj.directories[i];
 	if(x) {
 	    fDir(lobj,x);
 	    let z;
 	    if (lobj.path=="."){  z = ""} else z = lobj.path;
 
-	    ff({
+	    fRet(
+		ff({
 		lobj: x,
 		patth: z + "." + i,
 		parent: lobj.path,
 		fMassage: fMassage,
 		fFile: fFile,
-		fDir: fDir
-	    })
-
+		fDir: fDir,
+		fRet: fRet
+		}),
+		i,
+		lobj.directories.length
+	   )
 	}
     }
     return lobj;
@@ -177,7 +185,7 @@ function searchDirObjs(searchterms, fsobj,parentpath) {//returns a dirObj
     robj.directories = [];
     robj.params = {"s": searchterms ,"p": parentpath };
     robj.serverpath = "/search";
-    for (let x in output) robj.directories.push({"name": path.basename(output[x].dirname),"path": output[x].path});
+    for (let x in output) robj.directories.push({"name": path.basename(output[x].dirname),"path": output[x].path, "perma": output[x].perma});
     return robj;
 }
 

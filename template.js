@@ -15,6 +15,7 @@ let templates = [`
        <th id="header3">
        </th>
        <th id="header4">
+           <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" width="24px" height="24px" onclick="document.location.assign(location.protocol + '//' + location.host + '/' +  globj.perma)"><path d="M 7 5 L 7 28 L 8.59375 26.8125 L 16 21.25 L 23.40625 26.8125 L 25 28 L 25 5 Z M 9 7 L 23 7 L 23 24 L 16.59375 19.1875 L 16 18.75 L 15.40625 19.1875 L 9 24 Z"/></svg>
            <img src="/icons/blank.gif">
 
      <div class="dropdown">
@@ -37,44 +38,22 @@ let templates = [`
        </th>
     </tr>
 
-<%
-let bigdirs = [];
-let littledirs = [];
-for (let i = 0; i < obj.directories.length; i++) {
-   if(obj.directories[i].ndirs > 18) {
-      bigdirs.push(obj.directories[i])
-   } else {
-      littledirs.push(obj.directories[i])
-   }
-}
+   <% for (let i = 0; i < obj.directories.length; i++) {
+
+let newartist =  "";
+if (obj.directories[i].newartist) newartist = obj.directories[i].newartist + " ";
+
 %>
 
-   <% for (let i = 0; i < bigdirs.length; i++) {%>
 
-   <tr class="bigrow">
+<%    if(obj.directories[i].ndirs > 18) { %>
+         <tr class="bigrow"> <% } else  {   %> <tr> <% } %>
+
      <td class="indexcolicon">
-        <img  id=dirname<%= i %> path=<%= bigdirs[i].path%> class="dirselector" src="/icons/folder.gif">
+        <img  id=dirname<%= i %> path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %> class="dirselector" src="/icons/folder.gif">
      </td>
      <td>
-       <%= bigdirs[i].name%>
-     </td>
-     <td>
-     </td>
-     <td>
-     </td>
-   </tr>
-
-   <%}%>
-
-
-   <% for (let i = 0; i < littledirs.length; i++) {%>
-
-   <tr >
-     <td class="indexcolicon">
-        <img  id=dirname<%= i %> path=<%= littledirs[i].path%> class="dirselector" src="/icons/folder.gif">
-     </td>
-     <td>
-       <%= littledirs[i].name%>
+       <%= newartist + obj.directories[i].name %>
      </td>
      <td>
      </td>
@@ -99,7 +78,7 @@ for (let i = 0; i < obj.directories.length; i++) {
       name = filename.replace(re,"");
       if(obj.files[i].title) {
 		title = obj.files[i].title.replace(re,"");	       
-		if (title.length >= name.length ) name = title
+		name = title
 	  };
       if(obj.files[i].album) {
          album = obj.files[i].album; } else {

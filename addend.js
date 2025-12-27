@@ -13,15 +13,23 @@ if(opt.options.i){
 }
 else return;
 
+// 1st arg: The directory d in which dirobjs will be added, replaced, removed
+
 let d = [];
 if (opt.argv[0]) {
     d = opt.argv[0]
 }
 
-let addendobj = false;
+let addendobj = {};
+let addendobj_aa = [];
+
+// 2nd arg: the dirobj file or files created by fsObj.js
 
 if (opt.argv[1]) {
- addendobj = JSON.parse(fs.readFileSync(opt.argv[1]))
+    let fsobj_files = opt.argv[1];
+    for (f of fsobj_files.split(",")) {
+	addendobj_aa.push(JSON.parse(fs.readFileSync(f)));
+    }
 }
 
 if (process.env.APPLAIZ_DBG) console.error({argv: opt.argv, replace: opt.options.r,options: opt.options,d: d, addendobj: addendobj});
@@ -36,34 +44,48 @@ let robj = ff(
      fMassage: (obj)=>{
 	 let r = -1;	 
 	 if (obj.dirname == d){
-	     if (opt.options.r){
-		 r = obj.directories.findIndex((x)=>x.dirname == addendobj.dirname);
-		 if (r >= 0){
+	     console.error(d, "==", obj.dirname);
+	     for ( addendobj of addendobj_aa) {
+		 if (opt.options.r){
+		     r = obj.directories.findIndex((x)=>x.dirname == addendobj.dirname);
+		     if (r >= 0){
+			 if (process.env.APPLAIZ_DBG) console.error(
+			     {
+				 "Replace ":r,
+				 "Old dirname": obj.dirname,
+				 "New dirname":addendobj.dirname
+			     }
+			 );
+			 if (obj.directories[r].perma) {
+			     addendobj.perma = obj.directories[r].perma
+			 } else {
+			     console.error(
+				 {
+				     "Replace ":r,
+				     "no obj.directories[r].perma":  obj.directories[r].dirname
+				 }
+			     );
+			     process.exit(1)
+			 }
+			 obj.directories.splice(r,1,addendobj)
+		     }
+		 }else {
 		     if (process.env.APPLAIZ_DBG) console.error(
 			 {
-			     "Replace ":r,
-			     "Old dirname": obj.dirname,
+			     "Add":  addendobj.dirname,
+			     "To":obj.dirname,
+			     "length":obj.directories.length,
 			     "New dirname":addendobj.dirname
 			 }
 		     );
-		     obj.directories.splice(r,1,addendobj)
+		     obj.directories.push(addendobj);
+		     if (process.env.APPLAIZ_DBG) console.error(
+			 {
+			     "Added":addendobj.dirname,
+			     "new length":obj.directories.length
+			 }
+		     )
 		 }
-	     }else {
-		 if (process.env.APPLAIZ_DBG) console.error(
-		     {
-			 "Add":  obj.dirname,
-			 "To":obj.dirname,
-			 "length":obj.directories.length,
-			 "New dirname":addendobj.dirname
-		     }
-		 );
-		 obj.directories.push(addendobj);
-		 if (process.env.APPLAIZ_DBG) console.error(
-		     {
-			 "Added":addendobj.dirname,
-			 "new length":obj.directories.length
-		     }
-		 )
 	     }
 	 }
      }

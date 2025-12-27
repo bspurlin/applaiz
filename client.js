@@ -1,16 +1,3 @@
-<html lang="en">
-
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ideologue Applaiz</title>
-    <link rel="stylesheet" href="/css/style.css" type="text/css">
-
-<script src="/node_modules/ejs/ejs.min.js" ></script>
-<script src="template.js" type="text/javascript"> </script>
-
-<script>
-
   // The search results button will cycle
   // through the searches stored in the session
   
@@ -21,50 +8,8 @@
   }
   
   
-  //Globals
-  
-  let audioElement;
-  let globj, g_dirname;  
-  let playlist = [];
-  let playlists = {};
-  let searchresults = [];
-  let  sr_cyc =  sr_cyclic(searchresults);
-  let dirobj_cache = {};
-  
-  // Create a media player app; render a folder of audio
-  // files using a JSON representation of a filesystem
-  // fetched from the server.
 
-  window.onload = (event) => {
-      audioElement = document.createElement('audio');
-      audioElement.id = "audio0";
-      audioElement.controls=true;
-      audioElement.playsinline=true;
-      audioElement.type = "audio/mpeg";
-      audioElement.preload = "none";
-      audioElement.audioid="0";
-      audioElement.addEventListener("ended", (event) => {
-	  let originaldirname = event.target.dirname;
-	  let el = document.getElementById(event.target.nextid + 1000);
-	  playAndReset(playlist[event.target.nextid],originaldirname);
-	  Highlight(el, originaldirname);
-      });
-      audioElement.addEventListener("play",(event) => {
-	  setMediaMeta(event.target);
-      } );
-
-      const  startparams = ".";
-      let params = {d: startparams};
-      fetchObj(params,"/dirobj").then(anobj =>{ renderTable(anobj);
-				      dirobj_cache["."] = anobj
-				    });
-    //      for(x of ["abort","canplay","canplaythrough","ended","emptied","error","loadeddata","loadedmetadata","loadstart","pause","play","playing","progress","ratechange","seeked","seeking","stalled","suspend","timeupdate","volumechange","waiting"])audioElement.addEventListener(x,(e) => console.log("audioElement event type: ", e.type));
-      document.addEventListener("touchstart", function() {}, true);
-    }
-</script>
-
-<script>
-  function setMediaMeta (e) {
+function setMediaMeta (e) {
       if ("mediaSession" in navigator) {console.log("mediaSession: ",playlist[e.audioid].title);
 	  navigator.mediaSession.metadata = new MediaMetadata({
 	      title: playlist[e.audioid].title ,
@@ -154,20 +99,6 @@
       
   }
 
-</script>
-
-<script>
-  //disable back button
-history.pushState(null, document.title, location.href);
-window.addEventListener('popstate', function (event)
-{
-  history.pushState(null, document.title, location.href);
-});
-</script>
-
-
-<script>
-
   async  function fetchObj(params,url = document.URL) {
       let anobj = {};
 	const options = {
@@ -191,20 +122,19 @@ window.addEventListener('popstate', function (event)
     return anobj;
 	
   }
-</script>
-
-<script>
   
   function renderTable(lobj){
       let html = lobj;
       //let html = ejs.render(mkTempl(0), {obj: lobj});
       document.querySelector("#root").innerHTML = html;
       document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
+      document.title = lobj.dirname.replace(/.+\//,"")
       let direlements = document.getElementsByClassName("dirselector");
       for (e of direlements){
 	  e.addEventListener("click",(event) => {
+	      let perma = event.target.getAttribute("perma")
 	      let path = event.target.getAttribute("path")
-	      let params = {d: path};
+	      let params = {d: perma};
 	      if (!dirobj_cache[lobj.path])  dirobj_cache[lobj.path] = lobj;
 	      dirobj_cache[lobj.path].scrollpos =  event.target.id;
 	      if(dirobj_cache[path]) {
@@ -220,15 +150,14 @@ window.addEventListener('popstate', function (event)
 
       let backelem = document.getElementById("parent-a");
       backelem.addEventListener("click",(event) => {
-//	  if (!dirobj_cache[obj.path])  dirobj_cache[obj.path] = obj;
-//	  dirobj_cache[obj.path].scrollpos =  event.target.id;
 	  let path = event.target.getAttribute("path")
+	  let perma = event.target.getAttribute("perma")
 	  if(dirobj_cache[path]) {
 	      lobj = dirobj_cache[path];
 	      renderTable(lobj);
 	  } else {
 	      let params = {d: path};
-	      fetchObj(params,"/dirobj").then(anobj => {
+	      fetchObj(params,"/dirobj_nocache").then(anobj => {
 		  renderTable(anobj);
 	      })
 	  }
@@ -311,14 +240,3 @@ window.addEventListener('popstate', function (event)
       }	  
 
   }
-  
-</script>
-</head>
-<body>
-
-    <div id="root"></div>
-    <div id="ae"></div>
-
-</body>
-
-</html>
