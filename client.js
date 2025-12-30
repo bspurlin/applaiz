@@ -121,16 +121,17 @@ function setMediaMeta (e) {
 	
   }
   
-  function renderTable(lobj){
-      let html = ejs.render(mkTempl(0), {obj: lobj});
-      document.querySelector("#root").innerHTML = html;
-      document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
-      document.title = lobj.dirname.replace(/.+\//,"")
-      let direlements = document.getElementsByClassName("dirselector");
-      for (e of direlements){
-	  e.addEventListener("click",(event) => {
+function renderTable(lobj, templt = 1){
+    let html = ejs.render(mkTempl(0) + mkTempl(templt), {obj: lobj});
+    document.querySelector("#root").innerHTML = html;
+    document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
+    document.title = lobj.dirname.replace(/.+\//,"")
+    let direlements = document.getElementsByClassName("dirselector");
+    for (e of direlements){
+	e.addEventListener("click",(event) => {
 	      let perma = event.target.getAttribute("perma")
-	      let path = event.target.getAttribute("path")
+	    let path = event.target.getAttribute("path")
+	    let template = event.target.getAttribute("template")
 	      let params = {d: perma};
 	      if (!dirobj_cache[lobj.path])  dirobj_cache[lobj.path] = lobj;
 	      dirobj_cache[lobj.path].scrollpos =  event.target.id;
@@ -139,12 +140,24 @@ function setMediaMeta (e) {
 		  renderTable(lobj);
 	      } else {
 		  fetchObj(params,"/dirobj").then(anobj => {
-		      renderTable(anobj);
+		      renderTable(anobj,template);
 		  })
 	      }
 	  })
       }
 
+    let lielements =  document.getElementsByClassName("applaizli");
+    for (e of lielements){
+	e.addEventListener("click",(event) => {
+	    let perma = event.target.getAttribute("perma");
+	    let params = {d: perma};
+	    fetchObj(params,"/dirobj").then(anobj => {
+		renderTable(anobj,1);
+	    })
+	}
+			  )
+    }
+    
       let backelem = document.getElementById("parent-a");
       backelem.addEventListener("click",(event) => {
 	  let path = event.target.getAttribute("path")

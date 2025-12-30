@@ -122,3 +122,16 @@ td.playicon {
   margin-top:1px;
   margin-bottom:1px;
 }
+
+.applaiznew{
+    background-color:lightgreen;
+    border-radius: 15px;
+    border: 2px solid black;
+    font-family:sans-serif;
+    font-size:larger
+}
+
+li {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}

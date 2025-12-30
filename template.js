@@ -38,7 +38,8 @@ let templates = [`<table>
 
        </th>
     </tr>
-
+`,
+		 `
    <% for (let i = 0; i < obj.directories.length; i++) {
 
 let newartist =  "";
@@ -51,9 +52,9 @@ if (obj.directories[i].newartist) newartist = obj.directories[i].newartist + " "
          <tr class="bigrow"> <% } else  {   %> <tr> <% } %>
 
      <td class="indexcolicon">
-        <img  id=dirname<%= i %> path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %> class="dirselector" src="/icons/folder.gif">
+        <img  id=dirname<%= i %> path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %>  template=<%= obj.directories[i].template %> class="dirselector" src="/icons/folder.gif">
      </td>
-     <td>
+     <td  <% if(obj.directories[i].template == 2) {  %> class="applaiznew"  <% } %>   >
        <%= newartist + obj.directories[i].name %>
      </td>
      <td>
@@ -117,6 +118,13 @@ if (obj.directories[i].newartist) newartist = obj.directories[i].newartist + " "
   </tbody>
 </table>
 `
-	    ]
+		 ,
+`
+</table>
+
+<%- obj.html %> 
+
+`
+		]
 
 if(typeof module === undefined) {} else { module.exports = { mkTempl } }

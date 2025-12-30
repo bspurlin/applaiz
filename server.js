@@ -8,17 +8,27 @@ app.use(cors({
     origin: '*'
 }));
 
-const {ff, mkDirObj, searchDirObjs } = require("./modules.js");
+var n_new_days = 0;
+const opt = require('node-getopt').create([
+    ['' , 'n_new_days[=]'                    , 'new days','n'],
+]).parseSystem();
+if (opt.options.n_new_days ){
+    n_new_days = opt.options.n_new_days;
+    console.log({"n_new_days": n_new_days})
+}
+
+const {ff, mkDirObj, searchDirObjs, newHTML } = require("./modules.js");
 let permalinks = {};
 
 // massage the filesystem-object
-fsobj = ff(
+const fsobj = ff(
     {
 	lobj: JSON.parse(fs.readFileSync("./fsobj")),
 	fMassage: (obj, patth, parent) => { //give every directory
 	    obj.path = patth;     // a dot-numeric path
 	    obj.parent = parent;  // and a parent so we can go back
-	    permalinks[obj.perma] = obj.path 
+	    permalinks[obj.perma] = obj.path;
+	    obj.template = 1
 	},
 	fFile: (obj) => {             // Sort the list of files case-
 	    obj.files.sort((a,b) => { //insensitively		       
@@ -31,6 +41,20 @@ fsobj = ff(
 	}
     }
 )
+
+if (n_new_days) {
+    let newdir = {
+	"directories":[],
+	"files":[],
+	"dirname": "New!",
+	"perma": "Newbang",
+	"path": "." + fsobj.directories.length,
+	"html": newHTML(structuredClone(fsobj), n_new_days),
+	"template": 2
+    };
+    fsobj.directories.push(newdir);
+    permalinks[newdir.perma] = newdir.path
+}
 
 app.use(express.static('public'))
 app.use(bodyParser.json());
