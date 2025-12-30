@@ -44,6 +44,7 @@ let templates = [`<table>
 
 let newartist =  "";
 if (obj.directories[i].newartist) newartist = obj.directories[i].newartist + " ";
+if (obj.directories[i].template) {} else {obj.directories[i].template = 1} 
 
 %>
 
@@ -54,7 +55,7 @@ if (obj.directories[i].newartist) newartist = obj.directories[i].newartist + " "
      <td class="indexcolicon">
         <img  id=dirname<%= i %> path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %>  template=<%= obj.directories[i].template %> class="dirselector" src="/icons/folder.gif">
      </td>
-     <td  <% if(obj.directories[i].template == 2) {  %> class="applaiznew"  <% } %>   >
+     <td  <% if(obj.directories[i].template == 2) {  %> class="applaiznew dirselector"  path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %>  template=<%= obj.directories[i].template %>  <% } %>   >
        <%= newartist + obj.directories[i].name %>
      </td>
      <td>

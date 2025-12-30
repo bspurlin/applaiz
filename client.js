@@ -122,35 +122,39 @@ function setMediaMeta (e) {
   }
   
 function renderTable(lobj, templt = 1){
+    lobj.template = templt;
     let html = ejs.render(mkTempl(0) + mkTempl(templt), {obj: lobj});
     document.querySelector("#root").innerHTML = html;
     document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
     document.title = lobj.dirname.replace(/.+\//,"")
+    if (!dirobj_cache[lobj.path])  dirobj_cache[lobj.path] = lobj;
     let direlements = document.getElementsByClassName("dirselector");
     for (e of direlements){
 	e.addEventListener("click",(event) => {
-	      let perma = event.target.getAttribute("perma")
+	    let perma = event.target.getAttribute("perma")
 	    let path = event.target.getAttribute("path")
 	    let template = event.target.getAttribute("template")
-	      let params = {d: perma};
-	      if (!dirobj_cache[lobj.path])  dirobj_cache[lobj.path] = lobj;
-	      dirobj_cache[lobj.path].scrollpos =  event.target.id;
-	      if(dirobj_cache[path]) {
-		  lobj = dirobj_cache[path];
-		  renderTable(lobj);
-	      } else {
-		  fetchObj(params,"/dirobj").then(anobj => {
-		      renderTable(anobj,template);
-		  })
-	      }
-	  })
-      }
+	    let params = {d: perma};
+	    dirobj_cache[lobj.path].scrollpos =  event.target.id;
+	    if(dirobj_cache[path]) {
+		lobj = dirobj_cache[path];
+		renderTable(lobj, lobj.template);
+	    } else {
+		fetchObj(params,"/dirobj").then(anobj => {
+		    renderTable(anobj,template);
+		})
+	    }
+	})
+    }
 
     let lielements =  document.getElementsByClassName("applaizli");
     for (e of lielements){
+	e.setAttribute("path", lobj.path);
 	e.addEventListener("click",(event) => {
 	    let perma = event.target.getAttribute("perma");
-	    let params = {d: perma};
+	    let parent = event.target.getAttribute("path");
+	    if (!dirobj_cache[lobj.path])  dirobj_cache[lobj.path] = lobj;
+	    let params = {d: perma, parent: parent};
 	    fetchObj(params,"/dirobj").then(anobj => {
 		renderTable(anobj,1);
 	    })
@@ -164,7 +168,7 @@ function renderTable(lobj, templt = 1){
 	  let perma = event.target.getAttribute("perma")
 	  if(dirobj_cache[path]) {
 	      lobj = dirobj_cache[path];
-	      renderTable(lobj);
+	      renderTable(lobj,lobj.template);
 	  } else {
 	      let params = {d: path};
 	      fetchObj(params,"/dirobj_nocache").then(anobj => {

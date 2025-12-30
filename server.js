@@ -67,6 +67,7 @@ app.post('/dirobj/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
     let d = permalinks[req.body.d];
     let retval = mkDirObj(d,fsobj);
+    if(req.body.parent) retval.parent = req.body.parent;
     console.log({
 	"dirObj":JSON.stringify(req.body),
 	"dir":d,
