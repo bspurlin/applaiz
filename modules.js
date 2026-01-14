@@ -86,8 +86,15 @@ function mkDirObj(pathn,obj) {
     while((x = numeric_path.shift()) != undefined) obj=obj.directories[x];
     let directories, aa  = [];
     for (let i = 0; i < obj.directories.length; i++) {
+	let f1 = {};
+	if (obj.directories[i].files.length > 0) {
+	    f1 = obj.directories[i].files[0]
+	} else {
+	    f1= {"album": undefined};
+	}
         aa[i] = {
 	    "name":path.basename(obj.directories[i].dirname),
+	    "album": f1.album,
 	    "path": obj.directories[i].path,
 	    "perma": obj.directories[i].perma,
 	    "newartist":  obj.directories[i].newartist,
@@ -106,6 +113,7 @@ function mkDirObj(pathn,obj) {
     }		
     return {
 	'dirname': obj.dirname,
+	'album': obj.album,
 	'files': obj.files,
 	'parent': obj.parent,
 	'path': obj.path,
