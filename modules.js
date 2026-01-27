@@ -402,7 +402,7 @@ function newHTML(fsobj , n) {
 	    fDir:(x,y)=>{ // L4 for each directory create a list element
 	        // including a link to the applaiz dirobj
 		let l = x.directories.length;
-		let locname = path.basename(y.dirname);
+		locname = path.basename(y.dirname);
 		
 		html_out = html_out + `
      <li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  >` + locname + `</span>
