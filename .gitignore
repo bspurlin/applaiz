@@ -1,0 +1,7 @@
+Shared
+fsobj*
+[A-Z]*.json
+[0-9]*.json
+!package.json
+!Genre_s.json
+!applaiz-files.json

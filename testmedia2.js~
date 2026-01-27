@@ -1,0 +1,6 @@
+let { default: mediaInfoFactory } = await import("mediainfo.js");
+let mediainfo = await mediaInfoFactory({ format: 'json'});
+let buffer1=fs.readFileSync("Applaiz/Rock/The Police/Synchronicity/01 Synchronicity I.m4a" );
+let buffer=fs.readFileSync("Applaiz/Opera/John.Adams.Nixon.In.China.De.Waart-wav-ape/CD305-Sitting around the radio.m4a")
+mediainfo.analyzeData(()=>buffer.length,()=>buffer);
+mediainfo.analyzeData(()=>buffer1.length,()=>buffer1);

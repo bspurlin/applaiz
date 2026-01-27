@@ -1,0 +1,164 @@
+{
+  "directories": [
+    {
+      "directories": [],
+      "files": [
+        {
+          "filename": "01 Sonata in D Minor, K. 141_ Allegro.m4a",
+          "title": "Sonata in D Minor, K. 141: Allegro",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "01 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "02 Sonata in D Minor, K. 32_ Aria.m4a",
+          "title": "Sonata in D Minor, K. 32: Aria",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "02 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "03 Sonata in C Minor, K. 115_ Allegro.m4a",
+          "title": "Sonata in C Minor, K. 115: Allegro",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "03 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "04 Passacaglia ungherese.m4a",
+          "title": "Passacaglia ungherese",
+          "artist": " Justin Taylor",
+          "composer": "György Ligeti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "04 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "05 Sonata in D Minor, K. 18_ Presto.m4a",
+          "title": "Sonata in D Minor, K. 18: Presto",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "05 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "06 Sonata in A Major, K. 208_ Adagio e cantabile.m4a",
+          "title": "Sonata in A Major, K. 208: Adagio e cantabile",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "06 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "07 Sonata in A Minor, K. 175_ Allegro.m4a",
+          "title": "Sonata in A Minor, K. 175: Allegro",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "07 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "08 Hungarian Rock_ Chaconne.m4a",
+          "title": "Hungarian Rock: Chaconne",
+          "artist": " Justin Taylor",
+          "composer": "György Ligeti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "08 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "09 Sonata in D Major, K. 492_ Presto.m4a",
+          "title": "Sonata in D Major, K. 492: Presto",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "09 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "10 Sonata in B Minor, K. 27_ Allegro.m4a",
+          "title": "Sonata in B Minor, K. 27: Allegro",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "10 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "11 Sonata in D Minor, K. 213_ Andante.m4a",
+          "title": "Sonata in D Minor, K. 213: Andante",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "11 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "12 Sonata in F Minor, K. 239_ Allegro.m4a",
+          "title": "Sonata in F Minor, K. 239: Allegro",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "12 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "13 Sonata in F Minor, K. 519_ Allegro Assai.m4a",
+          "title": "Sonata in F Minor, K. 519: Allegro Assai",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "13 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "14 Continuum.m4a",
+          "title": "Continuum",
+          "artist": " Justin Taylor",
+          "composer": "György Ligeti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "14 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        },
+        {
+          "filename": "15 Sonata in F Minor, K. 481_ Andante e cantabile.m4a",
+          "title": "Sonata in F Minor, K. 481: Andante e cantabile",
+          "artist": " Justin Taylor",
+          "composer": "Domenico Scarlatti",
+          "album": "Scarlatti & Ligeti: Continuum",
+          "genre": "Classical",
+          "trackNumber": "15 of 15",
+          "year": "2018-05-25T12:00:00Z"
+        }
+      ],
+      "dirname": "Applaiz/Classical/Pianists/Justin Taylor/Scarlatti & Ligeti_ Continuum",
+      "perma": "tbprr9s0Um3jAZkabkCzxg"
+    }
+  ],
+  "files": [],
+  "dirname": "Applaiz/Classical/Pianists/Justin Taylor",
+  "perma": "eS-IyBUHSfUY9BYgJwezvw"
+}
