@@ -2,7 +2,7 @@ function mkTempl(i) {
     return templates[i].replace(/(\r\n|\n|\r)/gm, "")
 }
 
-let templates = [`<table>
+let templates = [`<span class=topspan> <table>
 
 
 
@@ -122,6 +122,7 @@ if (obj.directories[i].template) {} else {obj.directories[i].template = 1}
 		 ,
 `
 </table>
+</span>
 
 <%- obj.html %> 
 
