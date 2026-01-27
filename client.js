@@ -148,20 +148,20 @@ function renderTable(lobj, templt = 1){
     }
 
     let lielements =  document.getElementsByClassName("applaizli");
-	for (e of lielements) {
-		e.setAttribute("path", lobj.path);
-		e.addEventListener("click", (event) => {
-			let perma = event.target.getAttribute("perma");
-			let parent = event.target.getAttribute("path");
-			let params = { d: perma, parent: parent };
-			dirobj_cache[lobj.path] = lobj;
-			dirobj_cache[lobj.path].scrollpos = event.target.id
-			fetchObj(params, "/dirobj").then(anobj => {
-				renderTable(anobj, 1);
-			})
-		})
+    for (e of lielements){
+	e.setAttribute("path", lobj.path);
+	e.addEventListener("click",(event) => {
+	    let perma = event.target.getAttribute("perma");
+	    let parent = event.target.getAttribute("path");
+	    if (!dirobj_cache[lobj.path])  dirobj_cache[lobj.path] = lobj;
+	    let params = {d: perma, parent: parent};
+	    fetchObj(params,"/dirobj").then(anobj => {
+		renderTable(anobj,1);
+	    })
 	}
-
+			  )
+    }
+    
       let backelem = document.getElementById("parent-a");
       backelem.addEventListener("click",(event) => {
 	  let path = event.target.getAttribute("path")
@@ -234,7 +234,9 @@ function renderTable(lobj, templt = 1){
       }
       if(lobj.scrollpos){
 	  let e = document.getElementById(lobj.scrollpos);
+	  if(lobj.directories && lobj.directories.length > 10){
 	      e.scrollIntoView({block: "center", inline: "nearest"});
+	  }else {window.scrollTo(0,0)}
       } else {window.scrollTo(0,0)}
 
   }
