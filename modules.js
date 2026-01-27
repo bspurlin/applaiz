@@ -404,9 +404,7 @@ function newHTML(fsobj , n) {
 		let l = x.directories.length;
 		locname = path.basename(y.dirname);
 		
-		html_out = html_out + `
-     <li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  >` + locname + `</span>
-`;
+		html_out = html_out + `<li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  >` + locname + `</span>`;
 	    
 		if(process.env.APPLAIZ_DBG_HTML)
 		    console.error(
