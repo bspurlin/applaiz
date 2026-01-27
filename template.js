@@ -65,9 +65,7 @@ if (obj.directories[i].template) {} else {obj.directories[i].template = 1}
    </tr>
 
    <%}%>
-</table>
-<%# Separate tables for dirs and files; Dir table has 4 columns, files 2 %>
-<table>
+
 
   <%
   let re = /.(m4a|mp3|wav|flac)$/ig;
@@ -107,13 +105,13 @@ if (obj.directories[i].template) {} else {obj.directories[i].template = 1}
    <tr class=indexrow id="<%= i + 1000%>" bgcolor=<%= i%2?"#F0F0F0":"#FFFFFF"   %>>
 	<td class="playicon" ><img class="soundfile" id="<%= i %>" src="/icons/loudspeaker.svg" filename="<%- filename%>" artist="<%- artist%>" selectiontitle="<%- name%>" album="<%- album%>">
 	</td>
-	<td class="indexcolname hoverMeta" tabindex="0">
+	<td class="selectiontitle hoverMeta" tabindex="0">
 	  <%- name%>
           <span class="metaContent">
 	    <%- metastr  %>
           </span>
 	</td>
-
+<td class="filecol3"></td><td class="filecol4"></td>
       </tr>
       <%}%>
   </tbody>

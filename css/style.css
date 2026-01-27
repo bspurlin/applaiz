@@ -99,7 +99,7 @@ td.playicon {
 
 .metaContent{
   display:none;
-  position:absolute; 
+  position:relative; 
   z-index:100;
   border:1px;
   background-color:white;
@@ -109,7 +109,6 @@ td.playicon {
   padding:3px;
   color:700070; 
   top:0px; 
-  left:200px;
   font-size: larger;
 }
 
@@ -140,3 +139,4 @@ li {
   position:sticky;
   top: 0;
 }
+

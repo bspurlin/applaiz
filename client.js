@@ -241,11 +241,15 @@ function renderTable(lobj, templt = 1){
 
   function Highlight (el, dirname = globj.dirname) {
       if (dirname == globj.dirname) {
-	  let rows =  document.getElementsByClassName("indexcolname");
-	  for (let i = 0; i < rows.length; i++)
-	      rows[i].setAttribute("bgcolor", i % 2 ?"#F0F0F0":"#FFFFFF");
+	  for (classnm of ["selectiontitle" , "filecol3" , "filecol4" ]){ 
+	      let rows =  document.getElementsByClassName(classnm);
+	      for (let i = 0; i < rows.length; i++)
+		  rows[i].setAttribute("bgcolor", i % 2 ?"#F0F0F0":"#FFFFFF");
+	  }
 	  el.childNodes[3].setAttribute("bgcolor", "#FFFFC0");
-	  el.childNodes[3].focus();
+	  el.childNodes[3].focus({ focusVisible: false });
+	  el.childNodes[4].setAttribute("bgcolor", "#FFFFC0");
+	  el.childNodes[5].setAttribute("bgcolor", "#FFFFC0");
 	  el.scrollIntoView({block: "center"});
       }	  
 
