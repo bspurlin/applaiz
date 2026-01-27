@@ -1,6 +1,6 @@
 let  mediainfo  = require("mediainfo.js");
 let fs = require("node:fs");
-let b = fs.readFileSync("../Music/Shared/Music by Label/Delos/Famous.Film.Themes.8102/01 - Mutiny on the Bounty.mp3");
+let b = fs.readFileSync(process.argv[2]);
 let oobj = {"a":"b"};
 
 async function findMediaInfo(b,m) {
@@ -26,12 +26,6 @@ async function findMediaInfo(b,m) {
     let m =  await mediainfo.default({ format: 'json' });
     await findMediaInfo(b,m)
     console.log(
-    "title\t", oobj["Track name"],"\n",
-    "artist\t",oobj["Performer"],"\n",
-    "album\t", oobj["Album"],"\n"
+oobj
     )}
 )();
-
-
-
-
