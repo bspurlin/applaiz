@@ -121,9 +121,9 @@ function setMediaMeta (e) {
 	
   }
   
-function renderTable(lobj, templt = 1){
+function renderTable(lobj, templt = 0){
     lobj.template = templt;
-    let html = ejs.render(mkTempl(0) + mkTempl(templt), {obj: lobj});
+    let html = ejs.render(mkTempl(templt), {obj: lobj});
     document.querySelector("#root").innerHTML = html;
     document.querySelector("body").insertBefore(audioElement,document.querySelector("#ae"));
     document.title = lobj.dirname.replace(/.+\//,"")
@@ -148,6 +148,7 @@ function renderTable(lobj, templt = 1){
     }
 
     let lielements =  document.getElementsByClassName("applaizli");
+
 	for (e of lielements) {
 		e.setAttribute("path", lobj.path);
 		e.addEventListener("click", (event) => {
@@ -157,12 +158,13 @@ function renderTable(lobj, templt = 1){
 			dirobj_cache[lobj.path] = lobj;
 			dirobj_cache[lobj.path].scrollpos = event.target.id
 			fetchObj(params, "/dirobj").then(anobj => {
-				renderTable(anobj, 1);
+				renderTable(anobj, 0);
 			})
 		})
-	}
 
-    
+	}
+	
+
       let backelem = document.getElementById("parent-a");
       backelem.addEventListener("click",(event) => {
 	  let path = event.target.getAttribute("path")
@@ -179,7 +181,8 @@ function renderTable(lobj, templt = 1){
       })
 			       	  
 	  
-      let tform = document.getElementById("sf");
+    let tform = document.getElementById("sf");
+    if(tform) 
       tform.addEventListener("submit", (e) => {
 	  let inputAll = document.querySelectorAll('.searchTerm');
 	  let aa = [];

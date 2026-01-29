@@ -99,7 +99,7 @@ td.playicon {
 
 .metaContent{
   display:none;
-  position:relative; 
+  position:absolute; 
   z-index:100;
   border:1px;
   background-color:white;
@@ -110,8 +110,8 @@ td.playicon {
   color:700070; 
   top:0px; 
   font-size: larger;
+  left: 10%;
 }
-
 
 .hoverMeta:focus span.metaContent{
     display:block;
@@ -133,10 +133,25 @@ td.playicon {
 li {
   margin-top: 10px;
   margin-bottom: 10px;
+  list-style-type: none;
 }
 
-.topspan{
+
+.topspan {
+  border-radius: 15px;
+  background-color: #ffff00;
+  border: 2px solid black;
+  font-family:sans-serif;
+  font-size:larger;
+  z-index: 2;
+  display: inline-block;
+  position: relative;
+  width: 25%;
+  text-align: center;
+}
+
+#litop{
+  position: -webkit-sticky;
   position:sticky;
   top: 0;
 }
-

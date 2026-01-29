@@ -2,7 +2,7 @@ function mkTempl(i) {
     return templates[i].replace(/(\r\n|\n|\r)/gm, "")
 }
 
-let templates = [`<span class=topspan> <table>
+let templates = [` <table>
 
 
 
@@ -38,13 +38,12 @@ let templates = [`<span class=topspan> <table>
 
        </th>
     </tr>
-`,
-		 `
+
    <% for (let i = 0; i < obj.directories.length; i++) {
 
 let newartist =  "";
 if (obj.directories[i].newartist) newartist = obj.directories[i].newartist + " ";
-if (obj.directories[i].template) {} else {obj.directories[i].template = 1} 
+if (obj.directories[i].template) {} else {obj.directories[i].template = 0} 
 
 %>
 
@@ -55,7 +54,7 @@ if (obj.directories[i].template) {} else {obj.directories[i].template = 1}
      <td class="indexcolicon">
         <img  id=dirname<%= i %> path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %>  template=<%= obj.directories[i].template %> class="dirselector" src="/icons/folder.gif">
      </td>
-     <td  <% if(obj.directories[i].template == 2) {  %> class="applaiznew dirselector"  path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %>  template=<%= obj.directories[i].template %>  <% } %>   >
+     <td  <% if(obj.directories[i].template == 1) {  %> class="applaiznew dirselector"  path=<%= obj.directories[i].path %> perma=<%= obj.directories[i].perma %>  template=<%= obj.directories[i].template %>  <% } %>   >
        <%= newartist + obj.directories[i].name %>
      </td>
      <td>
@@ -117,12 +116,15 @@ if (obj.directories[i].template) {} else {obj.directories[i].template = 1}
   </tbody>
 </table>
 `
-		 ,
-`
-</table>
-</span>
+,
 
-<%- obj.html %> 
+`
+
+<%
+let list = obj.html.trim().replace(/^<ul>/,'<ul id="newlist"><li id="litop"><span class="topspan"   path="." id="parent-a"    >  <img src="/icons/back.gif"   path="." id="parent-a"  />     </span> </li>');
+ %>
+
+<%- list %> 
 
 `
 		]

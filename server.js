@@ -28,7 +28,7 @@ const fsobj = ff(
 	    obj.path = patth;     // a dot-numeric path
 	    obj.parent = parent;  // and a parent so we can go back
 	    permalinks[obj.perma] = obj.path;
-	    obj.template = 1
+	    obj.template = 0
 	},
 	fFile: (obj) => {             // Sort the list of files case-
 	    obj.files.sort((a,b) => { //insensitively		       
@@ -50,7 +50,7 @@ if (n_new_days) {
 	"perma": "Newbang",
 	"path": "." + fsobj.directories.length,
 	"html": newHTML(structuredClone(fsobj), n_new_days),
-	"template": 2
+	"template": 1
     };
     fsobj.directories.push(newdir);
     permalinks[newdir.perma] = newdir.path
