@@ -155,3 +155,7 @@ li {
   position:sticky;
   top: 0;
 }
+
+.newbackimg {
+  pointer-events: none;
+}

@@ -121,7 +121,7 @@ if (obj.directories[i].template) {} else {obj.directories[i].template = 0}
 `
 
 <%
-let list = obj.html.trim().replace(/^<ul>/,'<ul id="newlist"><li id="litop"><span class="topspan"   path="." id="parent-a"    >  <img src="/icons/back.gif"   path="." id="parent-a"  />     </span> </li>');
+let list = obj.html.trim().replace(/^<ul>/,'<ul id="newlist"><li id="litop"><span class="topspan"   path="." id="parent-a"    >  <img src="/icons/back.gif" class="newbackimg" />     </span> </li>');
  %>
 
 <%- list %> 
