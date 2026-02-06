@@ -347,40 +347,14 @@ let outobj = {
 	   }
 }
 
-function newHTML(fsobj , n) {
+function HTMLul(grobj) {
 
     
     let html_out = ``;
 
     ff( //begin L4
 	{
-	    lobj:ff( //begin L3
-		{
-		    lobj:ff( //begin L2
-			{
-			    lobj: newOnly(fsobj, n).isnewobj    // L1
-			    ,
-			    
-			    fDir:(x,y)=>{  // L2 if a directory is new
-			        // its parent is also new.
-				
-				if ( y.isnew) x.isnew = 1;
-				
-			    }
-			    
-			}
-		    )  // end L2
-		    ,
-		    
-		    fMassage(lobj) { // L3 we want to ignore what is not new
-			
-			lobj.directories = lobj.directories.filter(dir => dir.isnew == 1 );
-			if (lobj.directories.length > 0 && lobj.files.length > 0) {
-			    lobj.files = []
-			}
-		    }
-		}
-	    )  // end L3
+	    lobj:grobj
 	    ,
 	    
 	    fMassage(lobj) { // L4 Create HTML. Start with an unordered list tag
@@ -393,7 +367,7 @@ function newHTML(fsobj , n) {
 		if(process.env.APPLAIZ_DBG_HTML)
 		    console.error(
 			{
-			    "fMassage lobj": lobj.dirname,
+    			    "fMassage lobj": lobj.dirname,
 			    "fMassage lobj dirl": lobj.directories.length,
 			    "fMassage lobj filesl": lobj.files.length
 			}
@@ -436,5 +410,36 @@ function newHTML(fsobj , n) {
     return html_out
 }
 
+function newHTML(fsobj, n) {
+    return HTMLul(
+		ff( //begin L3
+		    {
+			lobj:ff( //begin L2
+			    {
+				lobj: newOnly(fsobj, n).isnewobj    // L1
+				,
+				
+				fDir:(x,y)=>{  // L2 if a directory is new
+			            // its parent is also new.
+				    
+				    if ( y.isnew) x.isnew = 1;
+				    
+				}
+				
+			    }
+			)  // end L2
+			,
+			
+			fMassage(lobj) { // L3 we want to ignore what is not new
+			
+			    lobj.directories = lobj.directories.filter(dir => dir.isnew == 1 );
+			    if (lobj.directories.length > 0 && lobj.files.length > 0) {
+				lobj.files = []
+			    }
+			}
+		    }
+		)  // end L3
+	       )
+}
 
-module.exports = { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File, newOnly, newHTML };
+module.exports = { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File, newOnly, HTMLul, newHTML };
