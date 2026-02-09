@@ -347,7 +347,7 @@ let outobj = {
 	   }
 }
 
-function HTMLul(grobj) {
+function HTMLul(grobj, addl) {
 
     
     let html_out = ``;
@@ -361,7 +361,7 @@ function HTMLul(grobj) {
 	        // for each directory that contains directories
 		
 		if (lobj.directories.length > 0 )html_out = html_out + `
-   <ul>
+   <ul class="tree">
 `;
 		
 		if(process.env.APPLAIZ_DBG_HTML)
@@ -378,7 +378,7 @@ function HTMLul(grobj) {
 		let l = x.directories.length;
 		locname = path.basename(y.dirname);
 		
-		html_out = html_out + `<li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  >` + locname + `</span>`;
+		html_out = html_out + addl(y, locname);
 	    
 		if(process.env.APPLAIZ_DBG_HTML)
 		    console.error(
@@ -438,8 +438,16 @@ function newHTML(fsobj, n) {
 			    }
 			}
 		    }
-		)  // end L3
-	       )
+		),
+	(y,locnameq)=>{return `<li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  >` + locnameq + `</span>`}
+    )
 }
 
-module.exports = { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File, newOnly, HTMLul, newHTML };
+function allHTML(fsobj){
+    return HTMLul(fsobj,
+		  (y,locname)=>{return `<li perma=` + y.perma + ` ><input type="checkbox" perma="` +  y.perma  +  `" id="` +  y.perma + `"  ><label for="` + y.perma +`" class="applaiznew applaizli">`  + locname + `</label></input>`}
+		 )
+}
+    
+
+module.exports = { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File, newOnly, HTMLul, newHTML, allHTML };
