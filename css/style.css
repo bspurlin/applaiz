@@ -161,3 +161,26 @@ li {
   float: left;
   margin-left: 10%;
 }
+
+/* Hide the checkbox */
+.tree input[type="checkbox"] {
+  display: none;
+}
+
+/* Hide the sub-list by default */
+.tree ul {
+  display: none;
+}
+
+/* Show the sub-list when checkbox is checked */
+.tree input[type="checkbox"]:checked ~ ul {
+  display: block;
+}
+
+/* Optional: Add a custom marker (plus/minus) */
+.tree label::before {
+  content: '+ ';
+}
+.tree input[type="checkbox"]:checked ~ label::before {
+  content: '- ';
+}

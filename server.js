@@ -17,7 +17,7 @@ if (opt.options.n_new_days ){
     console.log({"n_new_days": n_new_days})
 }
 
-const {ff, mkDirObj, searchDirObjs, newHTML } = require("./modules.js");
+const {ff, mkDirObj, searchDirObjs, newHTML, HTMLul, newOnly } = require("./modules.js");
 let permalinks = {};
 
 // massage the filesystem-object
@@ -49,10 +49,40 @@ if (n_new_days) {
 	"dirname": "New!",
 	"perma": "Newbang",
 	"path": "." + fsobj.directories.length,
-	"html": newHTML(structuredClone(fsobj), n_new_days),
+	"html": HTMLul(
+	    ff( //begin L3
+		{
+		    lobj:ff( //begin L2
+			{
+			    lobj: newOnly(fsobj, n_new_days).isnewobj    // L1
+			    ,
+			    
+			    fDir:(x,y)=>{  // L2 if a directory is new
+			        // its parent is also new.
+				
+				if ( y.isnew) x.isnew = 1;
+				
+			    }
+			    
+			}
+		    )  // end L2
+		    ,
+		    
+		    fMassage(lobj) { // L3 we want to ignore what is not new
+			
+			lobj.directories = lobj.directories.filter(dir => dir.isnew == 1 );
+			if (lobj.directories.length > 0 && lobj.files.length > 0) {
+			    lobj.files = []
+			}
+		    }
+		}
+	    ),
+	    (y,locname)=>{return `<li perma=` + y.perma + ` ><input type="checkbox" perma=" id="` +  y.perma + `"  ><label for="` + y.perma +`"></label></input><span   class="applaiznew applaizli"  perma="` + y.perma + `" >` +  locname + `</span>`}
+	),
 	"template": 1
     };
     fsobj.directories.push(newdir);
+    console.log(newdir.html);
     permalinks[newdir.perma] = newdir.path
 }
 
