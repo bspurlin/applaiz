@@ -7,6 +7,7 @@ opt = require('node-getopt').create([
     ['s' , '=', 'search string-pattern'],
     ['p','=',"path name in number-dot format"],
     ['g','', "generate a mkdirobj"],
+    ['e' , ''                   , 'is empty'],
     ['m','=',"process m4a ilst data"],
     ['x','=','optional dirname prefix with -m']
 ]).parseSystem();
@@ -20,7 +21,7 @@ const {countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File } =
 if (opt.options.s)  fs.writeFileSync(1,JSON.stringify(searchDirObjs(opt.options.s,fsobj),null,1));
 
 if(opt.options.f) {
-    let count = countAttr(fsobj);
+    let count = countAttr(fsobj, opt.options.e);
     console.log("total tracks = ", count.length,
 		"\ntotal albums = ", count.albumcount,
                 "\ntitle tags = ", count.title,

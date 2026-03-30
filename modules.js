@@ -63,10 +63,16 @@ function searchFsObj (fsobj, rearray) {
 
 
 
-function countAttr (fsobj) {
+function countAttr (fsobj, emptyflag) {
+    const empty=emptyflag;
     robj = {length: 0, title: 0, artist: 0, album: 0, albumcount: 0};
     ff({
 	lobj: fsobj,
+	fMassage: (lobj) => {
+	    if(empty==true && lobj.files.length==0 && lobj.directories.length==0) {
+		console.log("Empty: ",lobj.dirname)
+	    }
+	},
 	fFile: (lobj) => {
 	    if(lobj.files.length > 0 ) robj.albumcount++;
 	    robj.length +=  lobj.files.length;

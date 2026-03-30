@@ -1,31 +1,22 @@
 let  mediainfo  = require("mediainfo.js");
+
 let fs = require("node:fs");
-let b = fs.readFileSync(process.argv[2]);
-let oobj = {"a":"b"};
 
-async function findMediaInfo(b,m) {
-    let str="";
+async function findMediaInfo(f,m) {
 
-    oobj = await m.analyzeData(()=>b.length,()=>b);
-    aa = oobj.split("\n");
-    bb=[];
-    for (x of aa) if(x) bb.push(x)
-    aa=[];
-    for (x of bb) if(x == 'General' || x == 'Audio'){}else{aa.push(x)};
-    aa = aa.map(str=>str.replace(/\s+:/,":"))
-    aa = aa.map(str=>str.replace(/:\s/,":"))
-    aa = aa.map(str=>str.replace(/:/,"\":\""))
-    aa = aa.map(str=>str.replace(/^(.+)$/,"\"$1\""))
-    str = aa.toString()
-    str = '{'+str+'}';
-    oobj=JSON.parse(str)
+    let b = fs.readFileSync(f);
+
+    let lobj={};
+
+    await m.analyzeData(()=>b.length,()=>b).then((x)=>{lobj=x; console.log(lobj.media)}) ;
+    
+    lobj
+    
 }
 
 
 (async function(){
-    let m =  await mediainfo.default({ format: 'json' });
-    await findMediaInfo(b,m)
-    console.log(
-oobj
+let m =  await mediainfo.default({ format: 'object' });    
+    console.log(    await findMediaInfo(process.argv[2],m) 
     )}
 )();
