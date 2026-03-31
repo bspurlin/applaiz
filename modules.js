@@ -1,7 +1,7 @@
-fs = require("fs")
-path = require("path");
+import fs from 'node:fs'
+import path from'node:path'
 
-const NodeID3 = require('node-id3');
+let { default: NodeID3 }= await import('node-id3');
 
 const genrs = JSON.parse(fs.readFileSync("Genre_s.json"));
 
@@ -65,7 +65,7 @@ function searchFsObj (fsobj, rearray) {
 
 function countAttr (fsobj, emptyflag) {
     const empty=emptyflag;
-    robj = {length: 0, title: 0, artist: 0, album: 0, albumcount: 0};
+    let robj = {length: 0, title: 0, artist: 0, album: 0, albumcount: 0};
     ff({
 	lobj: fsobj,
 	fMassage: (lobj) => {
@@ -89,6 +89,7 @@ function countAttr (fsobj, emptyflag) {
 
 function mkDirObj(pathn,obj) {
     let numeric_path = pathn.split('.').filter(x => x);
+    let x;
     while((x = numeric_path.shift()) != undefined) obj=obj.directories[x];
     let directories, aa  = [];
     for (let i = 0; i < obj.directories.length; i++) {
@@ -191,7 +192,7 @@ function ff ({
 function searchDirObjs(searchterms, fsobj,parentpath) {//returns a dirObj
     let aa  = searchterms.split(",");
     let rearray = [];
-    for (r of aa) rearray.push(new RegExp(r.trim(),'i'));
+    for (let r of aa) rearray.push(new RegExp(r.trim(),'i'));
     let output = searchFsObj(fsobj,rearray);
     let robj = {};
     robj.dirname = "Search: " + searchterms;
@@ -216,16 +217,16 @@ function m4aFile(fn) {
       
      */
 
-    stats=fs.statSync(fn);
+    let stats=fs.statSync(fn);
     console.error("file name",fn,"stats ",stats.size);
-    b = Buffer.alloc(stats.size);
+    let b = Buffer.alloc(stats.size);
     b = fs.readFileSync(fn);
     
     let ilistl = b[b.indexOf("ilst")-2]*256 + b[b.indexOf("ilst")-1];
     console.error("ilistl = ",ilistl);
     if (!ilistl) return 0;
     let bilst = Buffer.allocUnsafe(ilistl);
-    for(i = 0; i < ilistl; i++)bilst[i]=b[b.indexOf("ilst")+i];
+    for(let i = 0; i < ilistl; i++)bilst[i]=b[b.indexOf("ilst")+i];
     let pointer = 0;
     let title,album, track, year,genre,albumartist,composer = "";
     let artist = " ";
@@ -240,7 +241,7 @@ function m4aFile(fn) {
 	}
 	tag = tag.replace(/[\x00-\x01]/g,"")
 	// console.error("tag = ",tag)
-	value = bilst.slice(pointer+4,pointer + bilst[pointer - 1] +bilst[pointer -2]*0x100 -1);
+	let value = bilst.slice(pointer+4,pointer + bilst[pointer - 1] +bilst[pointer -2]*0x100 -1);
 	
 	if (tag == 'trkn') {
 	    track = value[11] < 10?'0' + value[11]:value[11];
@@ -323,9 +324,9 @@ let outobj = {
 		    let stat_parent = fs.lstatSync(x.dirname);
 		    if (y.files &&  y?.files[0]?.artist ) {artist = y.files[0].artist} else {artist = x.dirname.replace(/.+\//,"")};
 		    y.newartist = artist;
-		    datenow = Date.now();
+		    let datenow = Date.now();
 		    
-		    ago = 	stat1.mtimeMs < stat1.birthtimeMs?
+		    let ago = 	stat1.mtimeMs < stat1.birthtimeMs?
 			(datenow - stat1.mtimeMs)/86400000 : (datenow - stat1.birthtimeMs)/86400000 ;
 		    
 		    if ( ago < ndays ){
@@ -456,4 +457,4 @@ function allHTML(fsobj){
 }
     
 
-module.exports = { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File, newOnly, HTMLul, newHTML, allHTML };
+export { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File, newOnly, HTMLul, newHTML, allHTML };

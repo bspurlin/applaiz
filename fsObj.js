@@ -1,20 +1,25 @@
 #!/usr/bin/node
 
-const { readdir, readdirSync, readFileSync } = require('fs');
-const NodeID3 = require('node-id3');
+import { readdir, readdirSync, readFileSync } from 'fs';
+import NodeID3 from 'node-id3';
 const re = /(mp3|m4a|flac|wav$)/i;
 const regexm4a = new RegExp('\.m4a$','i')
 const regextherest = new RegExp('(\.mp3$|\.wav$|\.flac$)','i')
-const crypto = require("node:crypto");
+import crypto from "node:crypto";
 
-const {m4aFile, mp3File } = require("./modules.js");
+import {m4aFile, mp3File } from "./modules.js";
 
 // option "-s" to follow symbolic links
 // option "-p" to create permalinks, i. e., permalinks don't exist when scanning a new directory
-opt = require('node-getopt').create([
+
+import Getopt from 'node-getopt';
+
+const opt = Getopt.create([
 	['s' , '', 'follow symbolic links'],
 	['p', '', 'create permalink']
-    ]).parseSystem();
+    ])
+opt.parseSystem();
+console.log(opt)
 
 let dirobj = {};
 let space = "\t";
@@ -64,6 +69,6 @@ function fst (dirname,space) {
     return fsr
 } 
 
-out = fst(opt.argv[0]);
+const out = fst(opt.argv[0]);
 
 console.log(JSON.stringify(out,null,2));

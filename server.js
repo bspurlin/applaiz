@@ -1,23 +1,31 @@
-const http = require('http'); 
-const fs = require('fs');
-const bodyParser = require('body-parser');
-const express = require('express');
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+import http from 'http'; 
+import fs from 'fs';
+import bodyParser from 'body-parser';
+import express from 'express';
 const app = express();
-const cors = require('cors');
+import cors from 'cors';
 app.use(cors({
     origin: '*'
 }));
 
-var n_new_days = 0;
-const opt = require('node-getopt').create([
+let n_new_days = 0;
+import Getopt from 'node-getopt';
+const opt = Getopt.create([
     ['' , 'n_new_days[=]'                    , 'new days','n'],
-]).parseSystem();
+]);
+opt.parseSystem();
 if (opt.options.n_new_days ){
     n_new_days = opt.options.n_new_days;
     console.log({"n_new_days": n_new_days})
 }
 
-const {ff, mkDirObj, searchDirObjs, newHTML } = require("./modules.js");
+import {ff, mkDirObj, searchDirObjs, newHTML } from "./modules.js";
 let permalinks = {};
 
 // massage the filesystem-object
