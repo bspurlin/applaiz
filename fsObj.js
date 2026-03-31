@@ -1,4 +1,4 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
 import { readdir, readdirSync, readFileSync } from 'fs';
 import NodeID3 from 'node-id3';
