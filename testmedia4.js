@@ -1,7 +1,7 @@
-#!/usr/bin/node
+#!/usr/bin/env  node
 
 import mediainfo from "node-mediainfo";
-let testname="Applaiz/Music by Label/Sony Vivarte/21 Music From The Court Of Charles V Nicolas Gombert Huelgas-Ensemble Paul Van Nevel/03 - Media vita.mp3"
+
 let fs = await import("node:fs");
 let direntries = fs.readdirSync(process.argv[2],{withFileTypes:"true"})
 
@@ -11,9 +11,9 @@ let filepromises = [];
 
 for ( let i = 0; i < direntries.length; i++ ) {
     if(direntries[i].name.match(/(mp3|m4a)$/i)){
-	let fname=direntries[i].path + "/" + direntries[i].name;
+	let fname=direntries[i].parentPath + "/" + direntries[i].name;
 	if(process.env.APPLAIZ_DBG) console.log(fname)
-	filepromises.push( await mediainfo(fname))
+	filepromises.push(await  mediainfo(fname))
     }
 }
 
@@ -24,7 +24,7 @@ Promise.all(filepromises).then(i => {
     for (const x of i) {
 	
 	console.log(
-	    {
+	    {"x":x.media.track[0],
 		trackNumber: x.media.track[0].Track_Position,
 		genre: x.media.track[0].Genre,
 		title: x.media.track[0].Title,

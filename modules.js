@@ -383,7 +383,7 @@ function HTMLul(grobj, addl) {
 	    fDir:(x,y)=>{ // L4 for each directory create a list element
 	        // including a link to the applaiz dirobj
 		let l = x.directories.length;
-		locname = path.basename(y.dirname);
+		let locname = path.basename(y.dirname);
 		
 		html_out = html_out + addl(y, locname);
 	    

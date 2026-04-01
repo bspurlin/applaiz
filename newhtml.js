@@ -1,22 +1,25 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
-opt = require('node-getopt').create([
+import { newHTML } from "./modules.js";
+
+import Getopt from 'node-getopt';
+
+const opt = Getopt.create([
     ['n' , '='                    , 'new days','n'],
-    ['f', '=', 'json dirobj file']
-]).parseSystem()
+    ['i', '=', 'json dirobj file']
+])
+opt.parseSystem()
 
-fs = require("fs");
+import fs from "fs";
 
-if (opt.options.n && opt.options.f){
+if (opt.options.n && opt.options.i){
     //OK
    
 } else {
-    console.error("Usage: tst5.js -n <number of days> -f <json file> "
+    console.error("Usage: newhtml.js -n <number of days> -i <json file> "
 		 );
     process.exit(1);
 }
-const { newHTML } = require("./modules.js");
 
-
-console.log(newHTML(JSON.parse(fs.readFileSync(opt.options.f)),opt.options.n))
+console.log(newHTML(JSON.parse(fs.readFileSync(opt.options.i)),opt.options.n))
 
