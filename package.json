@@ -25,6 +25,7 @@
     "mediainfo.js": "^0.2.1",
     "node-getopt": "^0.3.2",
     "node-id3": "^0.2.6",
+    "node-mediainfo": "^1.0.3",
     "object-sizeof": "^2.6.3"
   }
 }
