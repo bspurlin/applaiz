@@ -37,7 +37,7 @@ let addendobj_aa = [];
 
 if (opt.argv[0]) {
     let fsobj_files = opt.argv[0];
-    for (f of fsobj_files.split(",")) {
+    for (let f of fsobj_files.split(",")) {
 	addendobj_aa.push(JSON.parse(fs.readFileSync(f)));
     }
 } else if (opt.options.del) {
