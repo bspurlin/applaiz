@@ -126,6 +126,7 @@ function mkDirObj(pathn,obj) {
 	'path': obj.path,
 	'perma': obj.perma,
 	'html': obj.html,
+	'template': obj.template,
 	'directories': aa,
 	'params': {"d": obj.parent },
 	'serverpath': "/"
