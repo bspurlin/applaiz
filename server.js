@@ -50,7 +50,7 @@ const fsobj = ff(
     }
 )
 
-if (n_new_days) {
+if (n_new_days > 0) {
     let newdir = {
 	"directories":[],
 	"files":[],

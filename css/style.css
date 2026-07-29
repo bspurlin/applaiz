@@ -92,9 +92,13 @@ td.playicon {
   font-weight: bold;
 }
 
+.indexrow{
+  position:relative;
+}
+
 
 .hoverMeta{
-  position:relative;
+ overflow:hidden;
 }
 
 .metaContent{
@@ -104,16 +108,17 @@ td.playicon {
   border:1px;
   background-color:white;
   border-style:solid;
-  border-width:1px;
-  border-color:red;
+  border-width:6px;
+  border-color:gray;
   padding:3px;
   color:700070; 
-  top:0px; 
+  top: 50%; 
   font-size: larger;
-  left: 10%;
+  right: 0;
+  width: 30%;
 }
 
-.hoverMeta:focus span.metaContent{
+.hoverMeta:focus .metaContent{
     display:block;
 }
 
