@@ -112,10 +112,9 @@ td.playicon {
   border-color:gray;
   padding:3px;
   color:700070; 
-  top: 50%; 
   font-size: larger;
   right: 0;
-  width: 30%;
+  width: 40%;
 }
 
 .hoverMeta:focus .metaContent{
