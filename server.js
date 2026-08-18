@@ -81,8 +81,6 @@ app.post('/dirobj/',(req,res)=>{
 	"dir":d,
 	"dirname":retval.dirname,
 	"template":retval.template,
-	"dn":req.get("ssl_client_s_dn"),
-	"sn": req.get("ssl_client_m_serial"),
 	"verified": req.get("ssl_client_verify")});
     res.end(JSON.stringify(retval));
 });
@@ -91,8 +89,6 @@ app.post('/dirobj_nocache/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
     console.log({
 	"dirobj_nocache":JSON.stringify(req.body),
-	"dn":req.get("ssl_client_s_dn"),
-	"sn": req.get("ssl_client_m_serial"),
 	"verified": req.get("ssl_client_verify")});
     res.end(JSON.stringify(mkDirObj(req.body.d,fsobj)));
 });
@@ -146,6 +142,8 @@ app.get('/:patth',(req,res)=>{
 	  "X-Forwarded-Host = ": req.get('X-Forwarded-Host'),
 	  "X-Forwarded-For = ": req.get('X-Forwarded-For'),
 	  "Cf-Access-Authenticated-User-Email = ": req.get('Cf-Access-Authenticated-User-Email'),
+	  "dn":req.get("ssl_client_s_dn"),
+	  "sn": req.get("ssl_client_m_serial"),
 	  "patth": req.params.patth}
 	}
     );
