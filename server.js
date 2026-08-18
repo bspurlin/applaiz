@@ -145,6 +145,7 @@ app.get('/:patth',(req,res)=>{
 	  "user-agent":req.get('user-agent'),
 	  "X-Forwarded-Host = ": req.get('X-Forwarded-Host'),
 	  "X-Forwarded-For = ": req.get('X-Forwarded-For'),
+	  "Cf-Access-Authenticated-User-Email = ": req.get('Cf-Access-Authenticated-User-Email'),
 	  "patth": req.params.patth}
 	}
     );
