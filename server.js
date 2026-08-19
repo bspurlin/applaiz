@@ -117,7 +117,7 @@ app.get('/css/*', (req, res)=>{
 app.get('/Applaiz/*', (req, res)=>{
     let decoded = decodeURI(req.path);
     decoded = decoded.replace(re,"#");
-    console.log("Shared: ",decoded,  req.ip, Date());
+    console.log("Shared: ",decoded, req.get('Cf-Access-Authenticated-User-Email')?req.get('Cf-Access-Authenticated-User-Email'):"", req.get("ssl_client_s_dn")?req.get("ssl_client_s_dn"):"", req.ip, Date());
     res.sendFile( __dirname + "/" + decoded)
 })
 
@@ -147,7 +147,14 @@ app.get('/:patth',(req,res)=>{
 	  "patth": req.params.patth}
 	}
     );
-
+    res.set({
+        // s-maxage=0 instructs Cloudflare NOT to cache it at the edge
+        // private ensures downstream shared caches skip it entirely
+        // no-store forces the browser never to save a copy
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, private, s-maxage=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
     res.render("index",{"obj": {"patth":req.params.patth}});
 });
 
