@@ -80,16 +80,16 @@ app.post('/dirobj/',(req,res)=>{
 	"dirObj":JSON.stringify(req.body),
 	"dir":d,
 	"dirname":retval.dirname,
-	"template":retval.template,
-	"verified": req.get("ssl_client_verify")});
+	"template":retval.template
+    });
     res.end(JSON.stringify(retval));
 });
 
 app.post('/dirobj_nocache/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
     console.log({
-	"dirobj_nocache":JSON.stringify(req.body),
-	"verified": req.get("ssl_client_verify")});
+	"dirobj_nocache":JSON.stringify(req.body)
+    });
     res.end(JSON.stringify(mkDirObj(req.body.d,fsobj)));
 });
 
@@ -117,7 +117,7 @@ app.get('/css/*', (req, res)=>{
 app.get('/Applaiz/*', (req, res)=>{
     let decoded = decodeURI(req.path);
     decoded = decoded.replace(re,"#");
-    console.log("Shared: ",decoded, req.get('Cf-Access-Authenticated-User-Email')?req.get('Cf-Access-Authenticated-User-Email'):"", req.get("ssl_client_s_dn")?req.get("ssl_client_s_dn"):"", req.ip, Date());
+    console.log("Shared: ",decoded, req.get('Cf-Access-Authenticated-User-Email'), req.get("ssl_client_s_dn"), req.ip, Date());
     res.sendFile( __dirname + "/" + decoded)
 })
 
@@ -144,6 +144,7 @@ app.get('/:patth',(req,res)=>{
 	  "Cf-Access-Authenticated-User-Email = ": req.get('Cf-Access-Authenticated-User-Email'),
 	  "dn":req.get("ssl_client_s_dn"),
 	  "sn": req.get("ssl_client_m_serial"),
+	  "verified": req.get("ssl_client_verify"),
 	  "patth": req.params.patth}
 	}
     );
