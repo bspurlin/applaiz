@@ -1,0 +1,188 @@
+import { useEffect, useState } from "react";
+
+export default function App() {
+  const [poll, setPoll] = useState(null); // { question, choices: [{id, label, total}] }
+  const [status, setStatus] = useState("loading"); // loading | ready | voting | done | error
+  const [myChoiceId, setMyChoiceId] = useState(null);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    fetch("/api/poll")
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load the question.");
+        return res.json();
+      })
+      .then((data) => {
+        setPoll(data);
+        setStatus("ready");
+      })
+      .catch((err) => {
+        setErrorMsg(err.message);
+        setStatus("error");
+      });
+  }, []);
+
+  async function castVote(choiceId) {
+    if (status !== "ready") return; // ignore double-clicks / already voted
+    setStatus("voting");
+    setMyChoiceId(choiceId);
+
+    try {
+      const res = await fetch("/api/vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ choiceId }),
+      });
+      if (!res.ok) throw new Error("Your vote couldn't be recorded.");
+      const updated = await res.json();
+      setPoll(updated);
+      setStatus("done");
+    } catch (err) {
+      setErrorMsg(err.message);
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-ink flex items-center justify-center p-6">
+      {status === "loading" && <LoadingState />}
+      {status === "error" && <ErrorState message={errorMsg} />}
+      {(status === "ready" || status === "voting") && poll && (
+        <QuestionView
+          question={poll.question}
+          choices={poll.choices}
+          pendingChoiceId={status === "voting" ? myChoiceId : null}
+          onSelect={castVote}
+        />
+      )}
+      {status === "done" && poll && (
+        <ResultsView choices={poll.choices} myChoiceId={myChoiceId} />
+      )}
+    </div>
+  );
+}
+
+function LoadingState() {
+  return (
+    <p className="font-body text-pencil text-sm tracking-wide animate-pulse">
+      Loading the question…
+    </p>
+  );
+}
+
+function ErrorState({ message }) {
+  return (
+    <div className="text-center max-w-sm">
+      <p className="font-display text-paper text-xl mb-2">Something went wrong</p>
+      <p className="font-body text-pencil text-sm">{message}</p>
+    </div>
+  );
+}
+
+function QuestionView({ question, choices, pendingChoiceId, onSelect }) {
+  return (
+    <div className="w-full max-w-md">
+      <div className="bg-paper rounded-2xl shadow-2xl px-6 py-8 sm:px-8 sm:py-10">
+        <p className="font-body text-stamp text-xs font-semibold tracking-[0.2em] uppercase mb-3">
+          One question
+        </p>
+        <h1 className="font-display text-ink text-2xl sm:text-3xl font-bold leading-snug mb-8">
+          {question}
+        </h1>
+
+        <div className="flex flex-col gap-3">
+          {choices.map((choice) => {
+            const isPending = pendingChoiceId === choice.id;
+            const isDisabled = pendingChoiceId !== null;
+            return (
+              <button
+                key={choice.id}
+                onClick={() => onSelect(choice.id)}
+                disabled={isDisabled}
+                className={[
+                  "group relative w-full text-left rounded-xl border-2 px-5 py-4",
+                  "font-body font-medium text-ink transition-all duration-150",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-stamp focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
+                  isPending
+                    ? "border-stamp bg-stamp/10 scale-[0.98]"
+                    : "border-ink/10 bg-white/60 hover:border-stamp hover:bg-stamp/5 active:scale-[0.98]",
+                  isDisabled && !isPending ? "opacity-40" : "",
+                ].join(" ")}
+              >
+                <span className="flex items-center justify-between">
+                  {choice.label}
+                  <span
+                    className={[
+                      "w-5 h-5 rounded-full border-2 flex-shrink-0 transition-colors",
+                      isPending ? "border-stamp bg-stamp" : "border-ink/20 group-hover:border-stamp",
+                    ].join(" ")}
+                  />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="font-body text-pencil text-xs mt-6 text-center">
+          Tap a choice — you can only answer once.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ResultsView({ choices, myChoiceId }) {
+  const totalVotes = choices.reduce((sum, c) => sum + c.total, 0);
+  const maxTotal = Math.max(1, ...choices.map((c) => c.total));
+
+  return (
+    <div className="w-full max-w-md">
+      <div className="bg-paper rounded-2xl shadow-2xl px-6 py-8 sm:px-8 sm:py-10">
+        <p className="font-body text-stamp text-xs font-semibold tracking-[0.2em] uppercase mb-1">
+          Recorded
+        </p>
+        <h1 className="font-display text-ink text-2xl sm:text-3xl font-bold leading-snug mb-1">
+          Results so far
+        </h1>
+        <p className="font-body text-pencil text-sm mb-8">
+          {totalVotes} {totalVotes === 1 ? "vote" : "votes"} total
+        </p>
+
+        <div className="flex flex-col gap-5">
+          {choices.map((choice) => {
+            const pct = totalVotes === 0 ? 0 : Math.round((choice.total / totalVotes) * 100);
+            const barWidth = `${(choice.total / maxTotal) * 100}%`;
+            const isMine = choice.id === myChoiceId;
+            return (
+              <div key={choice.id}>
+                <div className="flex items-baseline justify-between mb-1.5">
+                  <span className="font-body font-medium text-ink flex items-center gap-2">
+                    {choice.label}
+                    {isMine && (
+                      <span className="font-body text-[10px] font-semibold tracking-wide uppercase text-stamp border border-stamp rounded-full px-1.5 py-0.5">
+                        your vote
+                      </span>
+                    )}
+                  </span>
+                  <span className="font-body text-sm text-pencil tabular-nums">
+                    {choice.total} · {pct}%
+                  </span>
+                </div>
+                <div className="h-2.5 rounded-full bg-ink/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-stamp transition-all duration-500 ease-out"
+                    style={{ width: barWidth }}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="font-body text-pencil text-xs mt-8 text-center">
+          Thanks for answering. This poll is now closed to you.
+        </p>
+      </div>
+    </div>
+  );
+}
