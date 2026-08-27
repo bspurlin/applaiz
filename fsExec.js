@@ -7,8 +7,7 @@ const crypto = await import("node:crypto");
 
 console.error( process.argv[2])
 
-let global="yyyy";
-const command = 'mediascript.sh';
+const command = './mediascript.sh';
 
 const execPromise = (command) => {return new Promise((resolve, reject) => {exec(command, (error, stdout, stderr) => {if(error){reject(error); return};resolve(stdout.trim());});});};
 

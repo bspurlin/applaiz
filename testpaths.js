@@ -1,22 +1,27 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
-fs = require("fs");
-path = require("path");
-opt = require('node-getopt').create([
+import fs from "fs";
+import path from "path";
+import Getopt from 'node-getopt';
+
+const opt = Getopt.create([
     ['f','', "count the filename, album, artist, title in an fsobj"],
-    ['s' , '=', 'search string-pattern'],
+    ['s' , '=', 'search string-pattern within an fsobj'],
     ['p','=',"path name in number-dot format"],
     ['g','', "generate a mkdirobj"],
     ['e' , ''                   , 'is empty'],
     ['m','=',"process m4a ilst data"],
     ['x','=','optional dirname prefix with -m']
-]).parseSystem();
+])
+opt.parseSystem();
 
-size1of = require('object-sizeof');
+import size1of  from 'object-sizeof';
+
+let fsobj = {}
 
 if(opt.argv[0])fsobj=JSON.parse(fs.readFileSync(opt.argv[0]));
 
-const {countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File } = require("./modules.js");
+import {countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File } from "./modules.js"
 
 if (opt.options.s)  fs.writeFileSync(1,JSON.stringify(searchDirObjs(opt.options.s,fsobj),null,1));
 
@@ -41,11 +46,11 @@ function audioMetaData (dirname) {
     bigobj.directories = [];
     bigobj.files = [];
     bigobj.dirname = opt.options.x + "/" + path.basename(dirn); 
-    dirlist=adir.filter((x) => x.match(/^[^\.].+(m4a|mp3)/));
+    let dirlist=adir.filter((x) => x.match(/^[^\.].+(m4a|mp3)/));
     let b,fn;
-    for (filename of dirlist) {
+    for (let filename of dirlist) {
 	fn = dirn + "/" + filename;
-	meta = m4aFile(fn);
+	let meta = m4aFile(fn);
 	if (!meta ) meta = mp3File(fn);
 	meta.filename = filename;
 	bigobj.files.push(meta);

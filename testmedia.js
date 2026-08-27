@@ -1,6 +1,6 @@
-let  mediainfo  = require("mediainfo.js");
+import mediainfo from "mediainfo.js";
 
-let fs = require("node:fs");
+import fs from "node:fs";
 
 async function findMediaInfo(f,m) {
 

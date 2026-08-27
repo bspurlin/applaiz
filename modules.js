@@ -1,7 +1,7 @@
-fs = require("fs")
-path = require("path");
+import fs from 'node:fs'
+import path from'node:path'
 
-const NodeID3 = require('node-id3');
+let { default: NodeID3 }= await import('node-id3');
 
 const genrs = JSON.parse(fs.readFileSync("Genre_s.json"));
 
@@ -65,7 +65,7 @@ function searchFsObj (fsobj, rearray) {
 
 function countAttr (fsobj, emptyflag) {
     const empty=emptyflag;
-    robj = {length: 0, title: 0, artist: 0, album: 0, albumcount: 0};
+    let robj = {length: 0, title: 0, artist: 0, album: 0, albumcount: 0};
     ff({
 	lobj: fsobj,
 	fMassage: (lobj) => {
@@ -89,6 +89,7 @@ function countAttr (fsobj, emptyflag) {
 
 function mkDirObj(pathn,obj) {
     let numeric_path = pathn.split('.').filter(x => x);
+    let x;
     while((x = numeric_path.shift()) != undefined) obj=obj.directories[x];
     let directories, aa  = [];
     for (let i = 0; i < obj.directories.length; i++) {
@@ -125,6 +126,7 @@ function mkDirObj(pathn,obj) {
 	'path': obj.path,
 	'perma': obj.perma,
 	'html': obj.html,
+	'template': obj.template,
 	'directories': aa,
 	'params': {"d": obj.parent },
 	'serverpath': "/"
@@ -191,7 +193,7 @@ function ff ({
 function searchDirObjs(searchterms, fsobj,parentpath) {//returns a dirObj
     let aa  = searchterms.split(",");
     let rearray = [];
-    for (r of aa) rearray.push(new RegExp(r.trim(),'i'));
+    for (let r of aa) rearray.push(new RegExp(r.trim(),'i'));
     let output = searchFsObj(fsobj,rearray);
     let robj = {};
     robj.dirname = "Search: " + searchterms;
@@ -216,16 +218,16 @@ function m4aFile(fn) {
       
      */
 
-    stats=fs.statSync(fn);
+    let stats=fs.statSync(fn);
     console.error("file name",fn,"stats ",stats.size);
-    b = Buffer.alloc(stats.size);
+    let b = Buffer.alloc(stats.size);
     b = fs.readFileSync(fn);
     
     let ilistl = b[b.indexOf("ilst")-2]*256 + b[b.indexOf("ilst")-1];
     console.error("ilistl = ",ilistl);
     if (!ilistl) return 0;
     let bilst = Buffer.allocUnsafe(ilistl);
-    for(i = 0; i < ilistl; i++)bilst[i]=b[b.indexOf("ilst")+i];
+    for(let i = 0; i < ilistl; i++)bilst[i]=b[b.indexOf("ilst")+i];
     let pointer = 0;
     let title,album, track, year,genre,albumartist,composer = "";
     let artist = " ";
@@ -240,7 +242,7 @@ function m4aFile(fn) {
 	}
 	tag = tag.replace(/[\x00-\x01]/g,"")
 	// console.error("tag = ",tag)
-	value = bilst.slice(pointer+4,pointer + bilst[pointer - 1] +bilst[pointer -2]*0x100 -1);
+	let value = bilst.slice(pointer+4,pointer + bilst[pointer - 1] +bilst[pointer -2]*0x100 -1);
 	
 	if (tag == 'trkn') {
 	    track = value[11] < 10?'0' + value[11]:value[11];
@@ -323,10 +325,11 @@ let outobj = {
 		    let stat_parent = fs.lstatSync(x.dirname);
 		    if (y.files &&  y?.files[0]?.artist ) {artist = y.files[0].artist} else {artist = x.dirname.replace(/.+\//,"")};
 		    y.newartist = artist;
-		    datenow = Date.now();
+		    let datenow = Date.now();
 		    
-		    ago = 	stat1.mtimeMs < stat1.birthtimeMs?
-			(datenow - stat1.mtimeMs)/86400000 : (datenow - stat1.birthtimeMs)/86400000 ;
+		    // let ago = 	stat1.mtimeMs < stat1.birthtimeMs?
+			// (datenow - stat1.mtimeMs)/86400000 : (datenow - stat1.birthtimeMs)/86400000 ;
+		    let ago = (datenow - stat1.birthtimeMs)/86400000;
 		    
 		    if ( ago < ndays ){
 			if(process.env.APPLAIZ_DBG)
@@ -353,53 +356,27 @@ let outobj = {
 	   }
 }
 
-function newHTML(fsobj , n) {
+function HTMLul(grobj, addl) {
 
     
     let html_out = ``;
 
     ff( //begin L4
 	{
-	    lobj:ff( //begin L3
-		{
-		    lobj:ff( //begin L2
-			{
-			    lobj: newOnly(fsobj, n).isnewobj    // L1
-			    ,
-			    
-			    fDir:(x,y)=>{  // L2 if a directory is new
-			        // its parent is also new.
-				
-				if ( y.isnew) x.isnew = 1;
-				
-			    }
-			    
-			}
-		    )  // end L2
-		    ,
-		    
-		    fMassage(lobj) { // L3 we want to ignore what is not new
-			
-			lobj.directories = lobj.directories.filter(dir => dir.isnew == 1 );
-			if (lobj.directories.length > 0 && lobj.files.length > 0) {
-			    lobj.files = []
-			}
-		    }
-		}
-	    )  // end L3
+	    lobj:grobj
 	    ,
 	    
 	    fMassage(lobj) { // L4 Create HTML. Start with an unordered list tag
 	        // for each directory that contains directories
 		
 		if (lobj.directories.length > 0 )html_out = html_out + `
-   <ul>
+   <ul class="tree">
 `;
 		
 		if(process.env.APPLAIZ_DBG_HTML)
 		    console.error(
 			{
-			    "fMassage lobj": lobj.dirname,
+    			    "fMassage lobj": lobj.dirname,
 			    "fMassage lobj dirl": lobj.directories.length,
 			    "fMassage lobj filesl": lobj.files.length
 			}
@@ -408,9 +385,9 @@ function newHTML(fsobj , n) {
 	    fDir:(x,y)=>{ // L4 for each directory create a list element
 	        // including a link to the applaiz dirobj
 		let l = x.directories.length;
-		locname = path.basename(y.dirname);
+		let locname = path.basename(y.dirname);
 		
-		html_out = html_out + `<li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  >` + locname + `</span>`;
+		html_out = html_out + addl(y, locname);
 	    
 		if(process.env.APPLAIZ_DBG_HTML)
 		    console.error(
@@ -442,5 +419,44 @@ function newHTML(fsobj , n) {
     return html_out
 }
 
+function newHTML(fsobj, n) {
+    return HTMLul(
+		ff( //begin L3
+		    {
+			lobj:ff( //begin L2
+			    {
+				lobj: newOnly(fsobj, n).isnewobj    // L1
+				,
+				
+				fDir:(x,y)=>{  // L2 if a directory is new
+			            // its parent is also new.
+				    
+				    if ( y.isnew) x.isnew = 1;
+				    
+				}
+				
+			    }
+			)  // end L2
+			,
+			
+			fMassage(lobj) { // L3 we want to ignore what is not new
+			
+			    lobj.directories = lobj.directories.filter(dir => dir.isnew == 1 );
+			    if (lobj.directories.length > 0 && lobj.files.length > 0) {
+				lobj.files = []
+			    }
+			}
+		    }
+		),
+	(y,locnameq)=>{return `<li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  >` + locnameq + `</span>`}
+    )
+}
 
-module.exports = { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File, newOnly, newHTML };
+function allHTML(fsobj){
+    return HTMLul(fsobj,
+		  (y,locname)=>{return `<li perma=` + y.perma + ` ><input type="checkbox" perma="` +  y.perma  +  `" id="` +  y.perma + `"  ><label for="` + y.perma +`" class="applaiznew applaizli">`  + locname + `</label></input>`}
+		 )
+}
+    
+
+export { countAttr, ff, mkDirObj, searchFsObj, searchDirObjs, m4aFile, mp3File, newOnly, HTMLul, newHTML, allHTML };
