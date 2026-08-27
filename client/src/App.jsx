@@ -16,6 +16,7 @@ export default function App() {
 
 
     useEffect(() => {
+
         let isMounted = true;
         
         async function fetchData() {
@@ -36,7 +37,7 @@ export default function App() {
                 });
         }
 
-        fetchData();
+         fetchData();
 
         return () => { isMounted = false; };
     }, [options.body]);
@@ -50,7 +51,21 @@ export default function App() {
   };
 
   return (
-    <button onClick={() => handleFilterChange(dirobj.directories[0].perma)}>Change Options</button>
-  );
+
+      <div className="w-full max-w-md">
+	 
+      <div className="bg-paper rounded-2xl shadow-2xl px-6 py-8 sm:px-8 sm:py-10"></div>
+	  {status == "ready"   &&
+	   <button onClick={() => handleFilterChange(dirobj.directories[1].perma)}>
+	       <span>{dirobj.dirname}</span>
+	   </button>
+	  }
+	  
+ </div>
+
+);
+
+  
+
 }
 
