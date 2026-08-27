@@ -1,24 +1,32 @@
-#!/usr/bin/node
+#!/usr/bin/env node
 
-const fs = require('fs');
-const {ff, mkDirObj, countAttr,searchFsObj} = require("./modules.js");
-opt = require('node-getopt').create([
+import fs from 'fs';
+import {ff, mkDirObj, countAttr,searchFsObj} from "./modules.js";
+import { dirname } from 'path';
+
+
+
+import Getopt from 'node-getopt';
+
+const opt = Getopt.create([
     ['i', 'input=ARG',  'input fsobj', undefined],
     ['r' , ''                    , 'replace'],
     ['' ,'del='                   , 'delete'],  
     ['h' , 'help'                , 'display this help']
-]).bindHelp().parseSystem();
-
+])
+opt.bindHelp().parseSystem();
 
 if((opt.options.del && opt.options.r) || opt.options.del == "-r") {
-    console.error("Cannot delete" + opt.options.del + " and replace at the same time\n")
-    return
+    console.error("Cannot delete " + opt.options.del + " and replace at the same time\n")
+    process.exit(1)
 }
+
+let fsobj =  {};
 
 if(opt.options.i){
     fsobj = JSON.parse(fs.readFileSync(opt.options.i));
 }
-else return;
+else {console.error("addend.js -i <fsobj> ..."); process.exit(1)};
 
 
 
@@ -29,12 +37,12 @@ let addendobj_aa = [];
 
 if (opt.argv[0]) {
     let fsobj_files = opt.argv[0];
-    for (f of fsobj_files.split(",")) {
+    for (let f of fsobj_files.split(",")) {
 	addendobj_aa.push(JSON.parse(fs.readFileSync(f)));
     }
 } else if (opt.options.del) {
     const bdel=opt.options.del;
-    for (d of bdel.split(",")) {console.error("Here " + d);
+    for (let d of bdel.split(",")) {
 	addendobj_aa.push({"dirname": d})
     }
 }
@@ -47,8 +55,8 @@ let robj = ff(
     {lobj: fsobj,
      fMassage: (obj)=>{
 	 let r = -1;	 	 
-	 for ( addendobj of addendobj_aa) {
-	     if (path.dirname(addendobj.dirname) == obj.dirname) {
+	 for ( let addendobj of addendobj_aa) {
+	     if (dirname(addendobj.dirname) == obj.dirname) {
 		 if (opt.options.r) {
 		     r = obj.directories.findIndex((x)=>x.dirname == addendobj.dirname);
 		     if (r >= 0){
@@ -93,7 +101,7 @@ let robj = ff(
 	 }     
      },
      fDir: (lobj,x)=>{
-	 for ( addendobj of addendobj_aa) {
+	 for ( let addendobj of addendobj_aa) {
 	     if (opt.options.del && addendobj.dirname == x.dirname){
 		 console.error({"Delete": x.dirname});
 		 lobj.directories = lobj.directories.filter(dir => dir.dirname != addendobj.dirname )

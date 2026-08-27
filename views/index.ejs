@@ -46,7 +46,7 @@
       const  startparams = "<%= obj.patth %>";
       let params = {d: startparams};
 
-      fetchObj(params,"/dirobj").then(anobj =>{ renderTable(anobj);
+      fetchObj(params,"/dirobj").then(anobj =>{ renderTable(anobj,anobj.template);
 				      dirobj_cache[anobj.path] = anobj
 				    });
     //      for(x of ["abort","canplay","canplaythrough","ended","emptied","error","loadeddata","loadedmetadata","loadstart","pause","play","playing","progress","ratechange","seeked","seeking","stalled","suspend","timeupdate","volumechange","waiting"])audioElement.addEventListener(x,(e) => console.log("audioElement event type: ", e.type));
@@ -65,7 +65,7 @@ window.addEventListener('popstate', function (event)
 
 
 </head>
-<body>
+<body ontouchstart="">
 
     <div id="root"></div>
     <div id="ae"></div>

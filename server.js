@@ -1,23 +1,31 @@
-const http = require('http'); 
-const fs = require('fs');
-const bodyParser = require('body-parser');
-const express = require('express');
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+import http from 'http'; 
+import fs from 'fs';
+import bodyParser from 'body-parser';
+import express from 'express';
 const app = express();
-const cors = require('cors');
+import cors from 'cors';
 app.use(cors({
     origin: '*'
 }));
 
-var n_new_days = 0;
-const opt = require('node-getopt').create([
+let n_new_days = 0;
+import Getopt from 'node-getopt';
+const opt = Getopt.create([
     ['' , 'n_new_days[=]'                    , 'new days','n'],
-]).parseSystem();
+]);
+opt.parseSystem();
 if (opt.options.n_new_days ){
     n_new_days = opt.options.n_new_days;
     console.log({"n_new_days": n_new_days})
 }
 
-const {ff, mkDirObj, searchDirObjs, newHTML, HTMLul, newOnly } = require("./modules.js");
+import {ff, mkDirObj, searchDirObjs, newHTML } from "./modules.js";
 let permalinks = {};
 
 // massage the filesystem-object
@@ -42,47 +50,17 @@ const fsobj = ff(
     }
 )
 
-if (n_new_days) {
+if (n_new_days > 0) {
     let newdir = {
 	"directories":[],
 	"files":[],
 	"dirname": "New!",
 	"perma": "Newbang",
 	"path": "." + fsobj.directories.length,
-	"html": HTMLul(
-	    ff( //begin L3
-		{
-		    lobj:ff( //begin L2
-			{
-			    lobj: newOnly(fsobj, n_new_days).isnewobj    // L1
-			    ,
-			    
-			    fDir:(x,y)=>{  // L2 if a directory is new
-			        // its parent is also new.
-				
-				if ( y.isnew) x.isnew = 1;
-				
-			    }
-			    
-			}
-		    )  // end L2
-		    ,
-		    
-		    fMassage(lobj) { // L3 we want to ignore what is not new
-			
-			lobj.directories = lobj.directories.filter(dir => dir.isnew == 1 );
-			if (lobj.directories.length > 0 && lobj.files.length > 0) {
-			    lobj.files = []
-			}
-		    }
-		}
-	    ),
-	    (y,locname)=>{return `<li perma=` + y.perma + ` ><input type="checkbox" perma=" id="` +  y.perma + `"  ><label for="` + y.perma +`"></label></input><span   class="applaiznew applaizli"  perma="` + y.perma + `" >` +  locname + `</span>`}
-	),
+	"html": newHTML(structuredClone(fsobj), n_new_days),
 	"template": 1
     };
     fsobj.directories.push(newdir);
-    console.log(newdir.html);
     permalinks[newdir.perma] = newdir.path
 }
 
@@ -102,19 +80,16 @@ app.post('/dirobj/',(req,res)=>{
 	"dirObj":JSON.stringify(req.body),
 	"dir":d,
 	"dirname":retval.dirname,
-	"dn":req.get("ssl_client_s_dn"),
-	"sn": req.get("ssl_client_m_serial"),
-	"verified": req.get("ssl_client_verify")});
+	"template":retval.template
+    });
     res.end(JSON.stringify(retval));
 });
 
 app.post('/dirobj_nocache/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
     console.log({
-	"dirobj_nocache":JSON.stringify(req.body),
-	"dn":req.get("ssl_client_s_dn"),
-	"sn": req.get("ssl_client_m_serial"),
-	"verified": req.get("ssl_client_verify")});
+	"dirobj_nocache":JSON.stringify(req.body)
+    });
     res.end(JSON.stringify(mkDirObj(req.body.d,fsobj)));
 });
 
@@ -142,7 +117,7 @@ app.get('/css/*', (req, res)=>{
 app.get('/Applaiz/*', (req, res)=>{
     let decoded = decodeURI(req.path);
     decoded = decoded.replace(re,"#");
-    console.log("Shared: ",decoded,  req.ip, Date());
+    console.log("Shared: ",decoded, req.get('Cf-Access-Authenticated-User-Email'), req.get("ssl_client_s_dn"), req.ip, Date());
     res.sendFile( __dirname + "/" + decoded)
 })
 
@@ -166,10 +141,21 @@ app.get('/:patth',(req,res)=>{
 	  "user-agent":req.get('user-agent'),
 	  "X-Forwarded-Host = ": req.get('X-Forwarded-Host'),
 	  "X-Forwarded-For = ": req.get('X-Forwarded-For'),
+	  "Cf-Access-Authenticated-User-Email = ": req.get('Cf-Access-Authenticated-User-Email'),
+	  "dn":req.get("ssl_client_s_dn"),
+	  "sn": req.get("ssl_client_m_serial"),
+	  "verified": req.get("ssl_client_verify"),
 	  "patth": req.params.patth}
 	}
     );
-
+    res.set({
+        // s-maxage=0 instructs Cloudflare NOT to cache it at the edge
+        // private ensures downstream shared caches skip it entirely
+        // no-store forces the browser never to save a copy
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, private, s-maxage=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+    });
     res.render("index",{"obj": {"patth":req.params.patth}});
 });
 

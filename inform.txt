@@ -1,0 +1,11 @@
+{
+    qxfilenameqx: qx%FileNameExtension%qx,
+    qxtrackNumberqx: qx%Track/Position%qx,
+    qxgenreqx: qx%Genre%qx,
+    qxtitleqx: qx%Title%qx,
+    qxartistqx: qx%Performer%qx,
+    qxalbumartistqx: qx%Album/Performer%qx,
+    qxyearqx: qx%Recorded_Date%qx,
+    qxalbumqx: qx%Album%qx,
+    qxcomposerqx: qx%Composer%qx
+},
