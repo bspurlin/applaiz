@@ -13,7 +13,7 @@ export default function App() {
     const [status, setStatus] = useState("loading"); // loading 
     const [myChoiceId, setMyChoiceId] = useState(null);
     const [errorMsg, setErrorMsg] = useState("");
-
+    const [prevdir, setPrevDir] = useState("applaiz");
 
     useEffect(() => {
 
@@ -50,26 +50,19 @@ export default function App() {
     setOptions(prev => ({ ...prev, body: '{"d":"' + newQuery + '"}' }));
   };
 
-  return (
-
-      <div className="w-full max-w-md">
-	 
-	  {status == "ready"   &&
-	   <ul>
-	       <li><button onClick={() => handleFilterChange(dirobj.directories[0].perma)}>
-		   <span>{dirobj.directories[0].name}</span>
-	       </button></li>
-	       <li><button onClick={() => handleFilterChange(dirobj.directories[1].perma)}>
-		   <span>{dirobj.directories[1].name}</span>
-	       </button></li>
-	   </ul>
-	  }
-	  
-      </div>
-
+return (
+  <div className="w-full max-w-md">
+    {status == "ready" && (
+      <ul>
+        {dirobj.directories.map((directory, index) => (
+          <li class="rounded-box"   key={directory.perma || index}>
+            <button onClick={() => handleFilterChange(directory.perma)}>
+		<span>{directory.name.replace(/\./g," ")}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
 );
-
-  
-
 }
-
