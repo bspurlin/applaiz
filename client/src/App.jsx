@@ -13,7 +13,7 @@ export default function App() {
     const [status, setStatus] = useState("loading"); // loading 
     const [myChoiceId, setMyChoiceId] = useState(null);
     const [errorMsg, setErrorMsg] = useState("");
-    const [prevdir, setPrevDir] = useState("applaiz");
+    const [prevdir, setPrevDir] = useState(null);
 
     useEffect(() => {
 
@@ -28,6 +28,7 @@ export default function App() {
                 .then((data) => {
                     if (isMounted) {
                         setDirobj(data);
+			setPrevDir(dirobj);
                         setStatus("ready");
                     }
                 })
@@ -45,15 +46,20 @@ export default function App() {
   console.log("dirobj", dirobj);
 
 
-  //Event handler just updates the state
+  //Event handler updates options.body
   const handleFilterChange = (newQuery) => {
     setOptions(prev => ({ ...prev, body: '{"d":"' + newQuery + '"}' }));
   };
 
-return (
-  <div className="w-full max-w-md">
+    return (
+	<div className="w-full max-w-md">
+
     {status == "ready" && (
-      <ul>
+
+	<ul>
+	    <li class="rounded-box"   key={dirobj.perma}>
+		<button  onClick={() => setDirobj(prevdir)} ><span>Back</span></button>
+	    </li>
         {dirobj.directories.map((directory, index) => (
           <li class="rounded-box"   key={directory.perma || index}>
             <button onClick={() => handleFilterChange(directory.perma)}>
