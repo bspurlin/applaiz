@@ -45,7 +45,7 @@ export default function App() {
   console.log("dirobj", dirobj);
 
 
-  // 4. Event handler just updates the state
+  //Event handler just updates the state
   const handleFilterChange = (newQuery) => {
     setOptions(prev => ({ ...prev, body: '{"d":"' + newQuery + '"}' }));
   };
@@ -54,14 +54,18 @@ export default function App() {
 
       <div className="w-full max-w-md">
 	 
-      <div className="bg-paper rounded-2xl shadow-2xl px-6 py-8 sm:px-8 sm:py-10"></div>
 	  {status == "ready"   &&
-	   <button onClick={() => handleFilterChange(dirobj.directories[1].perma)}>
-	       <span>{dirobj.dirname}</span>
-	   </button>
+	   <ul>
+	       <li><button onClick={() => handleFilterChange(dirobj.directories[0].perma)}>
+		   <span>{dirobj.directories[0].name}</span>
+	       </button></li>
+	       <li><button onClick={() => handleFilterChange(dirobj.directories[1].perma)}>
+		   <span>{dirobj.directories[1].name}</span>
+	       </button></li>
+	   </ul>
 	  }
 	  
- </div>
+      </div>
 
 );
 
