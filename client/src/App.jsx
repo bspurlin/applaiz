@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { flushSync } from "react-dom";
 
 export default function App() {
     const [options, setOptions] = useState({
@@ -13,11 +14,24 @@ export default function App() {
     const [status, setStatus] = useState("loading"); // loading 
     const [myChoiceId, setMyChoiceId] = useState(null);
     const [errorMsg, setErrorMsg] = useState("");
-    const [prevdir, setPrevDir] = useState(null);
-    const [stack, setStack] = useState([]);
-    const [dirobjcache, setDirobjCache] = useState({
-	path: null
+    const dirobjcache = useRef({
+
     });
+
+
+  // Map persists across renders, doesn't trigger re-renders itself
+  const nodeRefs = useRef(new Map());
+
+  // Callback ref factory — registers/unregisters DOM nodes by id
+  const registerRef = (id) => (el) => {
+    if (el) {
+      nodeRefs.current.set(id, el);
+    } else {
+      nodeRefs.current.delete(id); // cleanup on unmount
+    }
+  };
+
+    
     useEffect(() => {
 
         let isMounted = true;
@@ -31,8 +45,9 @@ export default function App() {
                 .then((data) => {
                     if (isMounted) {
                         setDirobj(data);
-			setPrevDir(dirobj);
                         setStatus("ready");
+			dirobjcache.current = {...dirobjcache.current,[data.path]: data} ;
+
                     }
                 })
                 .catch((err) => {
@@ -46,35 +61,34 @@ export default function App() {
         return () => { isMounted = false; };
     }, [options.body]);
 
-    console.log("dirobj", dirobj);
+//    console.log("dirobj", dirobj);
 
     //Event handler sets dirobj to the parent, triggering render of the parent
-    const handleBack = (parent) => {parent && setDirobj(dirobjcache[parent])};
+    const handleBack = (parent,path) => {
+	if (true) {
+	    let lobj = dirobjcache.current[parent];
+	    console.log("handleback parent: ",  parent, "dirobjcache.current[parent]", lobj)
+	    console.log("handleback path: ",  path, "dirobjcache.current[path]", lobj)
+
+	    setDirobj(lobj);
+
+    }
+    };
 
 
-    //Event handler updates options.body triggering fetch of a new dirobj, and caches the current dirobj
-    const handleDirobjChange = (newPerma,newdir) => {
-	//TBD if (dirobjcache[newdir]) {console.log("cache hit ", newdir);setDirobj(dirobjcache[newdir]);return};
-	setDirobjCache(prev => ({ ...prev, [dirobj.path]: dirobj }));
-	setOptions(prev => ({ ...prev, body: '{"d":"' + newPerma + '"}' }));
+    //Event handler updates options.body triggering fetch of a new dirobj,
+    // unless cached and sets dirobj from cache 
+
+    const handleDirobjChange = (newPerma,newPath) => {
+	console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
+
+	if (dirobjcache.current[newPath]) {
+	    setDirobj(dirobjcache.current[newPath])
+	} else {
+	    setOptions(prev => ({ ...prev, body: '{"d":"' + newPerma + '"}' }));
+	}
   };
 									  
-    function push(item) {console.log("pushing",item.dirname);
-	    setStack((prevStack) => [...prevStack, item]);
-    };
-
-    function pop() {	console.log("before popping",stack[stack.length - 1].dirname,"stacklength",stack.length);
-	if (stack.length === 0) return;
-  
-	// Captures the top item before removing it
-	const topItem = stack[stack.length - 1]; 
-	
-	setStack((prevStack) => prevStack.slice(0, -1));
-	return topItem;
-    };
-	
-
-
     return (
 	<div className="w-full max-w-md">
 
@@ -82,17 +96,18 @@ export default function App() {
 
 	<ul>
 	    <li class="rounded-box"   key={dirobj.perma}>
-		<button  onClick={() => {handleBack(dirobj.parent)}} ><span>Back</span></button>
+		<button  onClick={() => {handleBack(dirobj.parent,dirobj.path)}} ><span>Back</span></button>
 	    </li>
         {dirobj.directories.map((directory, index) => (
-          <li class="rounded-box"   key={directory.perma || index}>
+            <li class="rounded-box" id={directory.perma} key={directory.perma || index} ref={registerRef(directory.perma)} >
               <button onClick={() => {
 			  handleDirobjChange(directory.perma,directory.path);
 		      }}>
 		<span>{directory.name.replace(/\./g," ")}</span>
             </button>
           </li>
-        ))}
+        ))
+	}
       </ul>
     )}
   </div>
