@@ -14,87 +14,94 @@ export default function App() {
     const [status, setStatus] = useState("loading"); // loading 
     const [myChoiceId, setMyChoiceId] = useState(null);
     const [errorMsg, setErrorMsg] = useState("");
-    const dirobjcache = useRef({
+    const [pendingTargetId, setPendingTargetId] = useState(null);
 
+    const dirobjcache = useRef({
     });
 
 
-  // Map persists across renders, doesn't trigger re-renders itself
-  const nodeRefs = useRef(new Map());
+    // Map persists across renders, doesn't trigger re-renders itself
+    const nodeRefs = useRef(new Map());
+    
+    // Callback ref factory — registers/unregisters DOM nodes by id
+    const registerRef = (id) => (el) => {
+	if (el) {
+	    nodeRefs.current.set(id, el);
+	} else {
+	    nodeRefs.current.delete(id); // cleanup on unmount
+	}
+    };
 
-  // Callback ref factory — registers/unregisters DOM nodes by id
-  const registerRef = (id) => (el) => {
-    if (el) {
-      nodeRefs.current.set(id, el);
-    } else {
-      nodeRefs.current.delete(id); // cleanup on unmount
-    }
-  };
+
 
     
     useEffect(() => {
-
-        let isMounted = true;
-        
-        async function fetchData() {
+	let isMounted = true;
+	async function fetchData() {
             fetch("/api/dirobj", options)
-                .then((res) => {
+		.then((res) => {
                     if (!res.ok) throw new Error("Failed to load the dirobj.");
                     return res.json();
-                })
-                .then((data) => {
+		})
+		.then((data) => {
                     if (isMounted) {
-                        setDirobj(data);
-                        setStatus("ready");
-			dirobjcache.current = {...dirobjcache.current,[data.path]: data} ;
-
+			setDirobj(data);
+			setStatus("ready");
+			dirobjcache.current = {...dirobjcache.current,[data.path]: data} ;  // Cache every dirobj that comes off the net		    
                     }
-                })
-                .catch((err) => {
+		})
+		.catch((err) => {
                     setErrorMsg(err.message);
                     setStatus("error");
-                });
-        }
-
-         fetchData();
-
-        return () => { isMounted = false; };
+		});
+	}
+	fetchData();
+	return () => { isMounted = false; };
     }, [options.body]);
 
-//    console.log("dirobj", dirobj);
-
+    useEffect(() => {
+	if (pendingTargetId) {
+	    const el = nodeRefs.current.get(pendingTargetId);
+	    if (el) {
+		el.classList.add('highlight');
+		el.scrollIntoView({ block: "center",behavior: 'smooth' });
+		// or el.focus(), measure with getBoundingClientRect(), etc.      
+	    } else {
+		// targetId might not exist in the cached list — worth guarding
+		console.warn(`Element ${pendingTargetId} not found in cached list`);
+	    }
+	    setPendingTargetId(null); // reset so it doesn't refire
+	}
+    }, [dirobj, pendingTargetId]);
+    
+    
     //Event handler sets dirobj to the parent, triggering render of the parent
     const handleBack = (parent,path) => {
 	if (true) {
 	    let lobj = dirobjcache.current[parent];
-	    console.log("handleback parent: ",  parent, "dirobjcache.current[parent]", lobj)
-	    console.log("handleback path: ",  path, "dirobjcache.current[path]", lobj)
-	    flushSync(() => {
-		setDirobj(lobj);
-	    });
-	    const el = nodeRefs.current.get(path);
-	    if (el) {
-		el.classList.add('highlight');
-		el.scrollIntoView({ block: "center",behavior: 'smooth' });
-		// or el.focus(), measure with getBoundingClientRect(), etc.
-	    }
 	    
-    }
+	    //console.log("handleback parent: ",  parent, "dirobjcache.current[parent]", lobj)
+	    //console.log("handleback path: ",  path, "dirobjcache.current[path]", lobj)
+	    
+	    setDirobj(lobj);
+	    
+	    setPendingTargetId(path);
+	}
     };
 
 
     //Event handler updates options.body triggering fetch of a new dirobj,
     // unless cached and sets dirobj from cache 
-
+    
     const handleDirobjChange = (newPerma,newPath) => {
 	console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
-
+	
 	if (dirobjcache.current[newPath]) {
 	    setDirobj(dirobjcache.current[newPath])
 	} else {
 	    setOptions(prev => ({ ...prev, body: '{"d":"' + newPerma + '"}' }));
 	}
-  };
+    };
 									  
     return (
 	<div className="w-full max-w-md">
@@ -118,5 +125,5 @@ export default function App() {
       </ul>
     )}
   </div>
-);
+    );
 }
