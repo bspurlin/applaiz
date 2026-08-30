@@ -69,9 +69,16 @@ export default function App() {
 	    let lobj = dirobjcache.current[parent];
 	    console.log("handleback parent: ",  parent, "dirobjcache.current[parent]", lobj)
 	    console.log("handleback path: ",  path, "dirobjcache.current[path]", lobj)
-
-	    setDirobj(lobj);
-
+	    flushSync(() => {
+		setDirobj(lobj);
+	    });
+	    const el = nodeRefs.current.get(path);
+	    if (el) {
+		el.classList.add('highlight');
+		el.scrollIntoView({ block: "center",behavior: 'smooth' });
+		// or el.focus(), measure with getBoundingClientRect(), etc.
+	    }
+	    
     }
     };
 
@@ -94,12 +101,12 @@ export default function App() {
 
     {status == "ready" && (
 
-	<ul>
-	    <li class="rounded-box"   key={dirobj.perma}>
+	<ul >
+	    <li   key={dirobj.perma} className="sticky top-0 z-10 bg-gray-100 p-4 font-bold border-b border-gray-300 h-14 flex items-center rounded-lg"  >
 		<button  onClick={() => {handleBack(dirobj.parent,dirobj.path)}} ><span>Back</span></button>
 	    </li>
         {dirobj.directories.map((directory, index) => (
-            <li class="rounded-box" id={directory.perma} key={directory.perma || index} ref={registerRef(directory.perma)} >
+            <li class="rounded-box"  id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} >
               <button onClick={() => {
 			  handleDirobjChange(directory.perma,directory.path);
 		      }}>
