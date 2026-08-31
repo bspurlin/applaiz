@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { flushSync } from "react-dom";
 
 export default function App() {
     const [options, setOptions] = useState({
@@ -98,38 +97,58 @@ export default function App() {
 	    setOptions(prev => ({ ...prev, body: '{"d":"' + newPerma + '"}' }));
 	}
     };
-									  
+
+    const BackButton= ({dirobj,onBackAction}) => {
+	return (
+	    <div   key={dirobj.perma} className="sticky top-0 z-10 bg-gray-100 p-4 font-bold border-b border-gray-300 h-14 flex items-center rounded-lg"  >
+		<button  onClick={() => {onBackAction(dirobj.parent,dirobj.path)}} ><span>Back</span></button>
+	    </div>
+	)
+    }
+
+    const DirectoryList = ({directories,onDirAction }) => {
+	return (
+	    <ul >
+		{directories.map((directory, index) => (
+		    <li class="rounded-box"  id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} >
+			<button onClick={() => {
+				    onDirAction(directory.perma,directory.path);
+				}}>
+			    <span>{directory.name.replace(/\./g," ")}</span>
+			</button>
+		    </li>
+		))
+		}
+	    </ul>
+	)
+    }
+
+    const FileList = ({files}) => {
+	return (
+	    <ul >
+		{files.map((file, index) => (
+		    <li id={index}  style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} class="w-32 border-[0.5px] border-gray-300 text-xs">
+			<span >
+			    <a  href={"http://localhost:3001/" + dirobj.dirname + "/" + file.filename } >{file.title||file.filename.replace(/(mp3|m4a$)/i,"")}</a>
+			</span>
+		    </li>
+		))
+		}
+	    </ul>
+	)
+    }
+
+
     return (
 	<div className="w-full max-w-md">
-
-    {status == "ready" && (
-<>
-	<ul >
-	    <li   key={dirobj.perma} className="sticky top-0 z-10 bg-gray-100 p-4 font-bold border-b border-gray-300 h-14 flex items-center rounded-lg"  >
-		<button  onClick={() => {handleBack(dirobj.parent,dirobj.path)}} ><span>Back</span></button>
-	    </li>
-        {dirobj.directories.map((directory, index) => (
-            <li class="rounded-box"  id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} >
-              <button onClick={() => {
-			  handleDirobjChange(directory.perma,directory.path);
-		      }}>
-		<span>{directory.name.replace(/\./g," ")}</span>
-            </button>
-          </li>
-        ))
-	}
-	</ul>
-	<ul >
-	    {dirobj.files.map((file, index) => (
-		<li id={index}  style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} class="w-32 border-[0.5px] border-gray-300 text-xs">
-		    <span >
-			<a  href={"http://localhost:3001/" + dirobj.dirname + "/" + file.filename } >{file.title||file.filename.replace(/(mp3|m4a$)/i,"")}</a>
-		    </span>
-		</li>
-	    ))}
-	</ul>
-</>
-    )}
-  </div>
+	    {status == "ready" && (
+		<>
+		    <BackButton dirobj={dirobj} onBackAction={handleBack} />
+		    <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} />
+		    <FileList files={dirobj.files} />
+		</>
+	 )
+	 }
+	</div>
     );
 }
