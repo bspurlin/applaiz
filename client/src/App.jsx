@@ -72,7 +72,7 @@ export default function App() {
     
     //Event handler sets dirobj to the parent, triggering render of the parent
     const handleBack = (parent,path) => {
-	if (true) {
+	if (path != ".") {
 	    let lobj = dirobjcache.current[parent];
 	    
 	    //console.log("handleback parent: ",  parent, "dirobjcache.current[parent]", lobj)
@@ -100,7 +100,7 @@ export default function App() {
 
     const BackButton= ({dirobj,onBackAction}) => {
 	return (
-	    <div   key={dirobj.perma} className="sticky top-0 z-10 bg-gray-100 p-4 font-bold border-b border-gray-300 h-14 flex items-center rounded-lg"  >
+	    <div   key={dirobj.perma} className="w-16 bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700 transition"  >
 		<button  onClick={() => {onBackAction(dirobj.parent,dirobj.path)}} ><span>Back</span></button>
 	    </div>
 	)
@@ -108,7 +108,7 @@ export default function App() {
 
     const DirectoryList = ({directories,onDirAction }) => {
 	return (
-	    <ul >
+	    <ul className="w-full max-w-md">
 		{directories.map((directory, index) => (
 		    <li class="rounded-box"  id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} >
 			<button onClick={() => {
@@ -127,7 +127,7 @@ export default function App() {
 	return (
 	    <ul >
 		{files.map((file, index) => (
-		    <li id={index}  style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} class="w-32 border-[0.5px] border-gray-300 text-xs">
+		    <li id={index}  style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} class="w-full border-[0.5px] border-gray-300 text-xs">
 			<span >
 			    <a  href={"http://localhost:3001/" + dirobj.dirname + "/" + file.filename } >{file.title||file.filename.replace(/(mp3|m4a$)/i,"")}</a>
 			</span>
@@ -140,14 +140,14 @@ export default function App() {
 
 
     return (
-	<div className="w-full max-w-md">
+	<div >
 	    {status == "ready" && (
 		<>
 		    <BackButton dirobj={dirobj} onBackAction={handleBack} />
 		    <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} />
 		    <FileList files={dirobj.files} />
 		</>
-	 )
+	    )
 	 }
 	</div>
     );
