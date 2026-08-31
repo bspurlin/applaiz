@@ -30,6 +30,12 @@ export default function App() {
 	}
     };
     
+const [nowPlaying, setNowPlaying] = useState(null);
+// nowPlaying shape: { files: [...], dirname: string, index: number }
+
+const audioRef = useRef(null);
+
+
     useEffect(() => {
 	let isMounted = true;
 	async function fetchData() {
@@ -68,7 +74,27 @@ export default function App() {
 	    setPendingTargetId(null); // reset so it doesn't refire
 	}
     }, [dirobj, pendingTargetId]);
+
+    useEffect(() => {
+	if (nowPlaying && audioRef.current) {
+            audioRef.current.load();  // force the element to pick up the new src
+            audioRef.current.play().catch((err) => {
+		console.warn("Playback failed:", err);
+            });
+	}
+    }, [nowPlaying?.dirname, nowPlaying?.index]);
+
+    const handlePlayFile = (files, index, dirname) => {
+	setNowPlaying({ files, dirname, index });
+    };
     
+    const handleTrackEnded = () => {
+	setNowPlaying((prev) => {
+            if (!prev) return prev;
+            const nextIndex = (prev.index + 1) % prev.files.length;
+            return { ...prev, index: nextIndex };
+	});
+    };
     
     //Event handler sets dirobj to the parent, triggering render of the parent
     const handleBack = (parent,path) => {
@@ -100,7 +126,7 @@ export default function App() {
 
     const BackButton= ({dirobj,onBackAction}) => {
 	return (
-	    <div   key={dirobj.perma} className="w-16 bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700 transition"  >
+	    <div   key={dirobj.perma} className="sticky top-0 z-10 w-16 bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700 transition"  >
 		<button  onClick={() => {onBackAction(dirobj.parent,dirobj.path)}} ><span>Back</span></button>
 	    </div>
 	)
@@ -123,21 +149,24 @@ export default function App() {
 	)
     }
 
-    const FileList = ({files}) => {
+    const FileList = ({ files, onPlayFile }) => {
 	return (
-	    <ul >
+            <ul>
 		{files.map((file, index) => (
-		    <li id={index}  style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} class="w-full border-[0.5px] border-gray-300 text-xs">
-			<span >
-			    <a  href={"http://localhost:3001/" + dirobj.dirname + "/" + file.filename } >{file.title||file.filename.replace(/(mp3|m4a$)/i,"")}</a>
-			</span>
-		    </li>
-		))
-		}
-	    </ul>
-	)
-    }
-
+                    <li
+			key={file.filename || index}
+			id={index}
+			style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }}
+			className="w-full border-[0.5px] border-gray-300 text-xs"
+                    >
+			<button onClick={() => onPlayFile(files, index, dirobj.dirname)}>
+                            {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
+			</button>
+                    </li>
+		))}
+            </ul>
+	);
+    };
 
     return (
 	<div >
@@ -145,10 +174,24 @@ export default function App() {
 		<>
 		    <BackButton dirobj={dirobj} onBackAction={handleBack} />
 		    <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} />
-		    <FileList files={dirobj.files} />
+		    <FileList files={dirobj.files}  onPlayFile={handlePlayFile}  />
 		</>
-	    )
-	 }
+	    )}
+
+	    {nowPlaying && (
+            <div className="audio-player-bar sticky bottom-0 z-10 bg-white border-t border-gray-300 p-2">
+                <span>
+                    {nowPlaying.files[nowPlaying.index].title
+                        || nowPlaying.files[nowPlaying.index].filename}
+                </span>
+                <audio
+                    ref={audioRef}
+                    src={"http://localhost:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
+                    onEnded={handleTrackEnded}
+                    controls
+                />
+            </div>
+        )}
 	</div>
     );
 }
