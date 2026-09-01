@@ -90,10 +90,11 @@ export default function App() {
     const [errorMsg, setErrorMsg] = useState("");
     const [pendingTargetId, setPendingTargetId] = useState(null);
     const [calloutPos, setCalloutPos] = useState(null);
-
-    const dirobjcache = useRef({
-    });
-
+    const [nowPlaying, setNowPlaying] = useState(null);
+    // nowPlaying shape: { files: [...], dirname: string, index: number }
+    
+    const dirobjcache = useRef({});
+    const audioRef = useRef(null);
 
     // Map persists across renders, doesn't trigger re-renders itself
     const nodeRefs = useRef(new Map());
@@ -177,6 +178,14 @@ useEffect(() => {
 
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
+    };
+
+    const handleTrackEnded = () => {
+        setNowPlaying((prev) => {
+            if (!prev) return prev;
+            const nextIndex = (prev.index + 1) % prev.files.length;
+            return { ...prev, index: nextIndex };
+        });
     };
     
     //Event handler sets dirobj to the parent, triggering render of the parent
