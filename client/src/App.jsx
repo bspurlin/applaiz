@@ -13,6 +13,7 @@ export default function App() {
     const [status, setStatus] = useState("loading"); // loading 
     const [errorMsg, setErrorMsg] = useState("");
     const [pendingTargetId, setPendingTargetId] = useState(null);
+    const [calloutPos, setCalloutPos] = useState(null);
 
     const dirobjcache = useRef({
     });
@@ -84,10 +85,72 @@ const audioRef = useRef(null);
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index]);
 
+
+    useEffect(() => {
+	if (!nowPlaying) {
+            setCalloutPos(null);
+            return;
+	}
+	const currentFile = nowPlaying.files[nowPlaying.index];
+	const el = nodeRefs.current.get(currentFile.filename);
+    console.log('callout lookup', {
+        index: nowPlaying.index,
+        found: !!el,
+        mapKeys: [...nodeRefs.current.keys()],
+    });	
+	if (el) {
+            const rect = el.getBoundingClientRect();
+            setCalloutPos({ top: rect.top, left: rect.right + 8 });
+	} else {
+            setCalloutPos(null); // source row not currently mounted — no callout
+	}
+    }, [dirobj, nowPlaying?.index]); // re-check on navigation (dirobj change) too
+
+
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
     };
     
+
+    const NowPlayingCallout = ({ file, pos }) => {
+	const fields = [
+            ['artist', 'Artist'],
+            ['album', 'Album'],
+            ['albumartist', 'Album Artist'],
+            ['composer', 'Composer'],
+            ['genre', 'Genre'],
+            ['year', 'Year'],
+            ['trackNumber', 'Track'],
+	];
+	
+	return (
+            <div
+		style={{
+                    position: 'fixed',
+                    top: pos.top,
+                    left: pos.left,
+                    maxWidth: '260px',
+                    border: '2px solid #555',
+                    borderRadius: '12px',
+                    padding: '12px',
+                    background: 'white',
+                    zIndex: 20,
+		}}
+            >
+		<div style={{ color: 'purple', fontFamily: 'serif', fontWeight: 'bold', marginBottom: '4px' }}>
+                    {file.title || file.filename}
+		</div>
+		{fields
+                 .filter(([key]) => file[key])
+                 .map(([key, label]) => (
+                     <div key={key} style={{ color: 'purple', fontFamily: 'serif', fontSize: '0.85em' }}>
+                         {label}: {file[key]}
+                     </div>
+                 ))}
+            </div>
+	);
+    };
+
     const handleTrackEnded = () => {
 	setNowPlaying((prev) => {
             if (!prev) return prev;
@@ -154,8 +217,9 @@ const audioRef = useRef(null);
             <ul>
 		{files.map((file, index) => (
                     <li
-			key={file.filename || index}
+			key={index}
 			id={index}
+			ref={registerRef(index)}
 			style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }}
 			className="w-full border-[0.5px] border-gray-300 text-xs"
                     >
@@ -167,31 +231,34 @@ const audioRef = useRef(null);
             </ul>
 	);
     };
-
+    
     return (
-	<div >
-	    {status == "ready" && (
+	<div>
+            {status == "ready" && (
 		<>
-		    <BackButton dirobj={dirobj} onBackAction={handleBack} />
-		    <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} />
-		    <FileList files={dirobj.files}  onPlayFile={handlePlayFile}  />
+                    <BackButton dirobj={dirobj} onBackAction={handleBack} />
+                    <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} />
+                    <FileList files={dirobj.files} onPlayFile={handlePlayFile} />
 		</>
-	    )}
-
-	    {nowPlaying && (
-            <div className="audio-player-bar sticky bottom-0 z-10 bg-white border-t border-gray-300 p-2">
-                <span>
-                    {nowPlaying.files[nowPlaying.index].title
-                        || nowPlaying.files[nowPlaying.index].filename}
-                </span>
-                <audio
-                    ref={audioRef}
-                    src={"http://localhost:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
-                    onEnded={handleTrackEnded}
-                    controls
-                />
-            </div>
-        )}
+            )}
+	    
+            {nowPlaying && calloutPos && (
+		<NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} />
+            )}
+	    
+            {nowPlaying && (
+		<div className="sticky bottom-0 z-10" style={{ background: 'white', borderTop: '2px solid #555', padding: '8px 12px' }}>
+                    <span style={{ fontWeight: 'bold' }}>
+			{nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename}
+                    </span>
+                    <audio
+			ref={audioRef}
+			src={"http://localhost:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
+			onEnded={handleTrackEnded}
+			controls
+                    />
+		</div>
+            )}
 	</div>
     );
 }
