@@ -145,8 +145,6 @@ export default function App() {
 	    setPendingTargetId(null); // reset so it doesn't refire
 	}
     }, [dirobj, pendingTargetId]);
-<<<<<<< Updated upstream
-=======
 
     useEffect(() => {
 	if (nowPlaying && audioRef.current) {
@@ -180,8 +178,6 @@ useEffect(() => {
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
     };
->>>>>>> Stashed changes
-    
     
     //Event handler sets dirobj to the parent, triggering render of the parent
     const handleBack = (parent,path) => {
@@ -210,90 +206,35 @@ useEffect(() => {
 	    setOptions(prev => ({ ...prev, body: '{"d":"' + newPerma + '"}' }));
 	}
     };
-    
-return (
-    <div>
-        {status == "ready" && (
-            <>
-                <BackButton dirobj={dirobj} onBackAction={handleBack} />
-		<DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} registerRef={registerRef} />
-		<FileList files={dirobj.files} onPlayFile={handlePlayFile} dirname={dirobj.dirname} registerRef={registerRef} />
-	    </>
-        )}
-
-<<<<<<< Updated upstream
-    const BackButton= ({dirobj,onBackAction}) => {
-	return (
-	    <div   key={dirobj.perma} className="w-16 bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700 transition"  >
-		<button  onClick={() => {onBackAction(dirobj.parent,dirobj.path)}} ><span>Back</span></button>
-	    </div>
-	)
-    }
-
-    const DirectoryList = ({directories,onDirAction }) => {
-	return (
-	    <ul className="w-full max-w-md">
-		{directories.map((directory, index) => (
-		    <li class="rounded-box"  id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} >
-			<button onClick={() => {
-				    onDirAction(directory.perma,directory.path);
-				}}>
-			    <span>{directory.name.replace(/\./g," ")}</span>
-			</button>
-		    </li>
-		))
-		}
-	    </ul>
-	)
-    }
-
-    const FileList = ({files}) => {
-	return (
-	    <ul >
-		{files.map((file, index) => (
-		    <li id={index}  style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} class="w-full border-[0.5px] border-gray-300 text-xs">
-			<span >
-			    <a  href={"http://localhost:3001/" + dirobj.dirname + "/" + file.filename } >{file.title||file.filename.replace(/(mp3|m4a$)/i,"")}</a>
-			</span>
-		    </li>
-		))
-		}
-	    </ul>
-	)
-    }
-
 
     return (
-	<div >
-	    {status == "ready" && (
+	<div>
+            {status == "ready" && (
 		<>
-		    <BackButton dirobj={dirobj} onBackAction={handleBack} />
-		    <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} />
-		    <FileList files={dirobj.files} />
+                   <BackButton dirobj={dirobj} onBackAction={handleBack} />
+		   <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} registerRef={registerRef} />
+		    <FileList files={dirobj.files} onPlayFile={handlePlayFile} dirname={dirobj.dirname} registerRef={registerRef} />
 		</>
-	    )
-	 }
+            )}
+	    
+            {nowPlaying && calloutPos && (
+		<NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} />
+            )}
+	    
+            {nowPlaying && (
+		<div className="sticky bottom-0 z-10" style={{ background: 'white', borderTop: '2px solid #555', padding: '8px 12px' }}>
+                    <span style={{ fontWeight: 'bold' }}>
+			{nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename}
+                    </span>
+                    <audio
+			ref={audioRef}
+			src={"http://localhost:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
+			onEnded={handleTrackEnded}
+			controls
+                    />
+		</div>
+            )}
 	</div>
-    );
-=======
-        {nowPlaying && calloutPos && (
-            <NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} />
-        )}
-
-        {nowPlaying && (
-            <div className="sticky bottom-0 z-10" style={{ background: 'white', borderTop: '2px solid #555', padding: '8px 12px' }}>
-                <span style={{ fontWeight: 'bold' }}>
-                    {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename}
-                </span>
-                <audio
-                    ref={audioRef}
-                    src={"http://localhost:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
-                    onEnded={handleTrackEnded}
-                    controls
-                />
-            </div>
-        )}
-    </div>
-);
->>>>>>> Stashed changes
+    );    
+    
 }
