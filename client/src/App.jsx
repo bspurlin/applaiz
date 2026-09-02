@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from "react";
 // Outside App, top-level
 
 const BackButton = ({ dirobj, onBackAction }) => (
-    <div key={dirobj.perma} className="sticky top-0 z-10 ...">
+    <div key={dirobj.perma} className="sticky top-0 z-10 w-16 bg-blue-600 text-white font-semibold
+ px-6 py-2 rounded-full hover:bg-blue-700 transition">
         <button onClick={() => onBackAction(dirobj.parent, dirobj.path)}><span>Back</span></button>
     </div>
 );
@@ -12,7 +13,7 @@ const BackButton = ({ dirobj, onBackAction }) => (
 const DirectoryList = ({ directories, onDirAction, registerRef }) => (
     <ul className="w-full max-w-md">
         {directories.map((directory, index) => (
-            <li id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)}>
+            <li id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} className="rounded-box" >
                 <button onClick={() => onDirAction(directory.perma, directory.path)}>
                     <span>{directory.name.replace(/\./g, " ")}</span>
                 </button>
@@ -34,7 +35,7 @@ const FileList = ({ files, onPlayFile, dirname, registerRef }) => (
 );
 
 const NowPlayingCallout = ({ file, pos }) => {
-	
+    console.log({"position": pos});	
 
 	const fields = [
             ['artist', 'Artist'],
@@ -52,7 +53,7 @@ const NowPlayingCallout = ({ file, pos }) => {
                     position: 'fixed',
                     top: pos.top,
                     left: pos.left,
-                    maxWidth: '260px',
+		    width: '260px',      // fixed width, not maxWidth, so it matches the position math exactly
                     border: '2px solid #555',
                     borderRadius: '12px',
                     padding: '12px',
@@ -107,6 +108,9 @@ export default function App() {
 	    nodeRefs.current.delete(id); // cleanup on unmount
 	}
     };
+
+const CALLOUT_WIDTH = 260; // matches maxWidth in NowPlayingCallout
+const MARGIN = 8;
     
     useEffect(() => {
 	let isMounted = true;
@@ -168,8 +172,12 @@ useEffect(() => {
         mapKeys: [...nodeRefs.current.keys()],
     });
      if (el) {
-        const rect = el.getBoundingClientRect();
-        setCalloutPos({ top: rect.top, left: rect.right + 8 });
+         const rect = el.getBoundingClientRect();
+	  console.log('rect', rect);
+         setCalloutPos({
+             top: rect.top,
+             left: window.innerWidth - CALLOUT_WIDTH - MARGIN,
+	 });
     } else {
         setCalloutPos(null);
     }
@@ -207,7 +215,7 @@ useEffect(() => {
     // unless cached and sets dirobj from cache 
     
     const handleDirobjChange = (newPerma,newPath) => {
-	console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
+	//console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
 	
 	if (dirobjcache.current[newPath]) {
 	    setDirobj(dirobjcache.current[newPath])
@@ -237,7 +245,7 @@ useEffect(() => {
                     </span>
                     <audio
 			ref={audioRef}
-			src={"http://localhost:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
+			src={"http://mrsmcmac:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
 			onEnded={handleTrackEnded}
 			controls
                     />
