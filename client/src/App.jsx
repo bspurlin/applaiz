@@ -1,5 +1,82 @@
 import { useEffect, useState, useRef } from "react";
 
+
+// Outside App, top-level
+
+const BackButton = ({ dirobj, onBackAction }) => (
+    <div key={dirobj.perma} className="sticky top-0 z-10 w-16 bg-blue-600 text-white font-semibold
+ px-6 py-2 rounded-full hover:bg-blue-700 transition">
+        <button onClick={() => onBackAction(dirobj.parent, dirobj.path)}><span>Back</span></button>
+    </div>
+);
+
+const DirectoryList = ({ directories, onDirAction, registerRef }) => (
+    <ul className="w-full max-w-md">
+        {directories.map((directory, index) => (
+            <li id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} className="rounded-box" >
+                <button onClick={() => onDirAction(directory.perma, directory.path)}>
+                    <span>{directory.name.replace(/\./g, " ")}</span>
+                </button>
+            </li>
+        ))}
+    </ul>
+);
+
+const FileList = ({ files, onPlayFile, dirname, registerRef }) => (
+    <ul>
+        {files.map((file, index) => (
+            <li key={index} id={index} ref={registerRef(index)} style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} className="w-full border-[0.5px] border-gray-300 text-xs">
+                <button onClick={() => onPlayFile(files, index, dirname)}>
+                    {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
+                </button>
+            </li>
+        ))}
+    </ul>
+);
+
+const NowPlayingCallout = ({ file, pos }) => {
+    console.log({"position": pos});	
+
+	const fields = [
+            ['artist', 'Artist'],
+            ['album', 'Album'],
+            ['albumartist', 'Album Artist'],
+            ['composer', 'Composer'],
+            ['genre', 'Genre'],
+            ['year', 'Year'],
+            ['trackNumber', 'Track'],
+	];
+
+	return (
+            <div
+		style={{
+                    position: 'fixed',
+                    top: pos.top,
+                    left: pos.left,
+		    width: '260px',      // fixed width, not maxWidth, so it matches the position math exactly
+                    border: '2px solid #555',
+                    borderRadius: '12px',
+                    padding: '12px',
+                    background: 'white',
+                    zIndex: 20,
+		}}
+            >
+		<div style={{ color: 'purple', fontFamily: 'serif', fontWeight: 'bold', marginBottom: '4px' }}>
+                    {file.title || file.filename}
+		</div>
+		{fields
+                 .filter(([key]) => file[key])
+                 .map(([key, label]) => (
+                     <div key={key} style={{ color: 'purple', fontFamily: 'serif', fontSize: '0.85em' }}>
+                         {label}: {file[key]}
+                     </div>
+                 ))}
+            </div>
+	);
+};
+
+
+
 export default function App() {
     const [options, setOptions] = useState({
         mode: 'cors',
@@ -14,10 +91,11 @@ export default function App() {
     const [errorMsg, setErrorMsg] = useState("");
     const [pendingTargetId, setPendingTargetId] = useState(null);
     const [calloutPos, setCalloutPos] = useState(null);
-
-    const dirobjcache = useRef({
-    });
-
+    const [nowPlaying, setNowPlaying] = useState(null);
+    // nowPlaying shape: { files: [...], dirname: string, index: number }
+    
+    const dirobjcache = useRef({});
+    const audioRef = useRef(null);
 
     // Map persists across renders, doesn't trigger re-renders itself
     const nodeRefs = useRef(new Map());
@@ -30,13 +108,10 @@ export default function App() {
 	    nodeRefs.current.delete(id); // cleanup on unmount
 	}
     };
+
+const CALLOUT_WIDTH = 260; // matches maxWidth in NowPlayingCallout
+const MARGIN = 8;
     
-const [nowPlaying, setNowPlaying] = useState(null);
-// nowPlaying shape: { files: [...], dirname: string, index: number }
-
-const audioRef = useRef(null);
-
-
     useEffect(() => {
 	let isMounted = true;
 	async function fetchData() {
@@ -85,78 +160,40 @@ const audioRef = useRef(null);
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index]);
 
-
-    useEffect(() => {
-	if (!nowPlaying) {
-            setCalloutPos(null);
-            return;
-	}
-	const currentFile = nowPlaying.files[nowPlaying.index];
-	const el = nodeRefs.current.get(currentFile.filename);
+useEffect(() => {
+    if (!nowPlaying) {
+        setCalloutPos(null);
+        return;
+    }
+    const el = nodeRefs.current.get(nowPlaying.index);
     console.log('callout lookup', {
         index: nowPlaying.index,
         found: !!el,
         mapKeys: [...nodeRefs.current.keys()],
-    });	
-	if (el) {
-            const rect = el.getBoundingClientRect();
-            setCalloutPos({ top: rect.top, left: rect.right + 8 });
-	} else {
-            setCalloutPos(null); // source row not currently mounted — no callout
-	}
-    }, [dirobj, nowPlaying?.index]); // re-check on navigation (dirobj change) too
+    });
+     if (el) {
+         const rect = el.getBoundingClientRect();
+	  console.log('rect', rect);
+         setCalloutPos({
+             top: rect.top,
+             left: window.innerWidth - CALLOUT_WIDTH - MARGIN,
+	 });
+    } else {
+        setCalloutPos(null);
+    }
+}, [dirobj, nowPlaying?.index]);
 
 
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
     };
-    
-
-    const NowPlayingCallout = ({ file, pos }) => {
-	const fields = [
-            ['artist', 'Artist'],
-            ['album', 'Album'],
-            ['albumartist', 'Album Artist'],
-            ['composer', 'Composer'],
-            ['genre', 'Genre'],
-            ['year', 'Year'],
-            ['trackNumber', 'Track'],
-	];
-	
-	return (
-            <div
-		style={{
-                    position: 'fixed',
-                    top: pos.top,
-                    left: pos.left,
-                    maxWidth: '260px',
-                    border: '2px solid #555',
-                    borderRadius: '12px',
-                    padding: '12px',
-                    background: 'white',
-                    zIndex: 20,
-		}}
-            >
-		<div style={{ color: 'purple', fontFamily: 'serif', fontWeight: 'bold', marginBottom: '4px' }}>
-                    {file.title || file.filename}
-		</div>
-		{fields
-                 .filter(([key]) => file[key])
-                 .map(([key, label]) => (
-                     <div key={key} style={{ color: 'purple', fontFamily: 'serif', fontSize: '0.85em' }}>
-                         {label}: {file[key]}
-                     </div>
-                 ))}
-            </div>
-	);
-    };
 
     const handleTrackEnded = () => {
-	setNowPlaying((prev) => {
+        setNowPlaying((prev) => {
             if (!prev) return prev;
             const nextIndex = (prev.index + 1) % prev.files.length;
             return { ...prev, index: nextIndex };
-	});
+        });
     };
     
     //Event handler sets dirobj to the parent, triggering render of the parent
@@ -178,7 +215,7 @@ const audioRef = useRef(null);
     // unless cached and sets dirobj from cache 
     
     const handleDirobjChange = (newPerma,newPath) => {
-	console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
+	//console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
 	
 	if (dirobjcache.current[newPath]) {
 	    setDirobj(dirobjcache.current[newPath])
@@ -187,58 +224,13 @@ const audioRef = useRef(null);
 	}
     };
 
-    const BackButton= ({dirobj,onBackAction}) => {
-	return (
-	    <div   key={dirobj.perma} className="sticky top-0 z-10 w-16 bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700 transition"  >
-		<button  onClick={() => {onBackAction(dirobj.parent,dirobj.path)}} ><span>Back</span></button>
-	    </div>
-	)
-    }
-
-    const DirectoryList = ({directories,onDirAction }) => {
-	return (
-	    <ul className="w-full max-w-md">
-		{directories.map((directory, index) => (
-		    <li class="rounded-box"  id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} >
-			<button onClick={() => {
-				    onDirAction(directory.perma,directory.path);
-				}}>
-			    <span>{directory.name.replace(/\./g," ")}</span>
-			</button>
-		    </li>
-		))
-		}
-	    </ul>
-	)
-    }
-
-    const FileList = ({ files, onPlayFile }) => {
-	return (
-            <ul>
-		{files.map((file, index) => (
-                    <li
-			key={index}
-			id={index}
-			ref={registerRef(index)}
-			style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }}
-			className="w-full border-[0.5px] border-gray-300 text-xs"
-                    >
-			<button onClick={() => onPlayFile(files, index, dirobj.dirname)}>
-                            {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
-			</button>
-                    </li>
-		))}
-            </ul>
-	);
-    };
-    
     return (
 	<div>
             {status == "ready" && (
 		<>
-                    <BackButton dirobj={dirobj} onBackAction={handleBack} />
-                    <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} />
-                    <FileList files={dirobj.files} onPlayFile={handlePlayFile} />
+                   <BackButton dirobj={dirobj} onBackAction={handleBack} />
+		   <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} registerRef={registerRef} />
+		    <FileList files={dirobj.files} onPlayFile={handlePlayFile} dirname={dirobj.dirname} registerRef={registerRef} />
 		</>
             )}
 	    
@@ -253,12 +245,13 @@ const audioRef = useRef(null);
                     </span>
                     <audio
 			ref={audioRef}
-			src={"http://localhost:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
+			src={"http://mrsmcmac:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
 			onEnded={handleTrackEnded}
 			controls
                     />
 		</div>
             )}
 	</div>
-    );
+    );    
+    
 }
