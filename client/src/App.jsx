@@ -245,7 +245,7 @@ useEffect(() => {
                     </span>
                     <audio
 			ref={audioRef}
-			src={"http://mrsmcmac:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
+			src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
 			onEnded={handleTrackEnded}
 			controls
                     />
