@@ -448,7 +448,7 @@ function newHTML(fsobj, n) {
 			}
 		    }
 		),
-	(y,locnameq)=>{return `<li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  >` + locnameq + `</span>`}
+	(y,locnameq)=>{return `<li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  "path="`+ y.path + `"  >` + locnameq + `</span>`}
     )
 }
 
