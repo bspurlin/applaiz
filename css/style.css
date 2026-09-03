@@ -173,8 +173,9 @@ li {
 
 /* Hide the sub-list by default */
 .tree ul {
-  display: none;
-}
+    /*  display: none; */
+    padding-left: 20px;
+ }
 
 /* Show the sub-list when checkbox is checked */
 .tree input[type="checkbox"]:checked ~ ul {

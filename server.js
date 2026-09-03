@@ -58,6 +58,7 @@ if (n_new_days > 0) {
 	"perma": "Newbang",
 	"path": "." + fsobj.directories.length,
 	"html": newHTML(structuredClone(fsobj), n_new_days),
+	"parent": ".",
 	"template": 1
     };
     fsobj.directories.push(newdir);

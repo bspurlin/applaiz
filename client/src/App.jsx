@@ -10,10 +10,17 @@ const BackButton = ({ dirobj, onBackAction }) => (
     </div>
 );
 
-const DirectoryList = ({ directories, onDirAction, registerRef }) => (
+    const classNames = [
+	"rounded-box",
+	"applaiznew"
+    ];
+    
+
+
+const DirectoryList = ({ directories, onDirAction, registerRef}) => (
     <ul className="w-full max-w-md">
         {directories.map((directory, index) => (
-            <li id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} className="rounded-box" >
+            <li id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} className={classNames[directory.template]} >
                 <button onClick={() => onDirAction(directory.perma, directory.path)}>
                     <span>{directory.name.replace(/\./g, " ")}</span>
                 </button>
@@ -25,7 +32,7 @@ const DirectoryList = ({ directories, onDirAction, registerRef }) => (
 const FileList = ({ files, onPlayFile, dirname, registerRef }) => (
     <ul>
         {files.map((file, index) => (
-            <li key={index} id={index} ref={registerRef(index)} style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} className="w-full border-[0.5px] border-gray-300 text-xs">
+            <li key={index} id={index} ref={registerRef(index)} style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} className="w-full border-[0.5px] border-gray-300 text-lg">
                 <button onClick={() => onPlayFile(files, index, dirname)}>
                     {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
                 </button>
@@ -35,8 +42,6 @@ const FileList = ({ files, onPlayFile, dirname, registerRef }) => (
 );
 
 const NowPlayingCallout = ({ file, pos }) => {
-    console.log({"position": pos});	
-
 	const fields = [
             ['artist', 'Artist'],
             ['album', 'Album'],
@@ -76,6 +81,35 @@ const NowPlayingCallout = ({ file, pos }) => {
 };
 
 
+const NewDirobjHtml = ({ html, onDirAction }) => {
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleClick = (event) => {
+            const li = event.target.closest('.applaizli');
+            if (!li || !container.contains(li)) return;
+
+            const perma = li.getAttribute('perma');
+	    const path = li.getAttribute('path'); 
+            onDirAction(perma, path);
+        };
+
+        container.addEventListener('click', handleClick);
+        return () => container.removeEventListener('click', handleClick);
+    }, [html,  onDirAction]);
+
+    return (
+        <div
+            ref={containerRef}
+	    className="new-tree"
+            dangerouslySetInnerHTML={{ __html: html }}
+        />
+    );
+};
+
 
 export default function App() {
     const [options, setOptions] = useState({
@@ -96,6 +130,7 @@ export default function App() {
     
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
+    const highlightedFileRef = useRef(null);
 
     // Map persists across renders, doesn't trigger re-renders itself
     const nodeRefs = useRef(new Map());
@@ -160,28 +195,40 @@ const MARGIN = 8;
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index]);
 
-useEffect(() => {
-    if (!nowPlaying) {
-        setCalloutPos(null);
-        return;
-    }
-    const el = nodeRefs.current.get(nowPlaying.index);
-    console.log('callout lookup', {
-        index: nowPlaying.index,
-        found: !!el,
-        mapKeys: [...nodeRefs.current.keys()],
-    });
-     if (el) {
-         const rect = el.getBoundingClientRect();
-	  console.log('rect', rect);
-         setCalloutPos({
-             top: rect.top,
-             left: window.innerWidth - CALLOUT_WIDTH - MARGIN,
-	 });
-    } else {
-        setCalloutPos(null);
-    }
-}, [dirobj, nowPlaying?.index]);
+    useEffect(() => {
+
+	if (highlightedFileRef.current) {
+            highlightedFileRef.current.style.backgroundColor = '';
+            highlightedFileRef.current.style.fontWeight = '';
+            highlightedFileRef.current = null;
+	}
+	
+	if (!nowPlaying) {
+            setCalloutPos(null);
+            return;
+	}
+	const el = nodeRefs.current.get(nowPlaying.index);
+	console.log('callout lookup', {
+            index: nowPlaying.index,
+            found: !!el,
+            mapKeys: [...nodeRefs.current.keys()],
+	});
+	if (el) {
+            el.style.backgroundColor = '#fff9c4';
+            el.style.fontWeight = 'bold';
+            el.scrollIntoView({ block: 'center', behavior: 'auto' });
+            const rect = el.getBoundingClientRect();
+            highlightedFileRef.current = el;
+	    console.log('rect', rect);
+            setCalloutPos({
+		top: rect.top,
+		left: window.innerWidth - CALLOUT_WIDTH - MARGIN,
+	    });
+	 
+	} else {
+            setCalloutPos(null);
+	}
+    }, [dirobj, nowPlaying?.index]);
 
 
     const handlePlayFile = (files, index, dirname) => {
@@ -197,20 +244,52 @@ useEffect(() => {
     };
     
     //Event handler sets dirobj to the parent, triggering render of the parent
-    const handleBack = (parent,path) => {
-	if (path != ".") {
-	    let lobj = dirobjcache.current[parent];
-	    
-	    //console.log("handleback parent: ",  parent, "dirobjcache.current[parent]", lobj)
-	    //console.log("handleback path: ",  path, "dirobjcache.current[path]", lobj)
-	    
-	    setDirobj(lobj);
-	    
-	    setPendingTargetId(path);
-	}
-    };
+//    const handleBack = (parent,path) => {
+//	if (path != ".") {
+//	    let lobj = dirobjcache.current[parent];
+//	    
+//	    console.log("handleback: ",  { parent, path, found: !!lobj, cacheKeys: Object.keys(dirobjcache.current) })
+//
+//	    
+//	    setDirobj(lobj);
+//	    
+//	    setPendingTargetId(path);
+//	}
+//    };
 
 
+const handleBack = async (parent, path) => {
+    if (path == ".") return;
+
+    const cached = dirobjcache.current[parent];
+    if (cached) {
+        setDirobj(cached);
+        setPendingTargetId(path);
+        return;
+    }
+
+    // Not in cache — parent was never fetched directly (e.g. arrived via New!).
+    // Fall back to path-based lookup.
+    try {
+        const res = await fetch("/api/dirobj_nocache", {
+            mode: 'cors',
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ d: parent }),
+        });
+        if (!res.ok) throw new Error("Failed to load parent by path.");
+        const data = await res.json();
+
+        dirobjcache.current = { ...dirobjcache.current, [data.path]: data };
+        setDirobj(data);
+        setPendingTargetId(path);
+    } catch (err) {
+        console.error("handleBack: path-based fetch failed", err);
+        setErrorMsg(err.message);
+        setStatus("error");
+    }
+};
+    
     //Event handler updates options.body triggering fetch of a new dirobj,
     // unless cached and sets dirobj from cache 
     
@@ -224,13 +303,29 @@ useEffect(() => {
 	}
     };
 
+    const templates = [
+	({ dirobj, onDirAction, onPlayFile, registerRef }) => (
+            <>
+		<DirectoryList directories={dirobj.directories} onDirAction={onDirAction} registerRef={registerRef} />
+		<FileList files={dirobj.files} onPlayFile={onPlayFile} dirname={dirobj.dirname} registerRef={registerRef} />
+            </>
+	),
+	({ dirobj, onDirAction }) => (
+            <NewDirobjHtml html={dirobj.html} onDirAction={onDirAction} />
+	),
+    ];
+
     return (
 	<div>
             {status == "ready" && (
 		<>
-                   <BackButton dirobj={dirobj} onBackAction={handleBack} />
-		   <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} registerRef={registerRef} />
-		    <FileList files={dirobj.files} onPlayFile={handlePlayFile} dirname={dirobj.dirname} registerRef={registerRef} />
+                    <BackButton dirobj={dirobj} onBackAction={handleBack} />
+                    {templates[dirobj.template]({
+			dirobj,
+			onDirAction: handleDirobjChange,
+			onPlayFile: handlePlayFile,
+			registerRef,
+                    })}
 		</>
             )}
 	    
@@ -252,6 +347,5 @@ useEffect(() => {
 		</div>
             )}
 	</div>
-    );    
-    
+    );  
 }
