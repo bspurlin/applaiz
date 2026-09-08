@@ -4,10 +4,10 @@ import { useEffect, useState, useRef } from "react";
 // Outside App, top-level
 
 const BackButton = ({ dirobj, onBackAction }) => (
-    <div key={dirobj.perma} className="sticky top-0 z-10 w-16 bg-blue-600 text-white font-semibold
- px-6 py-2 rounded-full hover:bg-blue-700 transition">
-        <button onClick={() => onBackAction(dirobj.parent, dirobj.path)}><span>Back</span></button>
-    </div>
+    <span key={dirobj.perma} className=" z-10 w-16 bg-yellow-50 text-white font-semibold border
+ px-6 py-2 rounded-full">
+        <button onClick={() => onBackAction(dirobj.parent, dirobj.path)}><img src="/api/icons/back.gif" /></button>
+    </span>
 );
 
     const classNames = [
@@ -30,10 +30,10 @@ const DirectoryList = ({ directories, onDirAction, registerRef}) => (
 );
 
 const FileList = ({ files, onPlayFile, dirname, registerRef }) => (
-    <ul>
+    <ul className="pb-16">
         {files.map((file, index) => (
-            <li key={index} id={index} ref={registerRef(index)} style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} className="w-full border-[0.5px] border-gray-300 text-lg">
-                <button onClick={() => onPlayFile(files, index, dirname)}>
+            <li key={index} id={index} ref={registerRef(index)} style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} className="w-full border-[2px] border-gray-300 text-lg rounded-full">
+                <button className="text-left ml-3" onClick={() => onPlayFile(files, index, dirname)}>
                     {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
                 </button>
             </li>
@@ -49,31 +49,42 @@ const NowPlayingCallout = ({ file, pos }) => {
             ['composer', 'Composer'],
             ['genre', 'Genre'],
             ['year', 'Year'],
-            ['trackNumber', 'Track'],
+//            ['trackNumber', 'Track'],
 	];
+    // 1. Create a Set to track values we've already rendered
+    const seenValues = new Set();
 
+    
 	return (
             <div
 		style={{
-                    position: 'fixed',
+		    position:'fixed', 
                     top: pos.top,
                     left: pos.left,
-		    width: '260px',      // fixed width, not maxWidth, so it matches the position math exactly
-                    border: '2px solid #555',
-                    borderRadius: '12px',
-                    padding: '12px',
-                    background: 'white',
-                    zIndex: 20,
-		}}
+		    zIndex:'100',
+		    borderRadius: '12px',
+		    background:'white',
+		    border:'6px solid gray',
+
+		    color:'#700070', 
+		    font:'larger',
+		    right:'0',
+		    width:'206px'		}}
             >
-		<div style={{ color: 'purple', fontFamily: 'serif', fontWeight: 'bold', marginBottom: '4px' }}>
-                    {file.title || file.filename}
-		</div>
+
 		{fields
-                 .filter(([key]) => file[key])
+                 .filter(([key]) => {
+                     const value = file[key];
+                     // 2. Only keep fields that exist and haven't been seen yet
+                     if (!value || seenValues.has(value)) {
+			 return false;
+                     }
+                     seenValues.add(value);
+                     return true;
+		 })
                  .map(([key, label]) => (
-                     <div key={key} style={{ color: 'purple', fontFamily: 'serif', fontSize: '0.85em' }}>
-                         {label}: {file[key]}
+                     <div key={key} className="border" style={{ color: 'purple', fontFamily: 'serif', fontSize: '0.85em'  }}>
+                         {file[key]}
                      </div>
                  ))}
             </div>
@@ -144,7 +155,7 @@ export default function App() {
 	}
     };
 
-const CALLOUT_WIDTH = 260; // matches maxWidth in NowPlayingCallout
+const CALLOUT_WIDTH = 200; // matches maxWidth in NowPlayingCallout
 const MARGIN = 8;
     
     useEffect(() => {
@@ -198,7 +209,11 @@ const MARGIN = 8;
     useEffect(() => {
 
 	if (highlightedFileRef.current) {
-            highlightedFileRef.current.style.backgroundColor = '';
+        if (nowPlaying.index % 2 == 0) {
+                highlightedFileRef.current.style.backgroundColor = 'white';
+             } else {
+                highlightedFileRef.current.style.backgroundColor = '#f0f0f0';
+             }
             highlightedFileRef.current.style.fontWeight = '';
             highlightedFileRef.current = null;
 	}
@@ -208,18 +223,17 @@ const MARGIN = 8;
             return;
 	}
 	const el = nodeRefs.current.get(nowPlaying.index);
-	console.log('callout lookup', {
-            index: nowPlaying.index,
-            found: !!el,
-            mapKeys: [...nodeRefs.current.keys()],
-	});
-	if (el) {
+//	console.log('callout lookup', {
+//          index: nowPlaying.index,
+//        found: !!el,
+//            mapKeys: [...nodeRefs.current.keys()],
+//	});
+	if (el && dirobj.dirname === nowPlaying.dirname) { 
             el.style.backgroundColor = '#fff9c4';
             el.style.fontWeight = 'bold';
             el.scrollIntoView({ block: 'center', behavior: 'auto' });
             const rect = el.getBoundingClientRect();
             highlightedFileRef.current = el;
-	    console.log('rect', rect);
             setCalloutPos({
 		top: rect.top,
 		left: window.innerWidth - CALLOUT_WIDTH - MARGIN,
@@ -230,7 +244,25 @@ const MARGIN = 8;
 	}
     }, [dirobj, nowPlaying?.index]);
 
+    useEffect(() => {
+	console.log(dirobj)
+    }, [dirobj]);
+    
 
+
+   useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+    const handlePopState = (event) => {
+      window.history.pushState(null, '', window.location.href);
+      console.log("Back button navigation was intercepted.");
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+   });
+
+    
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
     };
@@ -244,6 +276,7 @@ const MARGIN = 8;
     };
     
     //Event handler sets dirobj to the parent, triggering render of the parent
+    //Use this version if the parent of all New! dirobjs is the New! dirobj itself
 //    const handleBack = (parent,path) => {
 //	if (path != ".") {
 //	    let lobj = dirobjcache.current[parent];
@@ -265,8 +298,8 @@ const handleBack = async (parent, path) => {
     if (cached) {
         setDirobj(cached);
         setPendingTargetId(path);
-        return;
-    }
+        
+    } else {
 
     // Not in cache — parent was never fetched directly (e.g. arrived via New!).
     // Fall back to path-based lookup.
@@ -287,6 +320,7 @@ const handleBack = async (parent, path) => {
         console.error("handleBack: path-based fetch failed", err);
         setErrorMsg(err.message);
         setStatus("error");
+    }
     }
 };
     
@@ -319,32 +353,41 @@ const handleBack = async (parent, path) => {
 	<div>
             {status == "ready" && (
 		<>
-                    <BackButton dirobj={dirobj} onBackAction={handleBack} />
-                    {templates[dirobj.template]({
+                    <div className="sticky top-0 w-full min-h-10 flex items-center  bg-white font-bold">
+			<BackButton dirobj={dirobj} onBackAction={handleBack} />
+			{nowPlaying && (
+			    <>
+			   <span  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px]" >
+			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
+			    </span>
+			
+			    <span className="font-bold !font-normal">
+				{dirobj.name}
+			    </span>
+			    </>
+			)}
+		    </div>
+		    {templates[dirobj.template]({
 			dirobj,
 			onDirAction: handleDirobjChange,
 			onPlayFile: handlePlayFile,
 			registerRef,
-                    })}
+		    })}
 		</>
             )}
-	    
             {nowPlaying && calloutPos && (
 		<NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} />
             )}
 	    
             {nowPlaying && (
-		<div className="sticky bottom-0 z-10" style={{ background: 'white', borderTop: '2px solid #555', padding: '8px 12px' }}>
-                    <span style={{ fontWeight: 'bold' }}>
-			{nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename}
-                    </span>
-                    <audio
+
+                    <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
 			ref={audioRef}
-			src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
+			src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename.replace(/#/g,'%23')}
 			onEnded={handleTrackEnded}
 			controls
                     />
-		</div>
+
             )}
 	</div>
     );  
