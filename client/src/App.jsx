@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from 'react-router-dom';
 
 
 // Outside App, top-level
@@ -155,11 +156,18 @@ export default function App() {
 	}
     };
 
-const CALLOUT_WIDTH = 200; // matches maxWidth in NowPlayingCallout
-const MARGIN = 8;
-    
+    const CALLOUT_WIDTH = 200; // matches maxWidth in NowPlayingCallout
+    const MARGIN = 8;
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const query = searchParams.get('d') || undefined;
+
     useEffect(() => {
 	let isMounted = true;
+	if (query) {
+	    console.log("query = ", query);
+	    setOptions(prev => ({ ...prev, body: '{"d":"' + query + '"}' }));
+	}
 	async function fetchData() {
             fetch("/api/dirobj", options)
 		.then((res) => {
@@ -291,13 +299,17 @@ const MARGIN = 8;
 //    };
 
 
-const handleBack = async (parent, path) => {
-    if (path == ".") return;
+    const handleBack = async (parent, path) => {
 
-    const cached = dirobjcache.current[parent];
-    if (cached) {
-        setDirobj(cached);
-        setPendingTargetId(path);
+	// If we got here from a bookmark, reset the URL in the location bar
+	setSearchParams({});
+
+	if (path == ".") return;
+	
+	const cached = dirobjcache.current[parent];
+	if (cached) {
+            setDirobj(cached);
+            setPendingTargetId(path);
         
     } else {
 
