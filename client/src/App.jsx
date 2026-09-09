@@ -269,7 +269,6 @@ export default function App() {
       window.removeEventListener('popstate', handlePopState);
     };
    });
-
     
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
@@ -340,6 +339,8 @@ export default function App() {
     // unless cached and sets dirobj from cache 
     
     const handleDirobjChange = (newPerma,newPath) => {
+	setSearchParams({});
+
 	//console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
 	
 	if (dirobjcache.current[newPath]) {
