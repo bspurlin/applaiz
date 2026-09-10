@@ -129,7 +129,10 @@ function mkDirObj(pathn,obj) {
 	'template': obj.template,
 	'directories': aa,
 	'params': {"d": obj.parent },
-	'serverpath': "/"
+	'serverpath': "/",
+	'title': obj.dirname.replace(/.+\//,"")
+	    .replace(/(.)\.(.)/g,"$1 $2")
+	    .replace(/_/g," ")
     }
 }
 
