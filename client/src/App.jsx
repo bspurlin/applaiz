@@ -141,7 +141,7 @@ export default function App() {
     const [calloutPos, setCalloutPos] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
     // nowPlaying shape: { files: [...], dirname: string, index: number }
-    
+    const [stopplaying, setStopPlaying] = useState(false)
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
     const highlightedFileRef = useRef(null);
@@ -218,20 +218,21 @@ export default function App() {
 
     useEffect(() => {
 
-	if (highlightedFileRef.current) {
+	if (highlightedFileRef.current && nowPlaying) {
         if (nowPlaying.index % 2 == 0) {
                 highlightedFileRef.current.style.backgroundColor = 'white';
              } else {
                 highlightedFileRef.current.style.backgroundColor = '#f0f0f0';
              }
-            highlightedFileRef.current.style.fontWeight = '';
-            highlightedFileRef.current = null;
+        highlightedFileRef.current.style.fontWeight = '';
+        highlightedFileRef.current = null;
 	}
 	
 	if (!nowPlaying) {
             setCalloutPos(null);
             return;
 	}
+
 	const el = nodeRefs.current.get(nowPlaying.index);
 	const top_el = nodeRefs.current.get("nowplaying_top");
 //	console.log('callout lookup', {
@@ -276,6 +277,33 @@ export default function App() {
       window.removeEventListener('popstate', handlePopState);
     };
    });
+
+   useEffect(() => {
+    if (nowPlaying){
+ /*       console.log({"stopplaying changed to": stopplaying,
+        "highlightedFileRef": highlightedFileRef.current,
+        "nowPlaying": nowPlaying.index,
+        "filename": nowPlaying.files[nowPlaying.index].filename,
+        "color": highlightedFileRef.current ? highlightedFileRef.current.style.backgroundColor : null
+    });
+*/
+    if (highlightedFileRef.current) {
+        if(nowPlaying.index % 2 == 0 ) {
+            highlightedFileRef.current.style.backgroundColor = '#f0f0f0';
+        } else {   
+            highlightedFileRef.current.style.backgroundColor = 'white';
+        }
+    }
+    setNowPlaying(null);
+    setStopPlaying(false);
+   }
+},[stopplaying]);
+
+  const stopAudio = () => {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0; // Reset time to the beginning
+      setStopPlaying(true);
+  };
     
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
@@ -383,7 +411,11 @@ export default function App() {
 </>
 			{nowPlaying && (
 
-			   <span id="nowplaying_top" ref={registerRef("nowplaying_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px]" >
+			   <span id="nowplaying_top" ref={registerRef("nowplaying_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px] inline-flex items-center gap-1  " >
+
+<svg viewBox="0 0 24 24" width="24" height="24" fill="black" onClick={stopAudio} xmlns="http://w3.org" >
+  <rect x="6" y="6" width="12" height="12" rx="1.5" />
+</svg>
 			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
 			    </span>
 			)}
