@@ -6,9 +6,11 @@ import { useSearchParams } from 'react-router-dom';
 
 const BackButton = ({ dirobj, onBackAction }) => (
     <span key={dirobj.perma} className=" z-10 w-16 bg-yellow-50 text-white font-semibold border
- px-6 py-2 rounded-full">
-        <button onClick={() => onBackAction(dirobj.parent, dirobj.path)}><img src="/api/icons/back.gif" /></button>
-    </span>
+ px-6 py-2 rounded-full" onClick={() => onBackAction(dirobj.parent, dirobj.path)}  > 
+
+<img src="/api/icons/back.gif"/>
+</span>
+	
 );
 
     const classNames = [
@@ -231,12 +233,13 @@ export default function App() {
             return;
 	}
 	const el = nodeRefs.current.get(nowPlaying.index);
+	const top_el = nodeRefs.current.get("nowplaying_top");
 //	console.log('callout lookup', {
-//          index: nowPlaying.index,
-//        found: !!el,
-//            mapKeys: [...nodeRefs.current.keys()],
+//            index: nowPlaying.index,
+//            top_el: top_el
 //	});
-	if (el && dirobj.dirname === nowPlaying.dirname) { 
+	if (el && dirobj.dirname === nowPlaying.dirname) {
+	    top_el.style.color = 'black';
             el.style.backgroundColor = '#fff9c4';
             el.style.fontWeight = 'bold';
             el.scrollIntoView({ block: 'center', behavior: 'auto' });
@@ -248,12 +251,16 @@ export default function App() {
 	    });
 	 
 	} else {
+	    top_el.style.color = 'red';
             setCalloutPos(null);
 	}
     }, [dirobj, nowPlaying?.index]);
 
     useEffect(() => {
-	console.log(dirobj)
+	if(dirobj) {
+	    console.log(dirobj)
+	    document.title = dirobj.title
+	}
     }, [dirobj]);
     
 
@@ -367,17 +374,18 @@ export default function App() {
             {status == "ready" && (
 		<>
                     <div className="sticky top-0 w-full min-h-10 flex items-center  bg-white font-bold">
+<>
 			<BackButton dirobj={dirobj} onBackAction={handleBack} />
+			
+			<span className="px-6 py-2 rounded-full bg-yellow-50 border-[1px]">
+				{dirobj.title}
+			</span>
+</>
 			{nowPlaying && (
-			    <>
-			   <span  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px]" >
+
+			   <span id="nowplaying_top" ref={registerRef("nowplaying_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px]" >
 			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
 			    </span>
-			
-			    <span className="font-bold !font-normal">
-				{dirobj.name}
-			    </span>
-			    </>
 			)}
 		    </div>
 		    {templates[dirobj.template]({
