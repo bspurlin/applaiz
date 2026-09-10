@@ -7,8 +7,9 @@ import { useSearchParams } from 'react-router-dom';
 const BackButton = ({ dirobj, onBackAction }) => (
     <span key={dirobj.perma} className=" z-10 w-16 bg-yellow-50 text-white font-semibold border
  px-6 py-2 rounded-full" onClick={() => onBackAction(dirobj.parent, dirobj.path)}  > 
-
-<img src="/api/icons/back.gif"/>
+<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32" fill="black">
+  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+     </svg>
 </span>
 	
 );
