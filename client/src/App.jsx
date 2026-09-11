@@ -60,7 +60,7 @@ const NowPlayingCallout = ({ file, pos }) => {
 
     
 	return (
-            <div
+            <div className=" rounded overflow-hidden "
 		style={{
 		    position:'fixed', 
                     top: pos.top,
@@ -68,12 +68,11 @@ const NowPlayingCallout = ({ file, pos }) => {
 		    zIndex:'100',
 		    borderRadius: '12px',
 		    background:'white',
-		    border:'6px solid gray',
-
+		    border:'7px solid gray',
+		    fontFamily: 'sans-serif',
 		    color:'#700070', 
-		    font:'larger',
 		    right:'0',
-		    width:'206px'		}}
+		    width:'256px'		}}
             >
 
 		{fields
@@ -87,7 +86,7 @@ const NowPlayingCallout = ({ file, pos }) => {
                      return true;
 		 })
                  .map(([key, label]) => (
-                     <div key={key} className="border" style={{ color: 'purple', fontFamily: 'serif', fontSize: '0.85em'  }}>
+                     <div key={key} className="border" style={{ color: 'purple', fontFamily: 'sans-serif', fontSize: '1.0em'  }}>
                          {file[key]}
                      </div>
                  ))}
@@ -159,7 +158,7 @@ export default function App() {
 	}
     };
 
-    const CALLOUT_WIDTH = 200; // matches maxWidth in NowPlayingCallout
+    const CALLOUT_WIDTH = 250; // matches maxWidth in NowPlayingCallout
     const MARGIN = 8;
 
     const [searchParams, setSearchParams] = useSearchParams();
@@ -279,35 +278,34 @@ export default function App() {
     };
    });
 
-   useEffect(() => {
-    if (nowPlaying){
- /*       console.log({"stopplaying changed to": stopplaying,
-        "highlightedFileRef": highlightedFileRef.current,
-        "nowPlaying": nowPlaying.index,
-        "filename": nowPlaying.files[nowPlaying.index].filename,
-        "color": highlightedFileRef.current ? highlightedFileRef.current.style.backgroundColor : null
-    });
-*/
-    if (highlightedFileRef.current) {
-        if(nowPlaying.index % 2 == 0 ) {
-            highlightedFileRef.current.style.backgroundColor = '#f0f0f0';
-        } else {   
-            highlightedFileRef.current.style.backgroundColor = 'white';
-        }
-    }
-    setNowPlaying(null);
-    setStopPlaying(false);
-   }
-},[stopplaying]);
+    useEffect(() => {
+	if ( stopplaying &&  highlightedFileRef.current){
+            console.log({"stopplaying changed to": stopplaying,
+			 "highlightedFileRef": highlightedFileRef.current,
+			 "color": highlightedFileRef.current.style.backgroundColor,
+			 "id": highlightedFileRef.current.id
+			});
+            if ( highlightedFileRef.current.id % 2 == 0) {
+		highlightedFileRef.current.style.backgroundColor = '#f0f0f0';
+            } else {
+		highlightedFileRef.current.style.backgroundColor = 'white';
+            }
+	    
+	}
+    },[stopplaying]);
 
-  const stopAudio = () => {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0; // Reset time to the beginning
-      setStopPlaying(true);
-  };
+    const stopAudio = () => {
+	if(audioRef.current){
+	    audioRef.current.pause();
+	    audioRef.current.currentTime = 0; // Reset time to the beginning
+	}
+	setNowPlaying(false);
+	setStopPlaying(true);
+    };
     
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
+	setStopPlaying(false)
     };
 
     const handleTrackEnded = () => {
@@ -410,7 +408,7 @@ export default function App() {
 				{dirobj.title}
 			</span>
 </>
-			{nowPlaying && (
+			{nowPlaying && !stopplaying && (
 
 			   <span id="nowplaying_top" ref={registerRef("nowplaying_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px] inline-flex items-center gap-1  " >
 
@@ -433,7 +431,7 @@ export default function App() {
 		<NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} />
             )}
 	    
-            {nowPlaying && (
+            {nowPlaying && !stopplaying && (
 
                     <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
 			ref={audioRef}
