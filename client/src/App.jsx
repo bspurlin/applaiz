@@ -1,4 +1,129 @@
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from 'react-router-dom';
+
+
+// Outside App, top-level
+
+const BackButton = ({ dirobj, onBackAction }) => (
+    <span key={dirobj.perma} className=" z-10 w-16 bg-yellow-50 text-white font-semibold border
+ px-6 py-2 rounded-full" onClick={() => onBackAction(dirobj.parent, dirobj.path)}  > 
+<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32" fill="black">
+  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+     </svg>
+</span>
+	
+);
+
+    const classNames = [
+	"rounded-box",
+	"applaiznew"
+    ];
+    
+
+
+const DirectoryList = ({ directories, onDirAction, registerRef}) => (
+    <ul className="w-full max-w-md">
+        {directories.map((directory, index) => (
+            <li id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} className={classNames[directory.template]} >
+                <button onClick={() => onDirAction(directory.perma, directory.path)}>
+                    <span>{directory.name.replace(/\./g, " ")}</span>
+                </button>
+            </li>
+        ))}
+    </ul>
+);
+
+const FileList = ({ files, onPlayFile, dirname, registerRef }) => (
+    <ul className="pb-16">
+        {files.map((file, index) => (
+            <li key={index} id={index} ref={registerRef(index)} style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} className="w-full border-[2px] border-gray-300 text-lg rounded-full">
+                <button className="text-left ml-3" onClick={() => onPlayFile(files, index, dirname)}>
+                    {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
+                </button>
+            </li>
+        ))}
+    </ul>
+);
+
+const NowPlayingCallout = ({ file, pos }) => {
+	const fields = [
+            ['artist', 'Artist'],
+            ['album', 'Album'],
+            ['albumartist', 'Album Artist'],
+            ['composer', 'Composer'],
+            ['genre', 'Genre'],
+            ['year', 'Year'],
+//            ['trackNumber', 'Track'],
+	];
+    // 1. Create a Set to track values we've already rendered
+    const seenValues = new Set();
+
+    
+	return (
+            <div className=" rounded overflow-hidden "
+		style={{
+		    position:'fixed', 
+                    top: pos.top,
+                    left: pos.left,
+		    zIndex:'100',
+		    borderRadius: '12px',
+		    background:'white',
+		    border:'7px solid gray',
+		    fontFamily: 'sans-serif',
+		    color:'#700070', 
+		    right:'0',
+		    width:'256px'		}}
+            >
+
+		{fields
+                 .filter(([key]) => {
+                     const value = file[key];
+                     // 2. Only keep fields that exist and haven't been seen yet
+                     if (!value || seenValues.has(value)) {
+			 return false;
+                     }
+                     seenValues.add(value);
+                     return true;
+		 })
+                 .map(([key, label]) => (
+                     <div key={key} className="border" style={{ color: 'purple', fontFamily: 'sans-serif', fontSize: '1.0em'  }}>
+                         {file[key]}
+                     </div>
+                 ))}
+            </div>
+	);
+};
+
+
+const NewDirobjHtml = ({ html, onDirAction }) => {
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleClick = (event) => {
+            const li = event.target.closest('.applaizli');
+            if (!li || !container.contains(li)) return;
+
+            const perma = li.getAttribute('perma');
+	    const path = li.getAttribute('path'); 
+            onDirAction(perma, path);
+        };
+
+        container.addEventListener('click', handleClick);
+        return () => container.removeEventListener('click', handleClick);
+    }, [html,  onDirAction]);
+
+    return (
+        <div
+            ref={containerRef}
+	    className="new-tree"
+            dangerouslySetInnerHTML={{ __html: html }}
+        />
+    );
+};
+
 
 export default function App() {
     const [options, setOptions] = useState({
@@ -13,10 +138,13 @@ export default function App() {
     const [status, setStatus] = useState("loading"); // loading 
     const [errorMsg, setErrorMsg] = useState("");
     const [pendingTargetId, setPendingTargetId] = useState(null);
-
-    const dirobjcache = useRef({
-    });
-
+    const [calloutPos, setCalloutPos] = useState(null);
+    const [nowPlaying, setNowPlaying] = useState(null);
+    // nowPlaying shape: { files: [...], dirname: string, index: number }
+    const [stopplaying, setStopPlaying] = useState(false)
+    const dirobjcache = useRef({});
+    const audioRef = useRef(null);
+    const highlightedFileRef = useRef(null);
 
     // Map persists across renders, doesn't trigger re-renders itself
     const nodeRefs = useRef(new Map());
@@ -29,15 +157,28 @@ export default function App() {
 	    nodeRefs.current.delete(id); // cleanup on unmount
 	}
     };
+<<<<<<< HEAD
     
 const [nowPlaying, setNowPlaying] = useState(null);
 // nowPlaying shape: { files: [...], dirname: string, index: number }
 
 const audioRef = useRef(null);
 
+=======
+
+    const CALLOUT_WIDTH = 250; // matches maxWidth in NowPlayingCallout
+    const MARGIN = 8;
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const query = searchParams.get('d') || undefined;
+>>>>>>> claude
 
     useEffect(() => {
 	let isMounted = true;
+	if (query) {
+	    console.log("query = ", query);
+	    setOptions(prev => ({ ...prev, body: '{"d":"' + query + '"}' }));
+	}
 	async function fetchData() {
             fetch("/api/dirobj", options)
 		.then((res) => {
@@ -81,6 +222,7 @@ const audioRef = useRef(null);
             audioRef.current.play().catch((err) => {
 		console.warn("Playback failed:", err);
             });
+<<<<<<< HEAD
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index]);
 
@@ -107,15 +249,171 @@ const audioRef = useRef(null);
 	    setDirobj(lobj);
 	    
 	    setPendingTargetId(path);
+=======
+>>>>>>> claude
 	}
+    }, [nowPlaying?.dirname, nowPlaying?.index]);
+
+    useEffect(() => {
+
+	if (highlightedFileRef.current && nowPlaying) {
+        if (nowPlaying.index % 2 == 0) {
+                highlightedFileRef.current.style.backgroundColor = 'white';
+             } else {
+                highlightedFileRef.current.style.backgroundColor = '#f0f0f0';
+             }
+        highlightedFileRef.current.style.fontWeight = '';
+        highlightedFileRef.current = null;
+	}
+	
+	if (!nowPlaying) {
+            setCalloutPos(null);
+            return;
+	}
+
+	const el = nodeRefs.current.get(nowPlaying.index);
+	const top_el = nodeRefs.current.get("nowplaying_top");
+//	console.log('callout lookup', {
+//            index: nowPlaying.index,
+//            top_el: top_el
+//	});
+	if (el && dirobj.dirname === nowPlaying.dirname) {
+	    top_el.style.color = 'black';
+            el.style.backgroundColor = '#fff9c4';
+            el.style.fontWeight = 'bold';
+            el.scrollIntoView({ block: 'center', behavior: 'auto' });
+            const rect = el.getBoundingClientRect();
+            highlightedFileRef.current = el;
+            setCalloutPos({
+		top: rect.top,
+		left: window.innerWidth - CALLOUT_WIDTH - MARGIN,
+	    });
+	 
+	} else {
+	    top_el.style.color = 'red';
+            setCalloutPos(null);
+	}
+    }, [dirobj, nowPlaying?.index]);
+
+    useEffect(() => {
+	if(dirobj) {
+	    console.log(dirobj)
+	    document.title = dirobj.title
+	}
+    }, [dirobj]);
+    
+
+
+   useEffect(() => {
+    window.history.pushState(null, '', window.location.href);
+    const handlePopState = (event) => {
+      window.history.pushState(null, '', window.location.href);
+      console.log("Back button navigation was intercepted.");
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+   });
+
+    useEffect(() => {
+	if ( stopplaying &&  highlightedFileRef.current){
+            console.log({"stopplaying changed to": stopplaying,
+			 "highlightedFileRef": highlightedFileRef.current,
+			 "color": highlightedFileRef.current.style.backgroundColor,
+			 "id": highlightedFileRef.current.id
+			});
+            if ( highlightedFileRef.current.id % 2 == 0) {
+		highlightedFileRef.current.style.backgroundColor = '#f0f0f0';
+            } else {
+		highlightedFileRef.current.style.backgroundColor = 'white';
+            }
+	    
+	}
+    },[stopplaying]);
+
+    const stopAudio = () => {
+	if(audioRef.current){
+	    audioRef.current.pause();
+	    audioRef.current.currentTime = 0; // Reset time to the beginning
+	}
+	setNowPlaying(false);
+	setStopPlaying(true);
+    };
+    
+    const handlePlayFile = (files, index, dirname) => {
+	setNowPlaying({ files, dirname, index });
+	setStopPlaying(false)
     };
 
+    const handleTrackEnded = () => {
+        setNowPlaying((prev) => {
+            if (!prev) return prev;
+            const nextIndex = (prev.index + 1) % prev.files.length;
+            return { ...prev, index: nextIndex };
+        });
+    };
+    
+    //Event handler sets dirobj to the parent, triggering render of the parent
+    //Use this version if the parent of all New! dirobjs is the New! dirobj itself
+//    const handleBack = (parent,path) => {
+//	if (path != ".") {
+//	    let lobj = dirobjcache.current[parent];
+//	    
+//	    console.log("handleback: ",  { parent, path, found: !!lobj, cacheKeys: Object.keys(dirobjcache.current) })
+//
+//	    
+//	    setDirobj(lobj);
+//	    
+//	    setPendingTargetId(path);
+//	}
+//    };
 
+
+    const handleBack = async (parent, path) => {
+
+	// If we got here from a bookmark, reset the URL in the location bar
+	setSearchParams({});
+
+	if (path == ".") return;
+	
+	const cached = dirobjcache.current[parent];
+	if (cached) {
+            setDirobj(cached);
+            setPendingTargetId(path);
+        
+    } else {
+
+    // Not in cache — parent was never fetched directly (e.g. arrived via New!).
+    // Fall back to path-based lookup.
+    try {
+        const res = await fetch("/api/dirobj_nocache", {
+            mode: 'cors',
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ d: parent }),
+        });
+        if (!res.ok) throw new Error("Failed to load parent by path.");
+        const data = await res.json();
+
+        dirobjcache.current = { ...dirobjcache.current, [data.path]: data };
+        setDirobj(data);
+        setPendingTargetId(path);
+    } catch (err) {
+        console.error("handleBack: path-based fetch failed", err);
+        setErrorMsg(err.message);
+        setStatus("error");
+    }
+    }
+};
+    
     //Event handler updates options.body triggering fetch of a new dirobj,
     // unless cached and sets dirobj from cache 
     
     const handleDirobjChange = (newPerma,newPath) => {
-	console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
+	setSearchParams({});
+
+	//console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
 	
 	if (dirobjcache.current[newPath]) {
 	    setDirobj(dirobjcache.current[newPath])
@@ -124,6 +422,7 @@ const audioRef = useRef(null);
 	}
     };
 
+<<<<<<< HEAD
     const BackButton= ({dirobj,onBackAction}) => {
 	return (
 	    <div   key={dirobj.perma} className="sticky top-0 z-10 w-16 bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700 transition"  >
@@ -167,11 +466,25 @@ const audioRef = useRef(null);
             </ul>
 	);
     };
+=======
+    const templates = [
+	({ dirobj, onDirAction, onPlayFile, registerRef }) => (
+            <>
+		<DirectoryList directories={dirobj.directories} onDirAction={onDirAction} registerRef={registerRef} />
+		<FileList files={dirobj.files} onPlayFile={onPlayFile} dirname={dirobj.dirname} registerRef={registerRef} />
+            </>
+	),
+	({ dirobj, onDirAction }) => (
+            <NewDirobjHtml html={dirobj.html} onDirAction={onDirAction} />
+	),
+    ];
+>>>>>>> claude
 
     return (
-	<div >
-	    {status == "ready" && (
+	<div>
+            {status == "ready" && (
 		<>
+<<<<<<< HEAD
 		    <BackButton dirobj={dirobj} onBackAction={handleBack} />
 		    <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} />
 		    <FileList files={dirobj.files}  onPlayFile={handlePlayFile}  />
@@ -192,6 +505,49 @@ const audioRef = useRef(null);
                 />
             </div>
         )}
+=======
+                    <div className="sticky top-0 w-full min-h-10 flex items-center  bg-white font-bold">
+<>
+			<BackButton dirobj={dirobj} onBackAction={handleBack} />
+			
+			<span className="px-6 py-2 rounded-full bg-yellow-50 border-[1px]">
+				{dirobj.title}
+			</span>
+</>
+			{nowPlaying && !stopplaying && (
+
+			   <span id="nowplaying_top" ref={registerRef("nowplaying_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px] inline-flex items-center gap-1  " >
+
+<svg viewBox="0 0 24 24" width="24" height="24" fill="black" onClick={stopAudio} xmlns="http://w3.org" >
+  <rect x="6" y="6" width="12" height="12" rx="1.5" />
+</svg>
+			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
+			    </span>
+			)}
+		    </div>
+		    {templates[dirobj.template]({
+			dirobj,
+			onDirAction: handleDirobjChange,
+			onPlayFile: handlePlayFile,
+			registerRef,
+		    })}
+		</>
+            )}
+            {nowPlaying && calloutPos && (
+		<NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} />
+            )}
+	    
+            {nowPlaying && !stopplaying && (
+
+                    <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
+			ref={audioRef}
+			src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename.replace(/#/g,'%23')}
+			onEnded={handleTrackEnded}
+			controls
+                    />
+
+            )}
+>>>>>>> claude
 	</div>
-    );
+    );  
 }

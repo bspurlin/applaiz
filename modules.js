@@ -129,7 +129,10 @@ function mkDirObj(pathn,obj) {
 	'template': obj.template,
 	'directories': aa,
 	'params': {"d": obj.parent },
-	'serverpath': "/"
+	'serverpath': "/",
+	'title': obj.dirname.replace(/.+\//,"")
+	    .replace(/(.)\.(.)/g,"$1 $2")
+	    .replace(/_/g," ")
     }
 }
 
@@ -448,7 +451,7 @@ function newHTML(fsobj, n) {
 			}
 		    }
 		),
-	(y,locnameq)=>{return `<li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  >` + locnameq + `</span>`}
+	(y,locnameq)=>{return `<li perma=` + y.perma + ` ><span class="applaiznew applaizli" perma="` +  y.perma  +  `" id="` +  y.perma + `"  "path="`+ y.path + `"  >` + locnameq + `</span>`}
     )
 }
 
