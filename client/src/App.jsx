@@ -157,21 +157,12 @@ export default function App() {
 	    nodeRefs.current.delete(id); // cleanup on unmount
 	}
     };
-<<<<<<< HEAD
-    
-const [nowPlaying, setNowPlaying] = useState(null);
-// nowPlaying shape: { files: [...], dirname: string, index: number }
-
-const audioRef = useRef(null);
-
-=======
 
     const CALLOUT_WIDTH = 250; // matches maxWidth in NowPlayingCallout
     const MARGIN = 8;
 
     const [searchParams, setSearchParams] = useSearchParams();
     const query = searchParams.get('d') || undefined;
->>>>>>> claude
 
     useEffect(() => {
 	let isMounted = true;
@@ -222,35 +213,6 @@ const audioRef = useRef(null);
             audioRef.current.play().catch((err) => {
 		console.warn("Playback failed:", err);
             });
-<<<<<<< HEAD
-	}
-    }, [nowPlaying?.dirname, nowPlaying?.index]);
-
-    const handlePlayFile = (files, index, dirname) => {
-	setNowPlaying({ files, dirname, index });
-    };
-    
-    const handleTrackEnded = () => {
-	setNowPlaying((prev) => {
-            if (!prev) return prev;
-            const nextIndex = (prev.index + 1) % prev.files.length;
-            return { ...prev, index: nextIndex };
-	});
-    };
-    
-    //Event handler sets dirobj to the parent, triggering render of the parent
-    const handleBack = (parent,path) => {
-	if (path != ".") {
-	    let lobj = dirobjcache.current[parent];
-	    
-	    //console.log("handleback parent: ",  parent, "dirobjcache.current[parent]", lobj)
-	    //console.log("handleback path: ",  path, "dirobjcache.current[path]", lobj)
-	    
-	    setDirobj(lobj);
-	    
-	    setPendingTargetId(path);
-=======
->>>>>>> claude
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index]);
 
@@ -422,51 +384,6 @@ const audioRef = useRef(null);
 	}
     };
 
-<<<<<<< HEAD
-    const BackButton= ({dirobj,onBackAction}) => {
-	return (
-	    <div   key={dirobj.perma} className="sticky top-0 z-10 w-16 bg-blue-600 text-white font-semibold px-6 py-2 rounded-full hover:bg-blue-700 transition"  >
-		<button  onClick={() => {onBackAction(dirobj.parent,dirobj.path)}} ><span>Back</span></button>
-	    </div>
-	)
-    }
-
-    const DirectoryList = ({directories,onDirAction }) => {
-	return (
-	    <ul className="w-full max-w-md">
-		{directories.map((directory, index) => (
-		    <li class="rounded-box"  id={directory.path} key={directory.perma || index} ref={registerRef(directory.path)} >
-			<button onClick={() => {
-				    onDirAction(directory.perma,directory.path);
-				}}>
-			    <span>{directory.name.replace(/\./g," ")}</span>
-			</button>
-		    </li>
-		))
-		}
-	    </ul>
-	)
-    }
-
-    const FileList = ({ files, onPlayFile }) => {
-	return (
-            <ul>
-		{files.map((file, index) => (
-                    <li
-			key={file.filename || index}
-			id={index}
-			style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }}
-			className="w-full border-[0.5px] border-gray-300 text-xs"
-                    >
-			<button onClick={() => onPlayFile(files, index, dirobj.dirname)}>
-                            {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
-			</button>
-                    </li>
-		))}
-            </ul>
-	);
-    };
-=======
     const templates = [
 	({ dirobj, onDirAction, onPlayFile, registerRef }) => (
             <>
@@ -478,34 +395,11 @@ const audioRef = useRef(null);
             <NewDirobjHtml html={dirobj.html} onDirAction={onDirAction} />
 	),
     ];
->>>>>>> claude
 
     return (
 	<div>
             {status == "ready" && (
 		<>
-<<<<<<< HEAD
-		    <BackButton dirobj={dirobj} onBackAction={handleBack} />
-		    <DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} />
-		    <FileList files={dirobj.files}  onPlayFile={handlePlayFile}  />
-		</>
-	    )}
-
-	    {nowPlaying && (
-            <div className="audio-player-bar sticky bottom-0 z-10 bg-white border-t border-gray-300 p-2">
-                <span>
-                    {nowPlaying.files[nowPlaying.index].title
-                        || nowPlaying.files[nowPlaying.index].filename}
-                </span>
-                <audio
-                    ref={audioRef}
-                    src={"http://localhost:3001/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename}
-                    onEnded={handleTrackEnded}
-                    controls
-                />
-            </div>
-        )}
-=======
                     <div className="sticky top-0 w-full min-h-10 flex items-center  bg-white font-bold">
 <>
 			<BackButton dirobj={dirobj} onBackAction={handleBack} />
@@ -547,7 +441,6 @@ const audioRef = useRef(null);
                     />
 
             )}
->>>>>>> claude
 	</div>
     );  
 }
