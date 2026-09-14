@@ -591,6 +591,7 @@ export default function App() {
 			ref={audioRef}
 			src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename.replace(/#/g,'%23')}
 			onEnded={handleTrackEnded}
+			preload=none
 			controls
                     />
 
