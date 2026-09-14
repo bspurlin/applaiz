@@ -10,10 +10,10 @@ export default defineConfig({
     server: {
 	host: true,
 	allowedHosts: ['mrsmcmac','mrsmcmac.q.local'],
-	port: 5173,
+	port: 51001,
 	proxy: {
 	    "/api": {
-		target: "http://localhost:3001",
+		target: "http://localhost:30001",
 		changeOrigin: true,
 		rewrite: (path) => path.replace(/^\/api/, '')
 	    },
