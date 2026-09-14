@@ -1,4 +1,4 @@
-playimport { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from 'react-router-dom';
 
 
@@ -588,11 +588,10 @@ export default function App() {
             {nowPlaying && !stopplaying && (
 
                     <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
-			   ref={audioRef}
-			   src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename.replace(/#/g,'%23')}
-			   onEnded={handleTrackEnded}
-			   preload=none
-			   controls
+			ref={audioRef}
+			src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename.replace(/#/g,'%23')}
+			onEnded={handleTrackEnded}
+			controls
                     />
 
             )}
