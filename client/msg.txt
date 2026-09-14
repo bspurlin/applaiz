@@ -1,0 +1,63 @@
+
+
+Before moving functions oustide of App, debug statement in useEffect ... [dirobj, nowPlaying?.index]:
+"callout lookup {index: 1, found: false, mapKeys: Array(2)}"
+
+After moving functions outside of App:
+"callout lookup {index: 1, found: true, mapKeys: Array(2)}."  App runs, but bug persists and lost all css on DirectoryList and BackButton. I also put debugging statements inside  NowPlayingCallout() and ran its return code ok in the Node repl, but the return() of   NowPlayingCallout() is not rendering anywhere I can see it whether BackButton DirectoryList FileList and  NowPlayingCallout are moved outside of App, or not.
+
+Any suggestions?
+
+
+
+2026-09-13
+
+Hello, Claude.  A few notes for further devlopment of my App:
+
+I. Overall Requirements for further development:
+
+A.  No server side state.  Any session-to-session persistent state must be on the client side as bookmarks or browser persistent storage.
+
+B. Extension of the dirobj model to virtual dirobjs, e. g. for the rendering of search results or playlists.
+
+II. Work to be done; two drop-down menu choices:
+
+A.  Search
+
+The existing  client side call for search is to /api/search/:
+       POST
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: {s: <comma-delimited search terms>, p: <parent for Back button>}
+
+So on the server the log message
+
+{ 'Search: ': '{"s":"liszt,polonaise","p":".3.10"}', found: 17 }
+
+indicates the search received a POST body to search for "liszt,polonaise" with parent path ".3.10" and returned a virtual dirobj with 17 directories.
+
+on the client the dirobj is received as template type 0 and rendered as such:
+
+ {dirname: 'Search: liszt,polonaise', parent: '.3.10', path: 'liszt,polonaise', files: Array(0), directories: Array(17), …}directories: (17) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]dirname: "Search: liszt,polonaise"files: []params: {s: 'liszt,polonaise', p: '.3.10'}parent: ".3.10"path: "liszt,polonaise"serverpath: "/search"template: 0[[Prototype]]: Object
+
+B. The Search task is:
+
+1. Have a simple search icon in the menu that opens a form for the entry of up to three search terms to be concatenated in the above comma-delimited search list.
+
+2. Render the returned virtual dirobj or alert the user that no results were found.
+
+3. Keep a list of successful searches, visible below or next to the submission form,  for that session, so previous searches can be invoked repeatedly.
+
+
+B.  Bookmarks:
+
+I have implemented,  using react-router-dom, a simple GET that allows one to type in or retireive from a bookmark a url of the form http://localhost:5173/?d=Ni9LZjuTWSfaoAl5vQrRog which will retrieve and render a  dirobj corresponding to the d - parameter permalink.
+
+The challenge is to circumvent browser restrictions on directly creating bookmarks, if possible, and if not possible simply enter a url of the above form for  a given rendered dirobj url to be placed directly in the location bar so the user can bookmark it manually.
+
+The Bookmark task is:
+
+1. Have a simple bookmark icon in the menu
+
+2. That either opens the browser bookmark interface directly, or if not possible places a generated bookmark url in the location bar.

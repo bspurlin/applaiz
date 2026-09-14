@@ -124,6 +124,58 @@ const NewDirobjHtml = ({ html, onDirAction }) => {
     );
 };
 
+// Search panel — up to three terms, submit, previous-searches list.
+const SearchPanel = ({ terms, onTermChange, onSubmit, onClose, error, history, onSelectHistory }) => (
+    <div
+        style={{
+            position: 'fixed',
+            top: 56,
+            right: 8,
+            width: 260,
+            background: 'white',
+            border: '7px solid gray',
+            borderRadius: 12,
+            padding: 12,
+            zIndex: 120,
+        }}
+    >
+        {[0, 1, 2].map((i) => (
+            <input
+                key={i}
+                value={terms[i]}
+                onChange={(e) => onTermChange(i, e.target.value)}
+                placeholder={`Term ${i + 1}`}
+                className="border w-full mb-1 px-1"
+            />
+        ))}
+        <div className="flex gap-2 mt-1">
+            <button onClick={onSubmit} className="px-3 py-1 rounded-full bg-yellow-50 border-[1px]">
+                Search
+            </button>
+            <button onClick={onClose} className="px-3 py-1 rounded-full bg-yellow-50 border-[1px]">
+                Close
+            </button>
+        </div>
+
+        {error && <div style={{ color: 'red' }} className="mt-2 text-sm">{error}</div>}
+
+        {history.length > 0 && (
+            <div className="mt-2">
+                <div className="font-bold text-sm">Previous searches</div>
+                <ul className="list-none p-0 m-0">
+                    {history.map((h, i) => (
+                        <li key={i}>
+                            <button onClick={() => onSelectHistory(h)} className="text-sm underline">
+                                {h.label}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )}
+    </div>
+);
+
 
 export default function App() {
     const [options, setOptions] = useState({
@@ -163,6 +215,12 @@ export default function App() {
 
     const [searchParams, setSearchParams] = useSearchParams();
     const query = searchParams.get('d') || undefined;
+
+    // --- Search state ---
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchTerms, setSearchTerms] = useState(['', '', '']);
+    const [searchError, setSearchError] = useState(null);
+    const [searchHistory, setSearchHistory] = useState([]); // [{ label, path }]
 
     useEffect(() => {
 	let isMounted = true;
@@ -267,6 +325,12 @@ export default function App() {
 
 
    useEffect(() => {
+    // Deliberately runs on every render (no dependency array) — this is an
+    // attempt to trap the browser's native Back button, since this app's
+    // own navigation history lives in dirobjcache/handleBack, not in the
+    // browser's history stack. See conversation notes: this is a known
+    // fragile pattern (Safari in particular may resist it), kept
+    // intentionally per current design.
     window.history.pushState(null, '', window.location.href);
     const handlePopState = (event) => {
       window.history.pushState(null, '', window.location.href);
@@ -384,6 +448,70 @@ export default function App() {
 	}
     };
 
+    // --- Search ---
+    // p is the CURRENT dirobj's own path (where the user was standing when
+    // they searched) — matches the server's expectation, per the logged
+    // example: { s: "liszt,polonaise", p: ".3.10" }.
+    const handleSearch = async () => {
+	const s = searchTerms.map((t) => t.trim()).filter(Boolean).join(',');
+	if (!s) return;
+
+	try {
+	    const res = await fetch("/api/search", {
+		mode: 'cors',
+		method: 'POST',
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ s, p: dirobj.path }),
+	    });
+	    if (!res.ok) throw new Error("Search request failed.");
+	    const data = await res.json();
+
+	    if (!data.directories || data.directories.length === 0) {
+		setSearchError(`No results for "${s}"`);
+		return;
+	    }
+	    data.template = 0;
+	    for (let i of data.directories) i.template = 0;
+	    data.title = "Search: " + data.path;
+	    dirobjcache.current = { ...dirobjcache.current, [data.path]: data };
+	    setSearchError(null);
+	    setDirobj(data);
+	    setSearchHistory((prev) => [...prev, { label: s, path: data.path }]);
+	    setSearchOpen(false);
+	} catch (err) {
+	    setSearchError(err.message);
+	}
+    };
+
+    const handleSelectSearchHistory = (entry) => {
+	const cached = dirobjcache.current[entry.path];
+	if (cached) {
+	    setDirobj(cached);
+	    setSearchOpen(false);
+	}
+    };
+
+    // --- Bookmark ---
+    // No JS API exists in any current browser to open the native
+    // "add bookmark" dialog or add a bookmark programmatically — that was
+    // removed everywhere years ago for abuse-prevention reasons. The
+    // fallback: put a stable, perma-based URL in the location bar via
+    // useSearchParams (keeps react-router's state in sync) and prompt the
+    // user to bookmark it manually (Ctrl/Cmd+D).
+    //
+    // Virtual dirobjs (search results, and future playlists per the
+    // "virtual dirobj" model) have no `perma` — only a session-relative
+    // `path` — so they're correctly refused here rather than producing a
+    // bookmark link that breaks on the next server restart.
+    const handleBookmark = () => {
+	if (!dirobj?.perma) {
+	    alert("This view doesn't have a permanent link and can't be bookmarked.");
+	    return;
+	}
+	setSearchParams({ d: dirobj.perma });
+	alert('Press Ctrl+D (Cmd+D on Mac) to bookmark this page.');
+    };
+
     const templates = [
 	({ dirobj, onDirAction, onPlayFile, registerRef }) => (
             <>
@@ -400,7 +528,7 @@ export default function App() {
 	<div>
             {status == "ready" && (
 		<>
-                    <div className="sticky top-0 w-full min-h-10 flex items-center  bg-white font-bold">
+                    <div className="sticky top-0 w-full min-h-10 flex items-center gap-2 bg-white font-bold">
 <>
 			<BackButton dirobj={dirobj} onBackAction={handleBack} />
 			
@@ -413,11 +541,24 @@ export default function App() {
 			   <span id="nowplaying_top" ref={registerRef("nowplaying_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px] inline-flex items-center gap-1  " >
 
 <svg viewBox="0 0 24 24" width="24" height="24" fill="black" onClick={stopAudio} xmlns="http://w3.org" >
-  <rect x="6" y="6" width="12" height="12" rx="1.5" />
+  <rect x="6" y="6" width="24" height="24" rx="1.5" />
 </svg>
 			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
 			    </span>
 			)}
+
+			<span className="ml-auto flex items-center gap-2">
+			    <span onClick={() => setSearchOpen((prev) => !prev)} className="px-3 py-2 rounded-full bg-yellow-50 border-[1px]">
+				<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="black">
+				    <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1114 9.5 4.5 4.5 0 019.5 14z"/>
+				</svg>
+			    </span>
+			    <span onClick={handleBookmark} className="px-3 py-2 rounded-full bg-yellow-50 border-[1px]">
+				<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="black">
+				    <path d="M17 3H7a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2z"/>
+				</svg>
+			    </span>
+			</span>
 		    </div>
 		    {templates[dirobj.template]({
 			dirobj,
@@ -427,6 +568,19 @@ export default function App() {
 		    })}
 		</>
             )}
+
+	    {searchOpen && (
+		<SearchPanel
+		    terms={searchTerms}
+		    onTermChange={(i, val) => setSearchTerms((prev) => prev.map((t, idx) => (idx === i ? val : t)))}
+		    onSubmit={handleSearch}
+		    onClose={() => setSearchOpen(false)}
+		    error={searchError}
+		    history={searchHistory}
+		    onSelectHistory={handleSelectSearchHistory}
+		/>
+	    )}
+
             {nowPlaying && calloutPos && (
 		<NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} />
             )}
