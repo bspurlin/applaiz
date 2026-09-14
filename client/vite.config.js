@@ -9,7 +9,7 @@ export default defineConfig({
     plugins: [react()],
     server: {
 	host: true,
-	allowedHosts: ['mrsmcmac','mrsmcmac.q.local'],
+	allowedHosts: ['mrsmcmac','mrsmcmac.q.local','flexopla.net'],
 	port: 51001,
 	proxy: {
 	    "/api": {
