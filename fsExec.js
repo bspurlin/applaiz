@@ -27,6 +27,7 @@ async function fsExec(dirname) {
     x = x.replace(/\"/g,"");
     x = x.replace(/\\/g,"\\\\");
     x = x.replace(/qx/g,"\"");
+    x = x.replace(/\s+[\d][\d]:[\d][\d]:[\d][\d] UTC/g,"");
     let mobj = JSON.parse(x);
     fsr.files=mobj;
     fsr.perma =   crypto.createHash('shake128').update(fsr.dirname + Date.now().toString()).digest("base64url")
