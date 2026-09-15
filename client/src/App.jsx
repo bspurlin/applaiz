@@ -124,6 +124,51 @@ const NewDirobjHtml = ({ html, onDirAction }) => {
     );
 };
 
+// Hamburger menu — houses Search and Bookmark actions.
+// Deliberately dumb: no fetch/URL logic lives here, only the toggle UI.
+// Callers pass in the actions to run when each menu item is clicked.
+const HamburgerMenu = ({ open, onToggle, onSearchClick, onBookmarkClick }) => (
+    <div style={{ position: 'relative' }}>
+        <span onClick={onToggle} className="px-3 py-2 rounded-full bg-yellow-50 border-[1px] inline-flex items-center">
+            <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="black">
+                <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+            </svg>
+        </span>
+
+        {open && (
+            <div
+                style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: 0,
+                    marginTop: 4,
+                    background: 'white',
+                    border: '2px solid #555',
+                    borderRadius: 12,
+                    zIndex: 100,
+                    minWidth: 160,
+                    overflow: 'hidden',
+                }}
+            >
+                <button
+                    onClick={onSearchClick}
+                    className="w-full text-left px-4 py-2 hover:bg-yellow-50"
+                    style={{ display: 'block' }}
+                >
+                    🔍 Search
+                </button>
+                <button
+                    onClick={onBookmarkClick}
+                    className="w-full text-left px-4 py-2 hover:bg-yellow-50"
+                    style={{ display: 'block' }}
+                >
+                    🔖 Bookmark this view
+                </button>
+            </div>
+        )}
+    </div>
+);
+
 // Search panel — up to three terms, submit, previous-searches list.
 const SearchPanel = ({ terms, onTermChange, onSubmit, onClose, error, history, onSelectHistory }) => (
     <div
@@ -216,7 +261,8 @@ export default function App() {
     const [searchParams, setSearchParams] = useSearchParams();
     const query = searchParams.get('d') || undefined;
 
-    // --- Search state ---
+    // --- Search & menu state ---
+    const [menuOpen, setMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
     const [searchTerms, setSearchTerms] = useState(['', '', '']);
     const [searchError, setSearchError] = useState(null);
@@ -465,19 +511,21 @@ export default function App() {
 	    });
 	    if (!res.ok) throw new Error("Search request failed.");
 	    const data = await res.json();
+	data.template = 0;
+        for (let i of data.directories) i.template = 0;
+        data.title = "Search: " + data.path;
 
 	    if (!data.directories || data.directories.length === 0) {
 		setSearchError(`No results for "${s}"`);
 		return;
 	    }
-	    data.template = 0;
-	    for (let i of data.directories) i.template = 0;
-	    data.title = "Search: " + data.path;
+
 	    dirobjcache.current = { ...dirobjcache.current, [data.path]: data };
 	    setSearchError(null);
 	    setDirobj(data);
 	    setSearchHistory((prev) => [...prev, { label: s, path: data.path }]);
 	    setSearchOpen(false);
+	    setMenuOpen(false);
 	} catch (err) {
 	    setSearchError(err.message);
 	}
@@ -506,10 +554,12 @@ export default function App() {
     const handleBookmark = () => {
 	if (!dirobj?.perma) {
 	    alert("This view doesn't have a permanent link and can't be bookmarked.");
+	    setMenuOpen(false);
 	    return;
 	}
 	setSearchParams({ d: dirobj.perma });
 	alert('Press Ctrl+D (Cmd+D on Mac) to bookmark this page.');
+	setMenuOpen(false);
     };
 
     const templates = [
@@ -541,23 +591,22 @@ export default function App() {
 			   <span id="nowplaying_top" ref={registerRef("nowplaying_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px] inline-flex items-center gap-1  " >
 
 <svg viewBox="0 0 24 24" width="24" height="24" fill="black" onClick={stopAudio} xmlns="http://w3.org" >
-  <rect x="6" y="6" width="24" height="24" rx="1.5" />
+  <rect x="6" y="6" width="12" height="12" rx="1.5" />
 </svg>
 			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
 			    </span>
 			)}
 
-			<span className="ml-auto flex items-center gap-2">
-			    <span onClick={() => setSearchOpen((prev) => !prev)} className="px-3 py-2 rounded-full bg-yellow-50 border-[1px]">
-				<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="black">
-				    <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1114 9.5 4.5 4.5 0 019.5 14z"/>
-				</svg>
-			    </span>
-			    <span onClick={handleBookmark} className="px-3 py-2 rounded-full bg-yellow-50 border-[1px]">
-				<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="black">
-				    <path d="M17 3H7a2 2 0 00-2 2v16l7-3 7 3V5a2 2 0 00-2-2z"/>
-				</svg>
-			    </span>
+			<span className="ml-auto">
+			    <HamburgerMenu
+				open={menuOpen}
+				onToggle={() => setMenuOpen((prev) => !prev)}
+				onSearchClick={() => {
+				    setSearchOpen(true);
+				    setMenuOpen(false);
+				}}
+				onBookmarkClick={handleBookmark}
+			    />
 			</span>
 		    </div>
 		    {templates[dirobj.template]({
@@ -588,10 +637,11 @@ export default function App() {
             {nowPlaying && !stopplaying && (
 
                     <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
-			ref={audioRef}
-			src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename.replace(/#/g,'%23')}
-			onEnded={handleTrackEnded}
-			controls
+			   ref={audioRef}
+			   src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename.replace(/#/g,'%23')}
+			   onEnded={handleTrackEnded}
+			   preload={"none"}
+			   controls
                     />
 
             )}
