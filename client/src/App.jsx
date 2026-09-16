@@ -253,7 +253,7 @@ export default function App() {
     const [pendingTargetId, setPendingTargetId] = useState(null);
     const [calloutPos, setCalloutPos] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
-    // nowPlaying shape: { files: [...], dirname: string, index: number }
+    // nowPlaying shape: { files: [...], dirname: string, index: number, title: string }
     const [stopplaying, setStopPlaying] = useState(false)
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
@@ -415,16 +415,21 @@ export default function App() {
 	setStopPlaying(true);
     };
     
+    const getTitle = (files, index) => {
+	return files[index].title || files[index].filename.replace(/\.(mp3|m4a)/i,"");
+    }
+
     const handlePlayFile = (files, index, dirname) => {
-	setNowPlaying({ files, dirname, index });
+	setNowPlaying({ files, dirname, index, title: getTitle(files,index) });
 	setStopPlaying(false)
     };
 
+    
     const handleTrackEnded = () => {
         setNowPlaying((prev) => {
             if (!prev) return prev;
             const nextIndex = (prev.index + 1) % prev.files.length;
-            return { ...prev, index: nextIndex };
+            return { ...prev, index: nextIndex, title: getTitle(prev.files, nextIndex) };
         });
     };
     
@@ -589,7 +594,7 @@ export default function App() {
 	<div>
             {status == "ready" && (
 		<>
-                    <div className="sticky top-0 w-full min-h-10 flex items-center gap-2  py-2 rounded-sm bg-yellow-50 border-[1px]  font-semibold ">
+                    <div className="sticky top-0 w-full  flex items-center gap-2  py-2 rounded-sm bg-yellow-50 border-[1px]  font-semibold my-0 py-0 ">
 			<>
 			    <BackButton dirobj={dirobj} onBackAction={handleBack} />
 			
@@ -604,7 +609,7 @@ export default function App() {
 				<rect x="0" y="0" width="16" height="16"  />
 			    </svg>
 			    <span id="nowplaying_top" ref={registerRef("nowplaying_top")}   >
-			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
+			       {nowPlaying.title}
 			    </span>
 			    </>
 			)}
