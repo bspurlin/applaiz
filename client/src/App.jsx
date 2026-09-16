@@ -5,12 +5,11 @@ import { useSearchParams } from 'react-router-dom';
 // Outside App, top-level
 
 const BackButton = ({ dirobj, onBackAction }) => (
-    <span key={dirobj.perma} className=" z-10 w-16 bg-yellow-50 text-white font-semibold border
- px-6 py-2 rounded-full" onClick={() => onBackAction(dirobj.parent, dirobj.path)}  > 
-<svg xmlns="http://w3.org" viewBox="0 0 24 24" width="32" height="32" fill="black">
-  <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-     </svg>
-</span>
+    <span key={dirobj.perma} className=" inline-flex items-center justify-center" onClick={() => onBackAction(dirobj.parent, dirobj.path)}  > 
+	<svg xmlns="http://w3.org" viewBox="0 4 18 18" width="24" height="24" fill="black" >
+	    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+	</svg>
+    </span>
 	
 );
 
@@ -593,23 +592,24 @@ export default function App() {
 	<div>
             {status == "ready" && (
 		<>
-                    <div className="sticky top-0 w-full min-h-10 flex items-center gap-2 bg-white font-bold">
-<>
-			<BackButton dirobj={dirobj} onBackAction={handleBack} />
+                    <div className="sticky top-0 w-full min-h-10 flex items-center gap-2  py-2 rounded-sm bg-yellow-50 border-[1px]  font-semibold ">
+			<>
+			    <BackButton dirobj={dirobj} onBackAction={handleBack} />
 			
-			<span id="albumtitle_top" ref={registerRef("albumtitle_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px]">
+			    <span id="albumtitle_top" ref={registerRef("albumtitle_top")}  >
 				{dirobj.title}
-			</span>
+			    </span>
 </>
 			{nowPlaying && !stopplaying && (
+			    <>
 
-			   <span id="nowplaying_top" ref={registerRef("nowplaying_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px] inline-flex items-center gap-1  " >
-
-<svg viewBox="0 0 20 20" width="20" height="20" fill="black" onClick={stopAudio} xmlns="http://w3.org" style={{ flexShrink: 0 }}  >
-  <rect x="0" y="0" width="20" height="20"  />
-</svg>
+			    <svg viewBox="0 0 16 16" width="16" height="16" fill="black" onClick={stopAudio} xmlns="http://w3.org" style={{ flexShrink: 0 }}  >
+				<rect x="0" y="0" width="16" height="16"  />
+			    </svg>
+			    <span id="nowplaying_top" ref={registerRef("nowplaying_top")}   >
 			       {playingTitle}
 			    </span>
+			    </>
 			)}
 
 			<span className="ml-auto">
