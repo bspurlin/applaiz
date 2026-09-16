@@ -574,7 +574,7 @@ export default function App() {
 	  ? nowPlaying.index
 	  : null;
 
-
+    const massageUri = (uri) => {return encodeURI(uri).replace(/#/ig,'%23')}
 
     
     const templates = [
@@ -654,7 +654,7 @@ export default function App() {
 
                 <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
 		       ref={audioRef}
-		       src={"/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename.replace(/#/g,'%23')}
+		       src={massageUri("/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename)}
 		       onEnded={handleTrackEnded}
 		       preload={"none"}
 		       controls
