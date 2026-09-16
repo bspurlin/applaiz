@@ -33,15 +33,27 @@ const DirectoryList = ({ directories, onDirAction, registerRef}) => (
     </ul>
 );
 
-const FileList = ({ files, onPlayFile, dirname, registerRef }) => (
+const FileList = ({ files, onPlayFile, dirname, registerRef, playingIndex }) => (
     <ul className="pb-16">
-        {files.map((file, index) => (
-            <li key={index} id={index} ref={registerRef(index)} style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }} className="w-full border-[2px] border-gray-300 text-lg rounded-full">
-                <button className="text-left ml-3" onClick={() => onPlayFile(files, index, dirname)}>
-                    {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
-                </button>
-            </li>
-        ))}
+        {files.map((file, index) => {
+            const isPlaying = playingIndex === index;
+            return (
+                <li
+                    key={index}
+                    id={index}
+                    ref={registerRef(index)}
+                    style={{
+                        backgroundColor: isPlaying ? '#fff9c4' : (index % 2 === 0 ? '#f0f0f0' : '#ffffff'),
+                        fontWeight: isPlaying ? 'bold' : 'normal',
+                    }}
+                    className="w-full border-[2px] border-gray-300 text-lg rounded-full"
+                >
+                    <button className="text-left ml-3" onClick={() => onPlayFile(files, index, dirname)}>
+                        {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
+                    </button>
+                </li>
+            );
+        })}
     </ul>
 );
 
@@ -241,7 +253,6 @@ export default function App() {
     const [stopplaying, setStopPlaying] = useState(false)
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
-    const highlightedFileRef = useRef(null);
 
     // Map persists across renders, doesn't trigger re-renders itself
     const nodeRefs = useRef(new Map());
@@ -320,18 +331,11 @@ export default function App() {
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index]);
 
+    // Highlighting itself is now handled declaratively in FileList (via the
+    // playingIndex prop computed below), so this effect only needs to
+    // handle scrolling the now-playing row into view and positioning the
+    // metadata callout.
     useEffect(() => {
-
-	if (highlightedFileRef.current && nowPlaying) {
-        if (nowPlaying.index % 2 == 0) {
-                highlightedFileRef.current.style.backgroundColor = 'white';
-             } else {
-                highlightedFileRef.current.style.backgroundColor = '#f0f0f0';
-             }
-        highlightedFileRef.current.style.fontWeight = '';
-        highlightedFileRef.current = null;
-	}
-	
 	if (!nowPlaying) {
             setCalloutPos(null);
             return;
@@ -339,22 +343,14 @@ export default function App() {
 
 	const el = nodeRefs.current.get(nowPlaying.index);
 	const top_el = nodeRefs.current.get("nowplaying_top");
-//	console.log('callout lookup', {
-//            index: nowPlaying.index,
-//            top_el: top_el
-//	});
 	if (el && dirobj.dirname === nowPlaying.dirname) {
 	    top_el.style.color = 'black';
-            el.style.backgroundColor = '#fff9c4';
-            el.style.fontWeight = 'bold';
             el.scrollIntoView({ block: 'center', behavior: 'auto' });
             const rect = el.getBoundingClientRect();
-            highlightedFileRef.current = el;
             setCalloutPos({
 		top: rect.top,
 		left: window.innerWidth - CALLOUT_WIDTH - MARGIN,
 	    });
-	 
 	} else {
 	    top_el.style.color = 'red';
             setCalloutPos(null);
@@ -387,22 +383,6 @@ export default function App() {
       window.removeEventListener('popstate', handlePopState);
     };
    });
-
-    useEffect(() => {
-	if ( stopplaying &&  highlightedFileRef.current){
-            console.log({"stopplaying changed to": stopplaying,
-			 "highlightedFileRef": highlightedFileRef.current,
-			 "color": highlightedFileRef.current.style.backgroundColor,
-			 "id": highlightedFileRef.current.id
-			});
-            if ( highlightedFileRef.current.id % 2 == 0) {
-		highlightedFileRef.current.style.backgroundColor = '#f0f0f0';
-            } else {
-		highlightedFileRef.current.style.backgroundColor = 'white';
-            }
-	    
-	}
-    },[stopplaying]);
 
     const stopAudio = () => {
 	if(audioRef.current){
@@ -562,11 +542,17 @@ export default function App() {
 	setMenuOpen(false);
     };
 
+    // The playing row is only highlighted while the CURRENTLY RENDERED
+    // dirobj is the same one nowPlaying was set from.
+    const playingIndex = (nowPlaying && !stopplaying && dirobj && dirobj.dirname === nowPlaying.dirname)
+	  ? nowPlaying.index
+	  : null;
+
     const templates = [
-	({ dirobj, onDirAction, onPlayFile, registerRef }) => (
+	({ dirobj, onDirAction, onPlayFile, registerRef, playingIndex }) => (
             <>
 		<DirectoryList directories={dirobj.directories} onDirAction={onDirAction} registerRef={registerRef} />
-		<FileList files={dirobj.files} onPlayFile={onPlayFile} dirname={dirobj.dirname} registerRef={registerRef} />
+		<FileList files={dirobj.files} onPlayFile={onPlayFile} dirname={dirobj.dirname} registerRef={registerRef} playingIndex={playingIndex} />
             </>
 	),
 	({ dirobj, onDirAction }) => (
@@ -590,8 +576,8 @@ export default function App() {
 
 			   <span id="nowplaying_top" ref={registerRef("nowplaying_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px] inline-flex items-center gap-1  " >
 
-<svg viewBox="0 0 24 24" width="24" height="24" fill="black" onClick={stopAudio} xmlns="http://w3.org" >
-  <rect x="6" y="6" width="12" height="12" rx="1.5" />
+<svg viewBox="0 0 20 20" width="20" height="20" fill="black" onClick={stopAudio} xmlns="http://w3.org" style={{ flexShrink: 0 }}  >
+  <rect x="0" y="0" width="20" height="20"  />
 </svg>
 			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
 			    </span>
@@ -614,6 +600,7 @@ export default function App() {
 			onDirAction: handleDirobjChange,
 			onPlayFile: handlePlayFile,
 			registerRef,
+			playingIndex,
 		    })}
 		</>
             )}

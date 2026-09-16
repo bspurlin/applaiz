@@ -61,3 +61,82 @@ The Bookmark task is:
 1. Have a simple bookmark icon in the menu
 
 2. That either opens the browser bookmark interface directly, or if not possible places a generated bookmark url in the location bar.
+
+2026-09-15
+
+
+Good evening, M. Claude.  I am having trouble debugging a minor problem with App.jsx - alternate file highlighting - and I would appreciate any suggestions you might have.
+
+As you know, dirobj.files rendering is supposed to highlight every other file a different color: #f0f0f0 for even (index mod 2 == 0), otherwise white.
+
+This doesn't always work.  If I am in a directory, play a file, and the parent directory has both files and directories, if I go back to the parent directory, alternate file highlighting immediately breaks down, both in the parent directory and if I go back to the original directory.  If the parent directory does not contain files, or if I do not play a file in the original directory, all is well.
+
+On every dirobj render containing dirobj.files FileList() is invoked and is supposed to alternately highlight each file entry.  Attaching a debugger to line 39 of the file I am about to upload shows that this code is reached, but in the case mentioned above, seems to have no effect on the file entry background colors.
+
+
+Response:
+
+The likely cause: imperative DOM writes fighting React's diffing
+
+In the nowPlaying-highlight effect, you're directly mutating DOM nodes via el.style.backgroundColor = ... (both to apply the yellow highlight, and — in the cleanup branch — to restore the zebra-stripe color when clearing the previous highlight). Separately, FileList sets each <li>'s background declaratively, via style={{ backgroundColor: index % 2 === 0 ? '#f0f0f0' : '#ffffff' }}.
+
+These two mechanisms are touching the same DOM property through two different paths, and React only tracks the second one. Specifically:
+
+React's reconciler doesn't diff your JSX's declared style against the actual current DOM value — it diffs against the previous props it itself committed for that element. If you reach in via a ref and directly set el.style.backgroundColor to something React didn't set, React has no idea the DOM changed underneath it. On the next render, if the declared style value for that index happens to be the same string as what React last remembers committing (e.g., index 2 was '#f0f0f0' last time, and it's '#f0f0f0' again this time), React sees "no change needed" and skips writing to the DOM at all — leaving your manual override in place, invisibly out of sync with what the JSX says should be there....
+
+The real fix: stop mutating the DOM directly for this — drive it all through React state
+
+Rather than patching the cleanup math, I'd remove the imperative style-writing entirely and make "is this the now-playing row" a normal piece of render logic, computed the same way the zebra stripe already is:
+
+jsx
+const FileList = ({ files, onPlayFile, dirname, registerRef, playingIndex }) => (
+    <ul className="pb-16">
+        {files.map((file, index) => {
+            const isPlaying = playingIndex === index;
+            return (
+                <li
+                    key={index}
+                    id={index}
+                    ref={registerRef(index)}
+                    style={{
+                        backgroundColor: isPlaying ? '#fff9c4' : (index % 2 === 0 ? '#f0f0f0' : '#ffffff'),
+                        fontWeight: isPlaying ? 'bold' : 'normal',
+                    }}
+                    className="w-full border-[2px] border-gray-300 text-lg rounded-full"
+                >
+                    <button className="text-left ml-3" onClick={() => onPlayFile(files, index, dirname)}>
+                        {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
+                    </button>
+                </li>
+            );
+        })}
+    </ul>
+);
+
+In App, compute playingIndex for the currently rendered directory only (mirroring the dirobj.dirname === nowPlaying.dirname check you already have in the effect):
+
+jsx
+const playingIndex = (nowPlaying && dirobj.dirname === nowPlaying.dirname) ? nowPlaying.index : null;
+
+Pass it down to FileList in the template dispatch, and simplify the big effect to only handle scrolling and calloutPos — no more el.style.backgroundColor/fontWeight writes, no more highlightedFileRef bookkeeping at all:
+
+jsx
+useEffect(() => {
+    if (!nowPlaying) {
+        setCalloutPos(null);
+        return;
+ }
+    const el = nodeRefs.current.get(nowPlaying.index);
+    const top_el = nodeRefs.current.get("nowplaying_top");
+    if (el && dirobj.dirname === nowPlaying.dirname) {
+        top_el.style.color = 'black';
+        el.scrollIntoView({ block: 'center', behavior: 'auto' });
+        const rect = el.getBoundingClientRect();
+        setCalloutPos({ top: rect.top, left: window.innerWidth - CALLOUT_WIDTH - MARGIN });
+    } else {
+        top_el.style.color = 'red';
+        setCalloutPos(null);
+    }
+}, [dirobj, nowPlaying?.index]);
+
+This removes highlightedFileRef and the separate stopplaying-triggered restoration effect entirely — since the highlight color is now purely a function of (index, playingIndex), computed fresh on every render, there's nothing to manually "clear" or "restore." When the user backs out, plays a different file, or stops playback, FileList just re-renders with the correct colors automatically — no possibility of drift, because there's only one source of truth for the style instead of two competing writers.
