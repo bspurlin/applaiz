@@ -233,6 +233,11 @@ const SearchPanel = ({ terms, onTermChange, onSubmit, onClose, error, history, o
     </div>
 );
 
+const scaleSize  = (length,offset) => {
+	const baseSize = 32; // Maximum font size in px
+	const minSize = 14;  // Minimum font size in px
+    return Math.max(minSize, baseSize - Math.max(0, length - offset) * 1.5)
+};
 
 export default function App() {
     const [options, setOptions] = useState({
@@ -251,6 +256,7 @@ export default function App() {
     const [nowPlaying, setNowPlaying] = useState(null);
     // nowPlaying shape: { files: [...], dirname: string, index: number }
     const [stopplaying, setStopPlaying] = useState(false)
+    const [playingTitle, setPlayingTitle] = useState("");
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
 
@@ -343,6 +349,14 @@ export default function App() {
 
 	const el = nodeRefs.current.get(nowPlaying.index);
 	const top_el = nodeRefs.current.get("nowplaying_top");
+	const length = top_el.innerText.length;
+	if (length > 10) {
+	    const newSize = scaleSize(length,5);
+	    top_el.style.fontSize = newSize + "px";
+
+	} else {
+	    top_el.style.fontSize = "21px";
+	}
 	if (el && dirobj.dirname === nowPlaying.dirname) {
 	    top_el.style.color = 'black';
             el.scrollIntoView({ block: 'center', behavior: 'auto' });
@@ -359,8 +373,18 @@ export default function App() {
 
     useEffect(() => {
 	if(dirobj) {
-	    console.log(dirobj)
-	    document.title = dirobj.title
+	    console.log(dirobj);
+	    document.title = dirobj.title;
+	    const album_el = nodeRefs.current.get("albumtitle_top");
+	    const length = album_el.innerText.length;
+	    if (length > 10) {
+		const newSize = scaleSize(length,5);
+		album_el.style.fontSize = newSize + "px";
+		
+	    } else {
+		album_el.style.fontSize = "21px";
+	    }
+
 	}
     }, [dirobj]);
     
@@ -395,6 +419,8 @@ export default function App() {
     
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
+	const playingtitle = files[index].title ? files[index].title: files[index].filename.replace(/\.(mp3|m4a)/i,"");
+	setPlayingTitle(playingtitle);
 	setStopPlaying(false)
     };
 
@@ -548,6 +574,9 @@ export default function App() {
 	  ? nowPlaying.index
 	  : null;
 
+
+
+    
     const templates = [
 	({ dirobj, onDirAction, onPlayFile, registerRef, playingIndex }) => (
             <>
@@ -568,7 +597,7 @@ export default function App() {
 <>
 			<BackButton dirobj={dirobj} onBackAction={handleBack} />
 			
-			<span className="px-6 py-2 rounded-full bg-yellow-50 border-[1px]">
+			<span id="albumtitle_top" ref={registerRef("albumtitle_top")}  className="px-6 py-2 rounded-full bg-yellow-50 border-[1px]">
 				{dirobj.title}
 			</span>
 </>
@@ -579,7 +608,7 @@ export default function App() {
 <svg viewBox="0 0 20 20" width="20" height="20" fill="black" onClick={stopAudio} xmlns="http://w3.org" style={{ flexShrink: 0 }}  >
   <rect x="0" y="0" width="20" height="20"  />
 </svg>
-			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
+			       {playingTitle}
 			    </span>
 			)}
 
