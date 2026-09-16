@@ -255,7 +255,6 @@ export default function App() {
     const [nowPlaying, setNowPlaying] = useState(null);
     // nowPlaying shape: { files: [...], dirname: string, index: number }
     const [stopplaying, setStopPlaying] = useState(false)
-    const [playingTitle, setPlayingTitle] = useState("");
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
 
@@ -418,8 +417,6 @@ export default function App() {
     
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index });
-	const playingtitle = files[index].title ? files[index].title: files[index].filename.replace(/\.(mp3|m4a)/i,"");
-	setPlayingTitle(playingtitle);
 	setStopPlaying(false)
     };
 
@@ -607,7 +604,7 @@ export default function App() {
 				<rect x="0" y="0" width="16" height="16"  />
 			    </svg>
 			    <span id="nowplaying_top" ref={registerRef("nowplaying_top")}   >
-			       {playingTitle}
+			       {nowPlaying.files[nowPlaying.index].title || nowPlaying.files[nowPlaying.index].filename.replace(/\.(mp3|m4a)/i,"")}
 			    </span>
 			    </>
 			)}
