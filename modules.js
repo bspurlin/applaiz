@@ -15,15 +15,22 @@ function searchFsObj (fsobj, rearray) {
 	lobj: fsobj,
 	fFile: (lobj) => {
 	    let n = 0;
+	    let alreadyfound = new Array(score);
+ 	    let searchstring = lobj.dirname;
 	    for(let i =0; i< score; i++){
 		let re = rearray[i];
-		let searchstring = lobj.dirname;
 		if (re.test(searchstring)) {
 		    n++;
-		    continue;
+		    alreadyfound[i] = true
+		} else{
+		    alreadyfound[i] = false
 		}
+	    }
+	    if (n >= score) {
+		// We are done - dirname has matched all terms
+	    } else { // There are score - n remaining terms to be tested
 		for (let x = 0; x <  lobj.files.length; x++){
-		    searchstring=lobj.files[x].filename;
+		    let searchstring=lobj.files[x].filename;
 		    if (lobj.files[x].title != undefined)
 			searchstring = searchstring + lobj.files[x].title;
 		    if (lobj.files[x].artist != undefined)
@@ -34,9 +41,18 @@ function searchFsObj (fsobj, rearray) {
 			searchstring = searchstring + lobj.files[x].albumartist;
 		    if (lobj.files[x].composer != undefined)
 			searchstring = searchstring + lobj.files[x].composer;
-		    if (re.test(searchstring)) {
-			n++;
-			break;
+		    if (lobj.files[x].year != undefined)
+			searchstring = searchstring + lobj.files[x].year;
+		    let m = 0; //zero before each file test - a single file must match all remaining terms
+		    for (let i = 0; i < score ; i++ ){
+			let re = rearray[i];
+			if ( !alreadyfound[i] && re.test(searchstring)) { 
+			    m++;   // Matched a term not already matched by dirname
+			}
+		    }
+		    if (m >= score - n ) { // a file  has matched all remaining terms
+			n = m + n;
+			break
 		    }
 		}
 	    }
