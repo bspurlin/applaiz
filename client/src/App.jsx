@@ -257,7 +257,8 @@ export default function App() {
     const [stopplaying, setStopPlaying] = useState(false)
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
-
+    const pathRef = useRef(".");
+    
     // Map persists across renders, doesn't trigger re-renders itself
     const nodeRefs = useRef(new Map());
     
@@ -274,7 +275,9 @@ export default function App() {
     const MARGIN = 8;
 
     const [searchParams, setSearchParams] = useSearchParams();
-    const query = searchParams.get('d') || undefined;
+    const dirobj_get = searchParams.get('d') || undefined;
+    const searchterms_get = searchParams.get('s') || undefined;
+    const pathterms_get = searchParams.get('p') || undefined;
 
     // --- Search & menu state ---
     const [menuOpen, setMenuOpen] = useState(false);
@@ -285,9 +288,9 @@ export default function App() {
 
     useEffect(() => {
 	let isMounted = true;
-	if (query) {
-	    console.log("query = ", query);
-	    setOptions(prev => ({ ...prev, body: '{"d":"' + query + '"}' }));
+	if (dirobj_get) {
+	    console.log("dirobj_get = ", dirobj_get);
+	    setOptions(prev => ({ ...prev, body: '{"d":"' + dirobj_get + '"}' }));
 	}
 	async function fetchData() {
             fetch("/api/dirobj", options)
@@ -310,6 +313,49 @@ export default function App() {
 	fetchData();
 	return () => { isMounted = false; };
     }, [options.body]);
+
+    useEffect(() => {
+
+	if (searchterms_get) {
+	    let s = searchterms_get;	    
+	    console.log("searchterms_get: ", s);
+	    let p = pathterms_get
+	    if (pathterms_get){
+		console.log("pathterms: ", p);
+	    } else {
+		p = "."
+	    }
+	    let search_body = JSON.stringify({ s, p });
+	    const options =  {
+		mode: 'cors',
+		method: 'POST',
+		headers: { "Content-Type": "application/json" },
+		body: search_body
+	    }
+
+	async function fetchData() {
+            fetch("/api/search", options)
+		.then((res) => {
+                    if (!res.ok) throw new Error("Failed to load the search.");
+                    return res.json();
+		})
+		.then((data) => {
+		    console.log("Here parent", data.parent);
+		    data.perma = JSON.parse(search_body);
+		    setDirobj(data);
+		    setStatus("ready");
+		    dirobjcache.current = {...dirobjcache.current,[data.path]: data} ;  // Cache every dirobj that comes off the net	 
+		})
+		.catch((err) => {
+                    setErrorMsg(err.message);
+                    setStatus("error");
+		});
+	}
+	    fetchData();
+    
+	}
+	
+    },[searchterms_get]);
 
     useEffect(() => {
 	if (pendingTargetId) {
@@ -490,6 +536,7 @@ export default function App() {
     // unless cached and sets dirobj from cache 
     
     const handleDirobjChange = (newPerma,newPath) => {
+
 	setSearchParams({});
 
 	//console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
@@ -510,23 +557,20 @@ export default function App() {
 	if (!s) return;
 
 	try {
+	    let search_body = JSON.stringify({ s, p: dirobj.path});
 	    const res = await fetch("/api/search", {
 		mode: 'cors',
 		method: 'POST',
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ s, p: dirobj.path }),
+		body: search_body,
 	    });
 	    if (!res.ok) throw new Error("Search request failed.");
 	    const data = await res.json();
-	data.template = 0;
-        for (let i of data.directories) i.template = 0;
-        data.title = "Search: " + data.path;
-
 	    if (!data.directories || data.directories.length === 0) {
 		setSearchError(`No results for "${s}"`);
 		return;
 	    }
-
+	    data.perma = JSON.parse(search_body);
 	    dirobjcache.current = { ...dirobjcache.current, [data.path]: data };
 	    setSearchError(null);
 	    setDirobj(data);
@@ -564,7 +608,12 @@ export default function App() {
 	    setMenuOpen(false);
 	    return;
 	}
-	setSearchParams({ d: dirobj.perma });
+	if (dirobj.perma.s) {
+	    console.log("dirob.perma.s :",dirobj.perma.s,"p: ",dirobj.perma.p)
+	    setSearchParams(dirobj.perma);
+	} else {
+	    setSearchParams({ d: dirobj.perma });
+	}
 	alert('Press Ctrl+D (Cmd+D on Mac) to bookmark this page.');
 	setMenuOpen(false);
     };
@@ -594,7 +643,7 @@ export default function App() {
 	<div>
             {status == "ready" && (
 		<>
-                    <div className="sticky top-0 w-full  flex items-center gap-2  py-2 rounded-sm bg-yellow-50 border-[1px]  font-semibold my-0 py-0 ">
+                    <div className="sticky top-0 w-full  flex items-center text-center gap-2  py-2 rounded-sm bg-yellow-50 border-[1px]  font-semibold my-0 py-0 ">
 			<>
 			    <BackButton dirobj={dirobj} onBackAction={handleBack} />
 			
