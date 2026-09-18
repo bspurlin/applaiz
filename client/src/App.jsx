@@ -254,7 +254,8 @@ export default function App() {
     const [calloutPos, setCalloutPos] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
     // nowPlaying shape: { files: [...], dirname: string, index: number, title: string }
-    const [stopplaying, setStopPlaying] = useState(false)
+    const [stopplaying, setStopPlaying] = useState(false);
+    const  [loading, setLoading] = useState(false);
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
 
@@ -274,7 +275,9 @@ export default function App() {
     const MARGIN = 8;
 
     const [searchParams, setSearchParams] = useSearchParams();
-    const query = searchParams.get('d') || undefined;
+    const dirobj_get = searchParams.get('d') || undefined;
+    const searchterms_get = searchParams.get('s') || undefined;
+
 
     // --- Search & menu state ---
     const [menuOpen, setMenuOpen] = useState(false);
@@ -285,9 +288,9 @@ export default function App() {
 
     useEffect(() => {
 	let isMounted = true;
-	if (query) {
-	    console.log("query = ", query);
-	    setOptions(prev => ({ ...prev, body: '{"d":"' + query + '"}' }));
+	if (dirobj_get) {
+	    console.log("dirobj_get = ", dirobj_get);
+	    setOptions(prev => ({ ...prev, body: '{"d":"' + dirobj_get + '"}' }));
 	}
 	async function fetchData() {
             fetch("/api/dirobj", options)
@@ -373,16 +376,18 @@ export default function App() {
 	if(dirobj) {
 	    console.log(dirobj);
 	    document.title = dirobj.title;
-	    const album_el = nodeRefs.current.get("albumtitle_top");
-	    const length = album_el.innerText.length;
-	    if (length > 10) {
-		const newSize = scaleSize(length,5);
-		album_el.style.fontSize = newSize + "px";
-		
-	    } else {
-		album_el.style.fontSize = "21px";
+	    if (nodeRefs.current.get("albumtitle_top")){
+		const album_el = nodeRefs.current.get("albumtitle_top");
+		const length = album_el.innerText.length;
+		if (length > 10) {
+		    const newSize = scaleSize(length,5);
+		    album_el.style.fontSize = newSize + "px";
+		    
+		} else {
+		    album_el.style.fontSize = "21px";
+		}
 	    }
-
+	    
 	}
     }, [dirobj]);
     
@@ -406,6 +411,19 @@ export default function App() {
     };
    });
 
+    const searchedFor = useRef(null);
+    
+    useEffect(() => {
+	if (!searchterms_get || !dirobj) return;
+	if (searchedFor.current === searchterms_get) return;   // already ran for this value
+	searchedFor.current = searchterms_get;
+	const aa = [0,1,2].map((i) => searchterms_get.split(",")[i] || "");
+
+	setSearchTerms(aa);
+	handleSearch(aa);
+	
+    }, [searchterms_get,dirobj]);
+    
     const stopAudio = () => {
 	if(audioRef.current){
 	    audioRef.current.pause();
@@ -505,8 +523,9 @@ export default function App() {
     // p is the CURRENT dirobj's own path (where the user was standing when
     // they searched) — matches the server's expectation, per the logged
     // example: { s: "liszt,polonaise", p: ".3.10" }.
-    const handleSearch = async () => {
-	const s = searchTerms.map((t) => t.trim()).filter(Boolean).join(',');
+    const handleSearch = async (termsArg) => {
+	const terms = termsArg ?? searchTerms;
+	const s = terms.map((t) => t.trim()).filter(Boolean).join(',');
 	if (!s) return;
 
 	try {
@@ -527,7 +546,7 @@ export default function App() {
 		return;
 	    }
 
-	    dirobjcache.current = { ...dirobjcache.current, [data.path]: data };
+	    //dirobjcache.current = { ...dirobjcache.current, [data.path]: data };
 	    setSearchError(null);
 	    setDirobj(data);
 	    setSearchHistory((prev) => [...prev, { label: s, path: data.path }]);
