@@ -624,7 +624,7 @@ export default function App() {
 	  ? nowPlaying.index
 	  : null;
 
-    const massageUri = (uri) => {return encodeURI(uri).replace(/#/ig,'%23')}
+    const massageUri = (uri) => {return encodeURI(uri).replace(/#/ig,'%23')};
 
     
     const templates = [
