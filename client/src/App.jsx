@@ -254,11 +254,11 @@ export default function App() {
     const [calloutPos, setCalloutPos] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
     // nowPlaying shape: { files: [...], dirname: string, index: number, title: string }
-    const [stopplaying, setStopPlaying] = useState(false);
-    const  [loading, setLoading] = useState(false);
+    const [stopplaying, setStopPlaying] = useState(false)
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
-
+    const pathRef = useRef(".");
+    
     // Map persists across renders, doesn't trigger re-renders itself
     const nodeRefs = useRef(new Map());
     
@@ -277,7 +277,7 @@ export default function App() {
     const [searchParams, setSearchParams] = useSearchParams();
     const dirobj_get = searchParams.get('d') || undefined;
     const searchterms_get = searchParams.get('s') || undefined;
-
+    const pathterms_get = searchParams.get('p') || undefined;
 
     // --- Search & menu state ---
     const [menuOpen, setMenuOpen] = useState(false);
@@ -313,6 +313,49 @@ export default function App() {
 	fetchData();
 	return () => { isMounted = false; };
     }, [options.body]);
+
+    useEffect(() => {
+
+	if (searchterms_get) {
+	    let s = searchterms_get;	    
+	    console.log("searchterms_get: ", s);
+	    let p = pathterms_get
+	    if (pathterms_get){
+		console.log("pathterms: ", p);
+	    } else {
+		p = "."
+	    }
+	    let search_body = JSON.stringify({ s, p });
+	    const options =  {
+		mode: 'cors',
+		method: 'POST',
+		headers: { "Content-Type": "application/json" },
+		body: search_body
+	    }
+
+	async function fetchData() {
+            fetch("/api/search", options)
+		.then((res) => {
+                    if (!res.ok) throw new Error("Failed to load the search.");
+                    return res.json();
+		})
+		.then((data) => {
+		    console.log("Here parent", data.parent);
+		    data.perma = JSON.parse(search_body);
+		    setDirobj(data);
+		    setStatus("ready");
+		    dirobjcache.current = {...dirobjcache.current,[data.path]: data} ;  // Cache every dirobj that comes off the net	 
+		})
+		.catch((err) => {
+                    setErrorMsg(err.message);
+                    setStatus("error");
+		});
+	}
+	    fetchData();
+    
+	}
+	
+    },[searchterms_get]);
 
     useEffect(() => {
 	if (pendingTargetId) {
@@ -376,18 +419,16 @@ export default function App() {
 	if(dirobj) {
 	    console.log(dirobj);
 	    document.title = dirobj.title;
-	    if (nodeRefs.current.get("albumtitle_top")){
-		const album_el = nodeRefs.current.get("albumtitle_top");
-		const length = album_el.innerText.length;
-		if (length > 10) {
-		    const newSize = scaleSize(length,5);
-		    album_el.style.fontSize = newSize + "px";
-		    
-		} else {
-		    album_el.style.fontSize = "21px";
-		}
+	    const album_el = nodeRefs.current.get("albumtitle_top");
+	    const length = album_el.innerText.length;
+	    if (length > 10) {
+		const newSize = scaleSize(length,5);
+		album_el.style.fontSize = newSize + "px";
+		
+	    } else {
+		album_el.style.fontSize = "21px";
 	    }
-	    
+
 	}
     }, [dirobj]);
     
@@ -411,19 +452,6 @@ export default function App() {
     };
    });
 
-    const searchedFor = useRef(null);
-    
-    useEffect(() => {
-	if (!searchterms_get || !dirobj) return;
-	if (searchedFor.current === searchterms_get) return;   // already ran for this value
-	searchedFor.current = searchterms_get;
-	const aa = [0,1,2].map((i) => searchterms_get.split(",")[i] || "");
-
-	setSearchTerms(aa);
-	handleSearch(aa);
-	
-    }, [searchterms_get,dirobj]);
-    
     const stopAudio = () => {
 	if(audioRef.current){
 	    audioRef.current.pause();
@@ -508,6 +536,7 @@ export default function App() {
     // unless cached and sets dirobj from cache 
     
     const handleDirobjChange = (newPerma,newPath) => {
+
 	setSearchParams({});
 
 	//console.log({"handledirobchange": dirobj.path,"newPath":newPath ,"current":dirobjcache.current[dirobj.path].dirname},"prevdir",newPath);
@@ -523,30 +552,26 @@ export default function App() {
     // p is the CURRENT dirobj's own path (where the user was standing when
     // they searched) — matches the server's expectation, per the logged
     // example: { s: "liszt,polonaise", p: ".3.10" }.
-    const handleSearch = async (termsArg) => {
-	const terms = termsArg ?? searchTerms;
-	const s = terms.map((t) => t.trim()).filter(Boolean).join(',');
+    const handleSearch = async () => {
+	const s = searchTerms.map((t) => t.trim()).filter(Boolean).join(',');
 	if (!s) return;
 
 	try {
+	    let search_body = JSON.stringify({ s, p: dirobj.path});
 	    const res = await fetch("/api/search", {
 		mode: 'cors',
 		method: 'POST',
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ s, p: dirobj.path }),
+		body: search_body,
 	    });
 	    if (!res.ok) throw new Error("Search request failed.");
 	    const data = await res.json();
-	data.template = 0;
-        for (let i of data.directories) i.template = 0;
-        data.title = "Search: " + data.path;
-
 	    if (!data.directories || data.directories.length === 0) {
 		setSearchError(`No results for "${s}"`);
 		return;
 	    }
-
-	    //dirobjcache.current = { ...dirobjcache.current, [data.path]: data };
+	    data.perma = JSON.parse(search_body);
+	    dirobjcache.current = { ...dirobjcache.current, [data.path]: data };
 	    setSearchError(null);
 	    setDirobj(data);
 	    setSearchHistory((prev) => [...prev, { label: s, path: data.path }]);
@@ -583,7 +608,12 @@ export default function App() {
 	    setMenuOpen(false);
 	    return;
 	}
-	setSearchParams({ d: dirobj.perma });
+	if (dirobj.perma.s) {
+	    console.log("dirob.perma.s :",dirobj.perma.s,"p: ",dirobj.perma.p)
+	    setSearchParams(dirobj.perma);
+	} else {
+	    setSearchParams({ d: dirobj.perma });
+	}
 	alert('Press Ctrl+D (Cmd+D on Mac) to bookmark this page.');
 	setMenuOpen(false);
     };
@@ -613,7 +643,7 @@ export default function App() {
 	<div>
             {status == "ready" && (
 		<>
-                    <div className="sticky top-0 w-full  flex items-center gap-2  py-2 rounded-sm bg-yellow-50 border-[1px]  font-semibold my-0 py-0 ">
+                    <div className="sticky top-0 w-full  flex items-center text-center gap-2  py-2 rounded-sm bg-yellow-50 border-[1px]  font-semibold my-0 py-0 ">
 			<>
 			    <BackButton dirobj={dirobj} onBackAction={handleBack} />
 			

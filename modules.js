@@ -222,7 +222,9 @@ function searchDirObjs(searchterms, fsobj,parentpath) {//returns a dirObj
     robj.directories = [];
     robj.params = {"s": searchterms ,"p": parentpath };
     robj.serverpath = "/search";
-    for (let x in output) robj.directories.push({"name": path.basename(output[x].dirname),"path": output[x].path, "perma": output[x].perma});
+    robj.template = 0;
+    robj.title = "Search: " + searchterms;
+    for (let x in output) robj.directories.push({"name": path.basename(output[x].dirname),"path": output[x].path, "perma": output[x].perma, "template": 0});
     return robj;
 }
 
