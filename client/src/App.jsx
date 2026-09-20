@@ -381,9 +381,24 @@ export default function App() {
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index]);
 
+    // Leaving this in even though it doesn't work.
+    // Maybe Tesla will fix their bug and it will pop into life someday.
+
+    function initTeslaMediaState() {
+	if ('setPositionState' in navigator.mediaSession) {
+	    console.log("initTeslaMediaState","audioRef.current.duration",audioRef.current.duration);
+	    navigator.mediaSession.setPositionState({
+		duration: audioRef.current.duration || 180, // Must be a finite, positive number
+		playbackRate: audioRef.current.playbackRate || 1,
+		position: audioRef.current.currentTime || 0
+	    });
+	}
+    }
+
+    
     useEffect(() => {
 	if ("mediaSession" in navigator && nowPlaying) {
-	  console.log("mediaSession: ",nowPlaying.files[nowPlaying.index].title);
+
 	  navigator.mediaSession.metadata = new MediaMetadata({
 	      title: nowPlaying.files[nowPlaying.index].title ,
 	      artist: nowPlaying.files[nowPlaying.index].artist ,
@@ -391,13 +406,18 @@ export default function App() {
 	      artwork: [{ src: "/icons/sound2.gif" }]
 	  });
           navigator.mediaSession.setActionHandler("nexttrack",handleTrackEnded);
-	  navigator.mediaSession.setActionHandler("previoustrack",handlePrevTrack);
+	  navigator.mediaSession.setActionHandler("previoustrack",handlePreviousTrack);
 	  navigator.mediaSession.setActionHandler("pause", () => {
               audioRef.current.pause();
           });
 	  navigator.mediaSession.setActionHandler("play", () => {
               audioRef.current.play();
           });
+	    	    	    // Fire this whenever metadata loads, or on play
+	    audioRef.current.addEventListener('loadedmetadata', initTeslaMediaState);
+	    audioRef.current.addEventListener('play', initTeslaMediaState);
+
+
       }
       
     }, [nowPlaying?.dirname, nowPlaying?.index]);
@@ -501,11 +521,11 @@ export default function App() {
         });
     };
 
-    const handlePrevTrack  = () => {
+    const handlePreviousTrack  = () => {
         setNowPlaying((prev) => {
             if (!prev) return prev;
-            const nextIndex = (prev.index - 1) % prev.files.length;
-            return { ...prev, index: nextIndex, title: getTitle(prev.files, nextIndex) };
+            const previousIndex = prev.index == 0? prev.files.length - 1: prev.index - 1 ;
+            return { ...prev, index: previousIndex, title: getTitle(prev.files, previousIndex) };
         });
     };
 
