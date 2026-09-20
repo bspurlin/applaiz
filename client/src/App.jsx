@@ -381,6 +381,28 @@ export default function App() {
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index]);
 
+    useEffect(() => {
+	if ("mediaSession" in navigator && nowPlaying) {
+	  console.log("mediaSession: ",nowPlaying.files[nowPlaying.index].title);
+	  navigator.mediaSession.metadata = new MediaMetadata({
+	      title: nowPlaying.files[nowPlaying.index].title ,
+	      artist: nowPlaying.files[nowPlaying.index].artist ,
+	      album: nowPlaying.files[nowPlaying.index].album,
+	      artwork: [{ src: "/icons/sound2.gif" }]
+	  });
+          navigator.mediaSession.setActionHandler("nexttrack",handleTrackEnded);
+	  navigator.mediaSession.setActionHandler("previoustrack",handlePrevTrack);
+	  navigator.mediaSession.setActionHandler("pause", () => {
+              audioRef.current.pause();
+          });
+	  navigator.mediaSession.setActionHandler("play", () => {
+              audioRef.current.play();
+          });
+      }
+      
+    }, [nowPlaying?.dirname, nowPlaying?.index]);
+
+    
     // Highlighting itself is now handled declaratively in FileList (via the
     // playingIndex prop computed below), so this effect only needs to
     // handle scrolling the now-playing row into view and positioning the
@@ -478,6 +500,15 @@ export default function App() {
             return { ...prev, index: nextIndex, title: getTitle(prev.files, nextIndex) };
         });
     };
+
+    const handlePrevTrack  = () => {
+        setNowPlaying((prev) => {
+            if (!prev) return prev;
+            const nextIndex = (prev.index - 1) % prev.files.length;
+            return { ...prev, index: nextIndex, title: getTitle(prev.files, nextIndex) };
+        });
+    };
+
     
     //Event handler sets dirobj to the parent, triggering render of the parent
     //Use this version if the parent of all New! dirobjs is the New! dirobj itself
@@ -624,7 +655,7 @@ export default function App() {
 	  ? nowPlaying.index
 	  : null;
 
-    const massageUri = (uri) => {return encodeURI(uri).replace(/#/ig,'%23')}
+    const massageUri = (uri) => {return encodeURI(uri).replace(/#/ig,'%23')};
 
     
     const templates = [
