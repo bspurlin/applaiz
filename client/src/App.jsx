@@ -32,12 +32,12 @@ const DirectoryList = ({ directories, onDirAction, registerRef}) => (
     </ul>
 );
 
-const FileList = ({ files, onPlayFile, dirname, registerRef, playingIndex }) => (
+const FileList = ({ files, onPlayFile, dirname, registerRef, playingIndex, handleInfoPos }) => (
     <ul className="pb-16">
         {files.map((file, index) => {
             const isPlaying = playingIndex === index;
             return (
-                <li
+                <li 
                     key={index}
                     id={index}
                     ref={registerRef(index)}
@@ -45,18 +45,26 @@ const FileList = ({ files, onPlayFile, dirname, registerRef, playingIndex }) => 
                         backgroundColor: isPlaying ? '#fff9c4' : (index % 2 === 0 ? '#f0f0f0' : '#ffffff'),
                         fontWeight: isPlaying ? 'bold' : 'normal',
                     }}
-                    className="w-full border-[2px] border-gray-300 text-lg rounded-full"
+                    className="w-full border-[2px] border-gray-300 text-lg rounded-full flex gap-4 pr-4 items-center"
                 >
                     <button className="text-left ml-3" onClick={() => onPlayFile(files, index, dirname)}>
                         {file.title || file.filename.replace(/(mp3|m4a$)/i, "")}
                     </button>
+		    <div className="ml-auto flex items-center">
+			<svg id={"info_" + index} ref={registerRef("info_" + index)}  index={index}  onClick={() => handleInfoPos(files,index)} className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+  <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/>
+		    </svg>
+		    </div>
                 </li>
+		
             );
         })}
     </ul>
 );
 
-const NowPlayingCallout = ({ file, pos }) => {
+
+const NowPlayingCallout = ({ file, pos }) => {console.log("NowPlayingCallout",file);
 	const fields = [
             ['artist', 'Artist'],
             ['album', 'Album'],
@@ -252,6 +260,7 @@ export default function App() {
     const [errorMsg, setErrorMsg] = useState("");
     const [pendingTargetId, setPendingTargetId] = useState(null);
     const [calloutPos, setCalloutPos] = useState(null);
+    const [infoPos, setInfoPos] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
     // nowPlaying shape: { files: [...], dirname: string, index: number, title: string }
     const [stopplaying, setStopPlaying] = useState(false)
@@ -458,6 +467,14 @@ export default function App() {
     }, [dirobj, nowPlaying?.index]);
 
     useEffect(() => {
+	if(infoPos) {
+	    setCalloutPos(null);	    
+	}
+
+    }, [infoPos]);
+ 
+    
+    useEffect(() => {
 	if(dirobj) {
 	    console.log(dirobj);
 	    document.title = dirobj.title;
@@ -474,7 +491,9 @@ export default function App() {
 	}
     }, [dirobj]);
     
-
+    useEffect(() => {
+	setInfoPos(null);
+    }, [dirobj]);
 
    useEffect(() => {
     // Deliberately runs on every render (no dependency array) — this is an
@@ -509,7 +528,8 @@ export default function App() {
 
     const handlePlayFile = (files, index, dirname) => {
 	setNowPlaying({ files, dirname, index, title: getTitle(files,index) });
-	setStopPlaying(false)
+	setStopPlaying(false);
+	setInfoPos(false)
     };
 
     
@@ -529,6 +549,23 @@ export default function App() {
         });
     };
 
+
+const InfoPosCallout = (val) => {
+    const rv = NowPlayingCallout(val);
+
+    return rv
+}
+
+
+    
+    const handleInfoPos   = (files, index) => {
+	const el = nodeRefs.current.get("info_" + index);
+	console.log("el",el)
+	const rect = el.getBoundingClientRect();
+	const pos = {top: rect.top, left: window.innerWidth - CALLOUT_WIDTH - MARGIN};
+
+	setInfoPos({files, index,pos});
+    }
     
     //Event handler sets dirobj to the parent, triggering render of the parent
     //Use this version if the parent of all New! dirobjs is the New! dirobj itself
@@ -682,7 +719,7 @@ export default function App() {
 	({ dirobj, onDirAction, onPlayFile, registerRef, playingIndex }) => (
             <>
 		<DirectoryList directories={dirobj.directories} onDirAction={onDirAction} registerRef={registerRef} />
-		<FileList files={dirobj.files} onPlayFile={onPlayFile} dirname={dirobj.dirname} registerRef={registerRef} playingIndex={playingIndex} />
+		<FileList files={dirobj.files} onPlayFile={onPlayFile} dirname={dirobj.dirname} registerRef={registerRef} playingIndex={playingIndex} handleInfoPos={handleInfoPos} />
             </>
 	),
 	({ dirobj, onDirAction }) => (
@@ -751,6 +788,10 @@ export default function App() {
             {nowPlaying && calloutPos && (
 		<NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} />
             )}
+
+	    { infoPos && !calloutPos && (
+		< NowPlayingCallout file={infoPos.files[infoPos.index]} pos={infoPos.pos} />
+	    )}
 	    
             {nowPlaying && !stopplaying && (
 
