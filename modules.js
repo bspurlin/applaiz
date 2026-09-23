@@ -350,7 +350,7 @@ let outobj = {
 		    
 		    // let ago = 	stat1.mtimeMs < stat1.birthtimeMs?
 			// (datenow - stat1.mtimeMs)/86400000 : (datenow - stat1.birthtimeMs)/86400000 ;
-		    let ago = (datenow - stat1.birthtimeMs)/86400000;
+		    let ago = (datenow - stat1.mtimeMs)/86400000;
 		    
 		    if ( ago < ndays ){
 			if(process.env.APPLAIZ_DBG)
