@@ -64,7 +64,7 @@ const FileList = ({ files, onPlayFile, dirname, registerRef, playingIndex, handl
 );
 
 
-const NowPlayingCallout = ({ file, pos }) => {console.log("NowPlayingCallout",file);
+const NowPlayingCallout = ({ file, pos, setcalloutpos }) => {console.log("NowPlayingCallout",file);
 	const fields = [
             ['artist', 'Artist'],
             ['album', 'Album'],
@@ -91,7 +91,8 @@ const NowPlayingCallout = ({ file, pos }) => {console.log("NowPlayingCallout",fi
 		    fontFamily: 'sans-serif',
 		    color:'#700070', 
 		    right:'0',
-		    width:'256px'		}}
+		     width:'256px'		}}
+		 onClick={() => setcalloutpos(null)}
             >
 
 		{fields
@@ -786,11 +787,11 @@ const InfoPosCallout = (val) => {
 	    )}
 
             {nowPlaying && calloutPos && (
-		<NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} />
+		<NowPlayingCallout file={nowPlaying.files[nowPlaying.index]} pos={calloutPos} setcalloutpos={setCalloutPos} />
             )}
 
 	    { infoPos && !calloutPos && (
-		< NowPlayingCallout file={infoPos.files[infoPos.index]} pos={infoPos.pos} />
+		< NowPlayingCallout file={infoPos.files[infoPos.index]} pos={infoPos.pos}  setcalloutpos={setInfoPos}/>
 	    )}
 	    
             {nowPlaying && !stopplaying && (
