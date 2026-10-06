@@ -717,15 +717,18 @@ const InfoPosCallout = (val) => {
 
     
     const templates = [
-	({ dirobj, onDirAction, onPlayFile, registerRef, playingIndex }) => (
+	({ dirobj }) => (
             <>
-		<DirectoryList directories={dirobj.directories} onDirAction={onDirAction} registerRef={registerRef} />
-		<FileList files={dirobj.files} onPlayFile={onPlayFile} dirname={dirobj.dirname} registerRef={registerRef} playingIndex={playingIndex} handleInfoPos={handleInfoPos} />
+		<DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} registerRef={registerRef} />
+		<FileList files={dirobj.files} onPlayFile={handlePlayFile} dirname={dirobj.dirname} registerRef={registerRef} playingIndex={playingIndex} handleInfoPos={handleInfoPos} />
             </>
 	),
-	({ dirobj, onDirAction }) => (
-            <NewDirobjHtml html={dirobj.html} onDirAction={onDirAction} />
+	({ dirobj }) => (
+            <NewDirobjHtml html={dirobj.html} onDirAction={handleDirobjChange} />
 	),
+	({ dirobj }) => (
+	 " "  
+	)
     ];
 
     return (
@@ -765,11 +768,7 @@ const InfoPosCallout = (val) => {
 			</span>
 		    </div>
 		    {templates[dirobj.template]({
-			dirobj,
-			onDirAction: handleDirobjChange,
-			onPlayFile: handlePlayFile,
-			registerRef,
-			playingIndex,
+			dirobj
 		    })}
 		</>
             )}
