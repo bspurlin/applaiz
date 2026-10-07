@@ -99,15 +99,26 @@ app.post('/randomplaylist/',(req,res)=>{
 	let randomPermaIndex = 0;
 	let randomFileIndex = 0;
 	let dirObj = {};
+	let randomFile = {};
 	randomPermaIndex = Math.floor(Math.random() * permakeys.length);
 
 	dirObj = mkDirObj(permalinks[permakeys[randomPermaIndex]], fsobj)
 	if(dirObj.files.length > 0){
 	    randomFileIndex =  Math.floor(Math.random() * dirObj.files.length)
 	    i++;
-	    console.log(dirObj.dirname,dirObj.files.length,randomFileIndex,dirObj.files[randomFileIndex].title)
+	    randomFile = dirObj.files[randomFileIndex];
+	    randomFile.path = dirObj.path;
+	    randomFile.perma = dirObj.perma;
+	    randomFile.dirtitle = dirObj.title;
+	    files.push(randomFile)
 	}
+	//console.log(dirObj.dirname,dirObj.files.length,randomFileIndex,dirObj.files[randomFileIndex].title)
     }
+    retval.directories = [];
+    retval.files=files;
+    retval.template=0;
+    console.log("files: ",retval.files.length);
+    res.end(JSON.stringify(retval));
 });
     
 app.post('/dirobj_nocache/',(req,res)=>{

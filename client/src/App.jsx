@@ -5,7 +5,9 @@ import { useSearchParams } from 'react-router-dom';
 // Outside App, top-level
 
 const BackButton = ({ dirobj, onBackAction }) => (
-    <span key={dirobj.perma} className=" inline-flex items-center justify-center" onClick={() => onBackAction(dirobj.parent, dirobj.path)}  > 
+    <span key={dirobj.perma} className=" inline-flex items-center justify-center" onClick={
+	      () => onBackAction(dirobj.parent , dirobj.path)
+	  }  > 
 	<svg xmlns="http://w3.org" viewBox="0 4 18 18" width="24" height="24" fill="black" >
 	    <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
 	</svg>
@@ -64,7 +66,7 @@ const FileList = ({ files, onPlayFile, dirname, registerRef, playingIndex, handl
 );
 
 
-const NowPlayingCallout = ({ file, pos, setcalloutpos }) => {console.log("NowPlayingCallout",file);
+const NowPlayingCallout = ({ file, pos, setcalloutpos }) => {
 	const fields = [
             ['artist', 'Artist'],
             ['album', 'Album'],
@@ -275,7 +277,6 @@ export default function App() {
     const [nowPlaying, setNowPlaying] = useState(null);
     // nowPlaying shape: { files: [...], dirname: string, index: number, title: string }
     const [stopplaying, setStopPlaying] = useState(false)
-    const [randomplaying, setRandomPlaying] = useState(false)
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
     const pathRef = useRef(".");
@@ -407,7 +408,6 @@ export default function App() {
 
     function initTeslaMediaState() {
 	if ('setPositionState' in navigator.mediaSession) {
-	    console.log("initTeslaMediaState","audioRef.current.duration",audioRef.current.duration);
 	    navigator.mediaSession.setPositionState({
 		duration: audioRef.current.duration || 180, // Must be a finite, positive number
 		playbackRate: audioRef.current.playbackRate || 1,
@@ -435,8 +435,8 @@ export default function App() {
               audioRef.current.play();
           });
 	    	    	    // Fire this whenever metadata loads, or on play
-	    audioRef.current.addEventListener('loadedmetadata', initTeslaMediaState);
-	    audioRef.current.addEventListener('play', initTeslaMediaState);
+//	    audioRef.current.addEventListener('loadedmetadata', initTeslaMediaState);
+//	    audioRef.current.addEventListener('play', initTeslaMediaState);
 
 
       }
@@ -456,25 +456,27 @@ export default function App() {
 
 	const el = nodeRefs.current.get(nowPlaying.index);
 	const top_el = nodeRefs.current.get("nowplaying_top");
-	const length = top_el.innerText.length;
-	if (length > 10) {
-	    const newSize = scaleSize(length,5);
-	    top_el.style.fontSize = newSize + "px";
-
-	} else {
-	    top_el.style.fontSize = "21px";
-	}
-	if (el && dirobj.dirname === nowPlaying.dirname) {
-	    top_el.style.color = 'black';
-            el.scrollIntoView({ block: 'center', behavior: 'auto' });
-            const rect = el.getBoundingClientRect();
-            setCalloutPos({
-		top: rect.top,
-		left: window.innerWidth - CALLOUT_WIDTH - MARGIN,
-	    });
-	} else {
-	    top_el.style.color = 'red';
-            setCalloutPos(null);
+	if(top_el){
+	    const length = top_el.innerText.length;
+	    if (length > 10) {
+		const newSize = scaleSize(length,5);
+		top_el.style.fontSize = newSize + "px";
+		
+	    } else {
+		top_el.style.fontSize = "21px";
+	    }
+	    if (el && dirobj.dirname === nowPlaying.dirname) {
+		top_el.style.color = 'black';
+		el.scrollIntoView({ block: 'center', behavior: 'auto' });
+		const rect = el.getBoundingClientRect();
+		setCalloutPos({
+		    top: rect.top,
+		    left: window.innerWidth - CALLOUT_WIDTH - MARGIN,
+		});
+	    } else {
+		top_el.style.color = 'red';
+		setCalloutPos(null);
+	    }
 	}
     }, [dirobj, nowPlaying?.index]);
 
@@ -553,9 +555,6 @@ export default function App() {
         });
     };
 
-    const handleRandomTrackEnded = () => {
-    };
-
 
     const handleRandom = () => {
 	const options =  {
@@ -573,6 +572,10 @@ export default function App() {
 		})
 		.then((data) => {
 		    console.log("handleRandom: ", data);
+		    setDirobj(data);
+		    setNowPlaying((prev) => {return {files: data.files, index: 0, title: data.files[0].title}});
+		    setStatus("ready");
+
 		})
 		.catch((err) => {
                     setErrorMsg(err.message);
@@ -633,6 +636,7 @@ const InfoPosCallout = (val) => {
 	setSearchParams({});
 
 	if (path == ".") return;
+	if (!path && nowPlaying.files[nowPlaying.index].path) parent = nowPlaying.files[nowPlaying.index].path;
 	
 	const cached = dirobjcache.current[parent];
 	if (cached) {
@@ -783,7 +787,7 @@ const InfoPosCallout = (val) => {
 			    <BackButton dirobj={dirobj} onBackAction={handleBack} />
 			
 			    <span id="albumtitle_top" ref={registerRef("albumtitle_top")}  >
-				{dirobj.title}
+				{dirobj.title || nowPlaying.files[nowPlaying.index].dirtitle || "."}
 			    </span>
 </>
 			{nowPlaying && !stopplaying && (
@@ -837,23 +841,12 @@ const InfoPosCallout = (val) => {
 		< NowPlayingCallout file={infoPos.files[infoPos.index]} pos={infoPos.pos}  setcalloutpos={setInfoPos}/>
 	    )}
 	    
-            {nowPlaying && !stopplaying &&  !randomplaying && (
+            {nowPlaying && !stopplaying &&  (
 
                 <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
 		       ref={audioRef}
-		       src={massageUri("/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename)}
+		       src={massageUri("/api/" + nowPlaying.files[nowPlaying.index].dirname + "/" + nowPlaying.files[nowPlaying.index].filename)}
 		       onEnded={handleTrackEnded}
-		       preload={"none"}
-		       controls
-                />
-
-            )}
-            {nowPlaying && !stopplaying &&  randomplaying && (
-
-                <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
-		       ref={audioRef}
-		       src={massageUri("/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename)}
-		       onEnded={handleRandomTrackEnded}
 		       preload={"none"}
 		       controls
                 />

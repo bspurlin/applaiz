@@ -137,7 +137,7 @@ function mkDirObj(pathn,obj) {
     return {
 	'dirname': obj.dirname,
 	'album': obj.album,
-	'files': obj.files,
+	'files': obj.files.map((x)=>({...x,dirname: obj.dirname})),
 	'parent': obj.parent,
 	'path': obj.path,
 	'perma': obj.perma,
