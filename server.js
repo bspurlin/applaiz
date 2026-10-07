@@ -65,6 +65,8 @@ if (n_new_days > 0) {
     permalinks[newdir.perma] = newdir.path
 }
 
+let permakeys = Object.keys(permalinks);
+
 app.use(express.static('public'))
 app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: true }))
@@ -86,6 +88,28 @@ app.post('/dirobj/',(req,res)=>{
     res.end(JSON.stringify(retval));
 });
 
+app.post('/randomplaylist/',(req,res)=>{
+    res.setHeader('Content-Type', 'application/json');
+    let N = req.body.n;
+    let files = [];
+    let retval = {};
+    let i = 0;
+    console.log("randomplaylist: ");
+    while ( i < N ) {
+	let randomPermaIndex = 0;
+	let randomFileIndex = 0;
+	let dirObj = {};
+	randomPermaIndex = Math.floor(Math.random() * permakeys.length);
+
+	dirObj = mkDirObj(permalinks[permakeys[randomPermaIndex]], fsobj)
+	if(dirObj.files.length > 0){
+	    randomFileIndex =  Math.floor(Math.random() * dirObj.files.length)
+	    i++;
+	    console.log(dirObj.dirname,dirObj.files.length,randomFileIndex,dirObj.files[randomFileIndex].title)
+	}
+    }
+});
+    
 app.post('/dirobj_nocache/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
     console.log({

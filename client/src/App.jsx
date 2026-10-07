@@ -147,7 +147,7 @@ const NewDirobjHtml = ({ html, onDirAction }) => {
 // Hamburger menu — houses Search and Bookmark actions.
 // Deliberately dumb: no fetch/URL logic lives here, only the toggle UI.
 // Callers pass in the actions to run when each menu item is clicked.
-const HamburgerMenu = ({ open, onToggle, onSearchClick, onBookmarkClick }) => (
+const HamburgerMenu = ({ open, onToggle, onSearchClick, onBookmarkClick, onRandomClick }) => (
     <div style={{ position: 'relative' }}>
         <span onClick={onToggle} className="px-3 py-2 rounded-full bg-yellow-50 border-[1px] inline-flex items-center">
             <svg xmlns="http://w3.org" viewBox="0 0 24 24" width="24" height="24" fill="black">
@@ -183,6 +183,16 @@ const HamburgerMenu = ({ open, onToggle, onSearchClick, onBookmarkClick }) => (
                     style={{ display: 'block' }}
                 >
                     🔖 Bookmark this view
+                </button>
+                <button
+                    onClick={onRandomClick}
+                    className="w-full text-left px-4 py-2 hover:bg-yellow-50"
+                    style={{ display: 'flex' }}
+                >
+                    <svg height="20" width="20" viewBox="0 0 24 24" xmlns="http://w3.org">
+			<circle cx="12" cy="12" r="10" fill="#007bff" stroke="#0056b3" strokeWidth="2"/>
+		    </svg>
+		    Play random track
                 </button>
             </div>
         )}
@@ -265,6 +275,7 @@ export default function App() {
     const [nowPlaying, setNowPlaying] = useState(null);
     // nowPlaying shape: { files: [...], dirname: string, index: number, title: string }
     const [stopplaying, setStopPlaying] = useState(false)
+    const [randomplaying, setRandomPlaying] = useState(false)
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
     const pathRef = useRef(".");
@@ -542,6 +553,38 @@ export default function App() {
         });
     };
 
+    const handleRandomTrackEnded = () => {
+    };
+
+
+    const handleRandom = () => {
+	const options =  {
+	    mode: 'cors',
+	    method: 'POST',
+	    headers: { "Content-Type": "application/json" },
+	    body:  JSON.stringify({ n: 10 })
+	}
+
+	async function fetchData() {
+            fetch("/api/randomplaylist", options)
+		.then((res) => {
+                    if (!res.ok) throw new Error("Failed to load the search.");
+                    return res.json();
+		})
+		.then((data) => {
+		    console.log("handleRandom: ", data);
+		})
+		.catch((err) => {
+                    setErrorMsg(err.message);
+                    setStatus("error");
+		});
+	}
+	
+	fetchData();
+	
+    };
+
+
     const handlePreviousTrack  = () => {
         setNowPlaying((prev) => {
             if (!prev) return prev;
@@ -764,6 +807,7 @@ const InfoPosCallout = (val) => {
 				    setMenuOpen(false);
 				}}
 				onBookmarkClick={handleBookmark}
+				onRandomClick={handleRandom}
 			    />
 			</span>
 		    </div>
@@ -793,12 +837,23 @@ const InfoPosCallout = (val) => {
 		< NowPlayingCallout file={infoPos.files[infoPos.index]} pos={infoPos.pos}  setcalloutpos={setInfoPos}/>
 	    )}
 	    
-            {nowPlaying && !stopplaying && (
+            {nowPlaying && !stopplaying &&  !randomplaying && (
 
                 <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
 		       ref={audioRef}
 		       src={massageUri("/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename)}
 		       onEnded={handleTrackEnded}
+		       preload={"none"}
+		       controls
+                />
+
+            )}
+            {nowPlaying && !stopplaying &&  randomplaying && (
+
+                <audio className="fixed inset-x-0 bottom-0 w-3/4 mx-auto  z-10"
+		       ref={audioRef}
+		       src={massageUri("/api/" + nowPlaying.dirname + "/" + nowPlaying.files[nowPlaying.index].filename)}
+		       onEnded={handleRandomTrackEnded}
 		       preload={"none"}
 		       controls
                 />
