@@ -276,7 +276,8 @@ export default function App() {
     const [infoPos, setInfoPos] = useState(null);
     const [nowPlaying, setNowPlaying] = useState(null);
     // nowPlaying shape: { files: [...], dirname: string, index: number, title: string }
-    const [stopplaying, setStopPlaying] = useState(false)
+    const [stopplaying, setStopPlaying] = useState(false);
+    const [dirtitle, setDirTitle] = useState(".");
     const dirobjcache = useRef({});
     const audioRef = useRef(null);
     const pathRef = useRef(".");
@@ -324,7 +325,7 @@ export default function App() {
                     if (isMounted) {
 			setDirobj(data);
 			setStatus("ready");
-			dirobjcache.current = {...dirobjcache.current,[data.path]: data} ;  // Cache every dirobj that comes off the net	 
+			dirobjcache.current = {...dirobjcache.current,[data.path]: data} ;  // Cache every dirobj that comes off the net
                     }
 		})
 		.catch((err) => {
@@ -400,6 +401,7 @@ export default function App() {
             audioRef.current.play().catch((err) => {
 		console.warn("Playback failed:", err);
             });
+	    setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle)
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index,nowPlaying?.title]);
 
@@ -509,6 +511,22 @@ export default function App() {
 	setInfoPos(null);
     }, [dirobj]);
 
+    useEffect(() => {
+	if(dirobj){
+	    if(dirobj.files.length > 0){
+		if( dirobj.directories.length > 0 ) {
+		    setDirTitle(dirobj.title)
+		} else {console.log("Here: ",dirobj.files[0])
+		    setDirTitle(dirobj.files[0].dirtitle);
+		}
+	    } else {
+		setDirTitle(dirobj.title)
+	    }
+	}
+    }, [dirobj?.files]);
+
+
+    
    useEffect(() => {
     // Deliberately runs on every render (no dependency array) — this is an
     // attempt to trap the browser's native Back button, since this app's
@@ -532,12 +550,17 @@ export default function App() {
 	    audioRef.current.pause();
 	    audioRef.current.currentTime = 0; // Reset time to the beginning
 	}
+	if (nowPlaying) {
+	    setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle);
+	} else {
+	    setDirTitle("Random")
+	}
 	setNowPlaying(false);
 	setStopPlaying(true);
     };
-    
+        
     const getTitle = (files, index) => {
-	return files[index].title || files[index].filename.replace(/\.(mp3|m4a)/i,"");
+        return files[index].title || files[index].filename.replace(/\.(mp3|m4a)/i,"");
     }
 
     const handlePlayFile = (files, index, dirname) => {
@@ -573,6 +596,7 @@ export default function App() {
 		.then((data) => {
 		    console.log("handleRandom: ", data);
 		    setDirobj(data);
+		    setDirTitle(data.files[0].dirtitle);
 		    setNowPlaying((prev) => {return {files: data.files, index: 0, title: data.files[0].title}});
 		    setStatus("ready");
 
@@ -640,6 +664,8 @@ const InfoPosCallout = (val) => {
 	
 	const cached = dirobjcache.current[parent];
 	if (cached) {
+	    if (cached.files.length > 0 ) setDirTitle(cached.files[0].dirtitle);
+	    if (cached.files.length > 0 && cached.directories.length > 0) setDirTitle(cached.title);
             setDirobj(cached);
             setPendingTargetId(path);
         
@@ -787,7 +813,7 @@ const InfoPosCallout = (val) => {
 			    <BackButton dirobj={dirobj} onBackAction={handleBack} />
 			
 			    <span id="albumtitle_top" ref={registerRef("albumtitle_top")}  >
-				{dirobj.title || nowPlaying.files[nowPlaying.index].dirtitle || "."}
+				{dirtitle}
 			    </span>
 			</>
 			{nowPlaying && !stopplaying && (

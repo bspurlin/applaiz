@@ -78,6 +78,11 @@ app.post('/dirobj/',(req,res)=>{
     res.setHeader('Content-Type', 'application/json');
     let d = permalinks[req.body.d];
     let retval = mkDirObj(d,fsobj);
+    let files = [];
+    if (retval.files.length > 0) {
+	files = retval.files.map((x)=>({...x,dirtitle: retval.title}))
+	retval.files = files;
+    }
     if(req.body.parent) retval.parent = req.body.parent;
     console.log({
 	"dirObj":JSON.stringify(req.body),
