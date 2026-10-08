@@ -401,7 +401,7 @@ export default function App() {
 		console.warn("Playback failed:", err);
             });
 	}
-    }, [nowPlaying?.dirname, nowPlaying?.index]);
+    }, [nowPlaying?.dirname, nowPlaying?.index,nowPlaying?.title]);
 
     // Leaving this in even though it doesn't work.
     // Maybe Tesla will fix their bug and it will pop into life someday.
@@ -582,7 +582,7 @@ export default function App() {
                     setStatus("error");
 		});
 	}
-	
+
 	fetchData();
 	
     };
