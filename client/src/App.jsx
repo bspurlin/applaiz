@@ -789,7 +789,7 @@ const InfoPosCallout = (val) => {
 			    <span id="albumtitle_top" ref={registerRef("albumtitle_top")}  >
 				{dirobj.title || nowPlaying.files[nowPlaying.index].dirtitle || "."}
 			    </span>
-</>
+			</>
 			{nowPlaying && !stopplaying && (
 			    <>
 
