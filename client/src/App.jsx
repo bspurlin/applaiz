@@ -571,6 +571,8 @@ export default function App() {
 	    //console.log("stopAudio",nowPlaying.files[nowPlaying.index]);
 	    setNowPlaying(false);
 	    setDirTitle(dirtitle);
+	    setDirobj((prev) =>  ({...prev,path: path, parent: parent, title: dirtitle})   )
+
 	} else {
 	    setDirTitle("Random")
 	}
