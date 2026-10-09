@@ -79,10 +79,6 @@ app.post('/dirobj/',(req,res)=>{
     let d = permalinks[req.body.d];
     let retval = mkDirObj(d,fsobj);
     let files = [];
-    if (retval.files.length > 0) {
-	files = retval.files.map((x)=>({...x,dirtitle: retval.title}))
-	retval.files = files;
-    }
     if(req.body.parent) retval.parent = req.body.parent;
     console.log({
 	"dirObj":JSON.stringify(req.body),
@@ -113,6 +109,7 @@ app.post('/randomplaylist/',(req,res)=>{
 	    i++;
 	    randomFile = dirObj.files[randomFileIndex];
 	    randomFile.path = dirObj.path;
+	    randomFile.parent = dirObj.path;
 	    randomFile.perma = dirObj.perma;
 	    randomFile.dirtitle = dirObj.title;
 	    files.push(randomFile)

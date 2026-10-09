@@ -401,7 +401,7 @@ export default function App() {
             audioRef.current.play().catch((err) => {
 		console.warn("Playback failed:", err);
             });
-	    setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle)
+	    if(!dirtitle) setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle)
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index,nowPlaying?.title]);
 
@@ -467,6 +467,7 @@ export default function App() {
 	    } else {
 		top_el.style.fontSize = "21px";
 	    }
+	    console.log("useEffect-highlighting dirobj.dirname",dirobj.dirname,"nowPlaying.dirname",nowPlaying.dirname )
 	    if (el && dirobj.dirname === nowPlaying.dirname) {
 		top_el.style.color = 'black';
 		el.scrollIntoView({ block: 'center', behavior: 'auto' });
@@ -516,7 +517,7 @@ export default function App() {
 	    if(dirobj.files.length > 0){
 		if( dirobj.directories.length > 0 ) {
 		    setDirTitle(dirobj.title)
-		} else {console.log("Here: ",dirobj.files[0])
+		} else {console.log("useEffect[dirobj?.files]: ",dirobj.files[0].dirtitle)
 		    setDirTitle(dirobj.files[0].dirtitle);
 		}
 	    } else {
@@ -525,6 +526,16 @@ export default function App() {
 	}
     }, [dirobj?.files]);
 
+    useEffect(() => {
+	console.log({"dirtitle ":dirtitle,
+		     "nowPlaying...dirtitle": nowPlaying?nowPlaying.files[nowPlaying.index].dirtitle:nowPlaying,
+		     "dirobj.title":dirobj?dirobj.title:dirobj})
+	if(nowPlaying && !dirtitle) setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle)
+    }, [dirtitle]);
+
+    useEffect(() => {
+	if (dirobj) setDirTitle(dirobj.title)
+    }, [dirobj]);
 
     
    useEffect(() => {
@@ -551,7 +562,11 @@ export default function App() {
 	    audioRef.current.currentTime = 0; // Reset time to the beginning
 	}
 	if (nowPlaying) {
+	    let path=nowPlaying.files[nowPlaying.index].path;
+	    let parent=nowPlaying.files[nowPlaying.index].parent;
+	    console.log("stopAudio dirtitle",nowPlaying.files[nowPlaying.index].dirtitle);
 	    setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle);
+	    setDirobj((prev) => ({...prev,path: path, parent: parent,title: nowPlaying.files[nowPlaying.index].dirtitle}));
 	} else {
 	    setDirTitle("Random")
 	}
@@ -574,7 +589,7 @@ export default function App() {
         setNowPlaying((prev) => {
             if (!prev) return prev;
             const nextIndex = (prev.index + 1) % prev.files.length;
-            return { ...prev, index: nextIndex, title: getTitle(prev.files, nextIndex) };
+            return { ...prev, index: nextIndex, title: getTitle(prev.files, nextIndex),dirname: prev.files[nextIndex].dirname };
         });
     };
 
@@ -595,9 +610,11 @@ export default function App() {
 		})
 		.then((data) => {
 		    console.log("handleRandom: ", data);
+		    data.title = data.files[0].dirtitle;
+		    data.dirname = data.files[0].dirname;
 		    setDirobj(data);
 		    setDirTitle(data.files[0].dirtitle);
-		    setNowPlaying((prev) => {return {files: data.files, index: 0, title: data.files[0].title}});
+		    setNowPlaying((prev) => ( {files: data.files, index: 0, title: data.files[0].title, dirname: data.files[0].dirname}));
 		    setStatus("ready");
 
 		})
@@ -606,7 +623,7 @@ export default function App() {
                     setStatus("error");
 		});
 	}
-
+	setNowPlaying(null);
 	fetchData();
 	
     };
@@ -655,12 +672,16 @@ const InfoPosCallout = (val) => {
 
 
     const handleBack = async (parent, path) => {
-
+	console.log("handleBack: parent ; ",parent," path: ",path)
 	// If we got here from a bookmark, reset the URL in the location bar
 	setSearchParams({});
 
 	if (path == ".") return;
-	if (!path && nowPlaying.files[nowPlaying.index].path) parent = nowPlaying.files[nowPlaying.index].path;
+	if (!path && nowPlaying && nowPlaying.files[nowPlaying.index].path) parent = nowPlaying.files[nowPlaying.index].path;
+
+	if (path && !parent) parent = path;
+
+	if(!path && !parent) {parent = "."}
 	
 	const cached = dirobjcache.current[parent];
 	if (cached) {
@@ -800,7 +821,10 @@ const InfoPosCallout = (val) => {
             <NewDirobjHtml html={dirobj.html} onDirAction={handleDirobjChange} />
 	),
 	({ dirobj }) => (
-	 " "  
+            <>
+		<DirectoryList directories={dirobj.directories} onDirAction={handleDirobjChange} registerRef={registerRef} />
+		<FileList files={dirobj.files} onPlayFile={handlePlayFile} dirname={dirobj.dirname} registerRef={registerRef} playingIndex={playingIndex} handleInfoPos={handleInfoPos} />
+            </>
 	)
     ];
 
