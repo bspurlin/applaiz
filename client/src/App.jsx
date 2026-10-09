@@ -194,7 +194,7 @@ const HamburgerMenu = ({ open, onToggle, onSearchClick, onBookmarkClick, onRando
                     <svg height="20" width="20" viewBox="0 0 24 24" xmlns="http://w3.org">
 			<circle cx="12" cy="12" r="10" fill="#007bff" stroke="#0056b3" strokeWidth="2"/>
 		    </svg>
-		    Play random track
+		    Random Playlist
                 </button>
             </div>
         )}
@@ -602,7 +602,7 @@ export default function App() {
 	    mode: 'cors',
 	    method: 'POST',
 	    headers: { "Content-Type": "application/json" },
-	    body:  JSON.stringify({ n: 10 })
+	    body:  JSON.stringify({ n: 30 })
 	}
 
 	async function fetchData() {
