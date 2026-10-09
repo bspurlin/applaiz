@@ -134,9 +134,12 @@ function mkDirObj(pathn,obj) {
 	    return 0
 	})
     }
+    let title =  obj.dirname.replace(/.+\//,"")
+	    .replace(/(.)\.(.)/g,"$1 $2")
+	    .replace(/_/g," ")
     if (obj.files.length > 0) {
 	obj.files = obj.files.map((x)=>({...x,dirname: obj.dirname}))
-	obj.files = obj.files.map((x)=>({...x,dirtitle: obj.title}))
+	obj.files = obj.files.map((x)=>({...x,dirtitle: title}))
 	obj.files = obj.files.map((x)=>({...x,path: obj.path}))
 	obj.files = obj.files.map((x)=>({...x,parent: obj.parent}))
     }
@@ -154,9 +157,7 @@ function mkDirObj(pathn,obj) {
 	'directories': aa,
 	'params': {"d": obj.parent },
 	'serverpath': "/",
-	'title': obj.dirname.replace(/.+\//,"")
-	    .replace(/(.)\.(.)/g,"$1 $2")
-	    .replace(/_/g," ")
+	'title': title
     }
 }
 

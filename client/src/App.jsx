@@ -363,7 +363,7 @@ export default function App() {
                     return res.json();
 		})
 		.then((data) => {
-		    console.log("Here parent", data.parent);
+		    console.log("Search parent", data.parent);
 		    data.perma = JSON.parse(search_body);
 		    setDirobj(data);
 		    setStatus("ready");
@@ -401,7 +401,12 @@ export default function App() {
             audioRef.current.play().catch((err) => {
 		console.warn("Playback failed:", err);
             });
-	    if(!dirtitle) setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle)
+	    if(dirobj.dirname != nowPlaying.dirname) setDirobj( (prev) => ({...prev,dirname: nowPlaying.dirname}))
+	    if(!dirtitle) setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle);
+	    if(dirtitle != nowPlaying.files[nowPlaying.index].dirtitle){
+		setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle);
+		console.log("not equal " ,dirtitle," !=  ",nowPlaying.files[nowPlaying.index].dirtitle )
+	    }
 	}
     }, [nowPlaying?.dirname, nowPlaying?.index,nowPlaying?.title]);
 
@@ -467,7 +472,7 @@ export default function App() {
 	    } else {
 		top_el.style.fontSize = "21px";
 	    }
-	    console.log("useEffect-highlighting dirobj.dirname",dirobj.dirname,"nowPlaying.dirname",nowPlaying.dirname )
+	    //console.log("useEffect-highlighting dirobj.dirname",dirobj.dirname,"nowPlaying.dirname",nowPlaying.dirname )
 	    if (el && dirobj.dirname === nowPlaying.dirname) {
 		top_el.style.color = 'black';
 		el.scrollIntoView({ block: 'center', behavior: 'auto' });
@@ -517,7 +522,7 @@ export default function App() {
 	    if(dirobj.files.length > 0){
 		if( dirobj.directories.length > 0 ) {
 		    setDirTitle(dirobj.title)
-		} else {console.log("useEffect[dirobj?.files]: ",dirobj.files[0].dirtitle)
+		} else {//console.log("useEffect[dirobj?.files]: ",dirobj.files[0].dirtitle)
 		    setDirTitle(dirobj.files[0].dirtitle);
 		}
 	    } else {
@@ -533,9 +538,6 @@ export default function App() {
 	if(nowPlaying && !dirtitle) setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle)
     }, [dirtitle]);
 
-    useEffect(() => {
-	if (dirobj) setDirTitle(dirobj.title)
-    }, [dirobj]);
 
     
    useEffect(() => {
@@ -564,13 +566,14 @@ export default function App() {
 	if (nowPlaying) {
 	    let path=nowPlaying.files[nowPlaying.index].path;
 	    let parent=nowPlaying.files[nowPlaying.index].parent;
-	    console.log("stopAudio dirtitle",nowPlaying.files[nowPlaying.index].dirtitle);
-	    setDirTitle(nowPlaying.files[nowPlaying.index].dirtitle);
-	    setDirobj((prev) => ({...prev,path: path, parent: parent,title: nowPlaying.files[nowPlaying.index].dirtitle}));
+	    let dirtitle = nowPlaying.files[nowPlaying.index].dirtitle;
+	    let title = nowPlaying.files[nowPlaying.index].title;
+	    //console.log("stopAudio",nowPlaying.files[nowPlaying.index]);
+	    setNowPlaying(false);
+	    setDirTitle(dirtitle);
 	} else {
 	    setDirTitle("Random")
 	}
-	setNowPlaying(false);
 	setStopPlaying(true);
     };
         
@@ -609,7 +612,7 @@ export default function App() {
                     return res.json();
 		})
 		.then((data) => {
-		    console.log("handleRandom: ", data);
+		    //console.log("handleRandom: ", data);
 		    data.title = data.files[0].dirtitle;
 		    data.dirname = data.files[0].dirname;
 		    setDirobj(data);
@@ -624,6 +627,7 @@ export default function App() {
 		});
 	}
 	setNowPlaying(null);
+	setStopPlaying(false);
 	fetchData();
 	
     };
@@ -648,7 +652,7 @@ const InfoPosCallout = (val) => {
     
     const handleInfoPos   = (files, index) => {
 	const el = nodeRefs.current.get("info_" + index);
-	console.log("el",el)
+	//console.log("el",el)
 	const rect = el.getBoundingClientRect();
 	const pos = {top: rect.top, left: window.innerWidth - CALLOUT_WIDTH - MARGIN};
 
